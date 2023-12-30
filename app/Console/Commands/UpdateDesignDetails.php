@@ -31,12 +31,12 @@ class UpdateDesignDetails extends Command
 
         foreach ($designs as $design) {
             // Check if 'details' is empty and 'image_url' is set
-            if (empty($design->details) && $design->setImage()) {
+            if (empty($design->details) && $design->setImages($design)) {
                 $prompt = "Please give me a description of around 100-150 characters about this house plan. It looks like {$design->image_url}, it's area is {$design->size} and here is a description of all its rooms {$design->floorsList}";
 
                 $response = Http::withHeaders([
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer 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'
+                    'Authorization' => 'Bearer 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'
                 ])->post('https://api.openai.com/v1/chat/completions', [
                     'model' => 'gpt-3.5-turbo',
                     'messages' => [
