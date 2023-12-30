@@ -395,13 +395,7 @@ $html .= '<thead class="thead-dark">';
         
         $design->setImages($design);
         $design->setPrice($design);
-        /* Check if 'details' is NULL and 'image_url' is set
-    if (is_null($design->details) && !empty($design->image_url)) {
-        $design->setDetails();
-        $design->description = $design->details;
-    } else $design->setDescription($design);
-        //$design->setMainCategory($design);
-	 */
+        $design->setDescription($design);
         return $design;
     }
     

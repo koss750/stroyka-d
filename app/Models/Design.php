@@ -131,33 +131,6 @@ public function setImages(Design $design)
         $design->images = $imageUrls;
     }
     
-    public function setDetails() {
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer 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'
-        ])->post('https://api.openai.com/v1/chat/completions', [
-            'model' => 'gpt-3.5-turbo',
-            'messages' => [
-                ["role" => "user", "content" => $this->generatePrompt()]
-            ],
-            'temperature' => 0.7
-        ]);
-
-        if ($response->successful()) {
-            $this->details = $response->json()['choices'][0]['message']['content'];
-            $this->save();
-        } else {
-            // Handle API request failure, log error details for debugging
-            echo('OpenAI API request failed: ' . $response->body());
-            die();
-        }
-    }
-
-    protected function generatePrompt() {
-        // Generate a prompt based on the product's existing attributes
-        return "Write a 150 character product description for a random house";
-    }
-    
     public function setDescription(Design $design) {
         $homeCategories = [1, 3, 4, 9, 10, 12, 17, 19, 20, 21, 22];
         $saunaCategories = [2, 5, 6, 7, 11, 13, 14, 15, 16];

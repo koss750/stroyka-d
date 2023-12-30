@@ -36,7 +36,7 @@ class UpdateDesignDetails extends Command
 
                 $response = Http::withHeaders([
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer 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'
+                    'Authorization' => 'Bearer'  . config('services.openai.api_key')
                 ])->post('https://api.openai.com/v1/chat/completions', [
                     'model' => 'gpt-3.5-turbo',
                     'messages' => [
