@@ -27,11 +27,13 @@ class UpdateDesignDetails extends Command
      */
     public function handle()
     {
-        $designs = Design::all();
+        // get all designs where 'details' is empty
+        $designs = Design::whereNull('details')->get();
 
         foreach ($designs as $design) {
             // Check if 'details' is empty and 'image_url' is set
-            if (empty($design->details) && $design->setImages($design)) {
+            $design->setImages($design);
+            if ($design->image_url) {
                 $prompt = "Please give me a description of around 100-150 characters about this house plan. It looks like {$design->image_url}, it's area is {$design->size} and here is a description of all its rooms {$design->floorsList}";
 
                 $response = Http::withHeaders([
