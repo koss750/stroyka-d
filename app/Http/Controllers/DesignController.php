@@ -393,7 +393,7 @@ $html .= '<thead class="thead-dark">';
         
         $design->rooms = $this->countRooms($design);
         
-        $design->setImages($design);
+        $design->setImages();
         $design->setPrice($design);
         $design->setDescription($design);
         return $design;

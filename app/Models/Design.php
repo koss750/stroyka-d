@@ -26,6 +26,8 @@ class Design extends Model implements HasMedia
 	
 	public $timestamps = true;
 
+    public $image_url = null;
+
     // Fillable fields for mass assignment
     protected $fillable = [
         'details',
@@ -77,11 +79,8 @@ class Design extends Model implements HasMedia
         'pvParts' => 'json', // or 'object' if you prefer
         'mvParts' => 'json' // or 'object' if you prefer
     ];
-    
-    public function designPrices()
-    {
-        return $this->hasMany(DesignPrice::class);
-    }
+
+    protected $appends = ['image_url'];
 
 	/**
 	 *      * The attributes that are mass assignable.
@@ -104,11 +103,31 @@ public function registerMediaCollections(): void
     $this->addMediaCollection('my_multi_collection');
 }
 
-public function setImages(Design $design)
+public function setImages()
+    {
+        // Your logic to determine the image URL
+        $imageUrl = $this->calculateImageUrl();
+
+        // Set the protected property instead of a direct model attribute
+        $this->imageUrl = $imageUrl;
+    }
+
+    // Method to get the image URL
+    public function getImageUrl()
+    {
+        // If imageUrl is not set, call setImages
+        if (is_null($this->imageUrl)) {
+            $this->setImages();
+        }
+
+        return $this->imageUrl;
+    }
+
+public function calculateImageUrl()
     {
         // Get media entries for this design
         $mediaEntries = Media::where('model_type', 'App\Models\Design')
-                             ->where('model_id', $design->id)
+                             ->where('model_id', $this->id)
                              ->orderBy('order_column')
                              ->get();
 
@@ -117,18 +136,19 @@ public function setImages(Design $design)
 
         foreach ($mediaEntries as $entry) {
             $fileName = str_replace(' ', '-', $entry->name);
-            $url = 'storage/' . $entry->order_column . '/conversions/' . $fileName . '-mild.jpg';
+            return 'storage/' . $entry->order_column . '/conversions/' . $fileName . '-mild.jpg';
+            /*
             if ($entry->order_column == 1) {
                 // Set the main image URL
-                $design->image_url = $url;
+                return $url;
             } else {
-                // Add to the images array
+                // Add the URL to the array
                 $imageUrls[] = $url;
-            }
+            }*/
         }
 
         // Set the images property
-        $design->images = $imageUrls;
+        //$design->images = $imageUrls;
     }
     
     public function setDescription(Design $design) {

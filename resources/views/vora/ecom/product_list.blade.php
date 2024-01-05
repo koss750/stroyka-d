@@ -62,7 +62,7 @@
                             </div>
                             <p>Product code: <span class="item">{{ $design->id }}</span> </p>
                             <p>Material: <span class="item">{{ $design->materialType }}</span></p>
-                            <p class="text-content">{{ $design->description }}</p>
+                            <p class="text-content">{{ $design->details }}</p>
                             <p class="price">от {{ $design->price }}₽</p>
                         </div>
                     </div>
