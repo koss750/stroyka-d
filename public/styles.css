@@ -2,6 +2,19 @@
     width: 100%;
 }
 
+.card-body {
+    background-image: url(https://ask-stroitelstvo.ru/upload/cache/910_99999_1c80940…/iblock/3bb/b92c8b0….jpg);
+    background-position: center;
+    background-size: cover;
+    border-radius: 0.5rem;
+}
+
+.card-info {
+    background-color: rgba(255,255,255,0.5);
+    border-radius: 14px;
+    margin-left: 0px;
+}
+
 .sbst-listing-box {
     background: #ffffff;
     border-bottom: 1px solid #d6d6d6;

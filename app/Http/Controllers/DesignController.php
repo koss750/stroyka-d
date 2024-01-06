@@ -326,7 +326,6 @@ $html .= '<thead class="thead-dark">';
                          ->map(function ($design) {
                              $design->rating = 5;
                              $design->reviewCount = 10;
-                             
                              return $this->transformDesign($design);
                          });
         $page_title = Translator::translate("listing_page_title");
