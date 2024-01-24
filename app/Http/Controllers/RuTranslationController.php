@@ -263,7 +263,7 @@ class RuTranslationController extends Controller
           "MetaDesc" => "META описание",
           "MetaHeader" => "Заголовок элемента",
           "rooms" => "Комнаты",
-          "listing_page_title" => "Галлерея проектов",
+          "listing_page_title" => "Галерея проектов",
           "listing_page_description" => "На этой странице вы можете смотреть и искать проекты",
           "popular" => "Популярный",
           "prefix" => "Префикс",
