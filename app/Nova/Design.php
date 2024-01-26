@@ -18,6 +18,7 @@ use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\KeyValue;
+use App\Nova\Actions\GenerateExcel;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\MorphToMany;
 use Ebess\AdvancedNovaMediaLibrary\Fields\Images;
@@ -86,6 +87,7 @@ class Design extends Resource
         $headers = $controller->getHeaders();
         return [
             (new DownloadExcel)->withHeadings(),
+            new GenerateExcel,
         ];
     }
     
@@ -212,21 +214,17 @@ class Design extends Resource
         return [
             ID::make()->sortable()->hide(),
             
-            
+            Panel::make(Translator::translate('documentation_files'), [
+                Text::make(Translator::translate('title'), 'title')->onlyOnDetail(),
+            ]),
             
             Panel::make('Главное', [
                 
                 Text::make(Translator::translate('title'), 'title')->rules('required')->sortable(),
                 
-                Boolean::make('Активен', 'active')
-            ->trueValue(true)
-            ->falseValue(false),
-                
-                //Text::make(__('Category'), function () {
-                //return $this->translateCode("category", $this->category);
-                 //   })->exceptOnForms(),
-                //Select::make(__('Category'), 'category')->options($this->translatedSelects("category"))->onlyOnForms(),
-                
+                Boolean::make('Активен', 'active')->trueValue(true)->falseValue(false)->onlyOnForms(),
+                //Описание
+                Textarea::make(Translator::translate('details'), 'details')->onlyOnDetail()->alwaysShow(),
                 
     
                 SimpleRepeatable::make(__('Category'), 'category', [

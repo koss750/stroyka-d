@@ -13,6 +13,12 @@ use HasTranslations;
 use Vanilo\Product\Models\Product;
 use App\Moodels\DesignPrice;
 use Illuminate\Support\Facades\Http;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\File;
 
 class Design extends Model implements HasMedia
 {
@@ -25,8 +31,6 @@ class Design extends Model implements HasMedia
 	protected $table = 'designs';
 	
 	public $timestamps = true;
-
-    public $image_url = null;
 
     // Fillable fields for mass assignment
     protected $fillable = [
@@ -79,8 +83,11 @@ class Design extends Model implements HasMedia
         'pvParts' => 'json', // or 'object' if you prefer
         'mvParts' => 'json' // or 'object' if you prefer
     ];
-
-    protected $appends = ['image_url'];
+    
+    public function designPrices()
+    {
+        return $this->hasMany(DesignPrice::class);
+    }
 
 	/**
 	 *      * The attributes that are mass assignable.
@@ -103,31 +110,11 @@ public function registerMediaCollections(): void
     $this->addMediaCollection('my_multi_collection');
 }
 
-public function setImages()
-    {
-        // Your logic to determine the image URL
-        $imageUrl = $this->calculateImageUrl();
-
-        // Set the protected property instead of a direct model attribute
-        $this->imageUrl = $imageUrl;
-    }
-
-    // Method to get the image URL
-    public function getImageUrl()
-    {
-        // If imageUrl is not set, call setImages
-        if (is_null($this->imageUrl)) {
-            $this->setImages();
-        }
-
-        return $this->imageUrl;
-    }
-
-public function calculateImageUrl()
+public function setImages(Design $design)
     {
         // Get media entries for this design
         $mediaEntries = Media::where('model_type', 'App\Models\Design')
-                             ->where('model_id', $this->id)
+                             ->where('model_id', $design->id)
                              ->orderBy('order_column')
                              ->get();
 
@@ -136,19 +123,45 @@ public function calculateImageUrl()
 
         foreach ($mediaEntries as $entry) {
             $fileName = str_replace(' ', '-', $entry->name);
-            return 'storage/' . $entry->order_column . '/conversions/' . $fileName . '-mild.jpg';
-            /*
+            $url = 'storage/' . $entry->order_column . '/conversions/' . $fileName . '-mild.jpg';
             if ($entry->order_column == 1) {
                 // Set the main image URL
-                return $url;
+                $design->image_url = $url;
             } else {
-                // Add the URL to the array
+                // Add to the images array
                 $imageUrls[] = $url;
-            }*/
+            }
         }
 
         // Set the images property
-        //$design->images = $imageUrls;
+        $design->images = $imageUrls;
+    }
+    
+    public function setDetails() {
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer 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'
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                ["role" => "user", "content" => $this->generatePrompt()]
+            ],
+            'temperature' => 0.7
+        ]);
+
+        if ($response->successful()) {
+            $this->details = $response->json()['choices'][0]['message']['content'];
+            $this->save();
+        } else {
+            // Handle API request failure, log error details for debugging
+            echo('OpenAI API request failed: ' . $response->body());
+            die();
+        }
+    }
+
+    protected function generatePrompt() {
+        // Generate a prompt based on the product's existing attributes
+        return "Write a 150 character product description for a random house";
     }
     
     public function setDescription(Design $design) {
@@ -230,6 +243,50 @@ public function setShortDescriptionAttribute($values)
 {
         $this->meta->short_description = $values;
 }
+
+public function foundationLentaExcel($width)
+    {
+        // Load the template file
+        $tapeLength = $width[0];
+        $tapeLength = $tapeLength/10-0.1;
+        $tapeWidth = $width[4];
+        if ($tapeWidth == 1) {
+             $tapeWidth = 10;
+        }
+        $tapeWidth = $tapeWidth/10;
+        $spreadsheet = IOFactory::load(storage_path('templates/foundation_lenta_tmp.xlsx'));
+        
+        // Manipulate the spreadsheet
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('D4', $this->lfLength);
+        $sheet->setCellValue('D5', $tapeWidth);
+        $sheet->setCellValue('D8', $tapeLength);
+        $sheet->setCellValue('D9', $this->lfAngleX);
+        $sheet->setCellValue('D10', $this->lfAngleT);
+        $sheet->setCellValue('D11', $this->lfAngleG);
+        $sheet->setCellValue('D12', $this->lfAngle45);
+        $sheet->setCellValue('D14', 0.2);
+        $sheet->setCellValue('D16', $this->mfSquare);
+        
+        // Create a writer to save the spreadsheet
+        $writer = new Xlsx($spreadsheet);
+        
+        // Define the file name and path in the storage
+        $fileName = $this->id . '_foundation_lenta_' . time() . '.xlsx';
+        $path = '/app/public/files/' . $this->id;
+        File::ensureDirectoryExists(storage_path($path));
+        $filePath = $path . "/" . $fileName;
+
+        // Save the file to storage
+        $writer->save(storage_path("$filePath"));
+        
+        $returnArray = [
+            "publicPath" => '/storage/files/' . $this->id . '/' . $fileName,
+            "fileName" => $fileName
+            ];
+        // Return a response for download
+        return $returnArray;
+    }
     
 }
 
