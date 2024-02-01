@@ -1,5 +1,6 @@
 node_modules
 storage/framework
-public/vendor/
 public/vendor
 vendor
+node_modules
+node_modules
