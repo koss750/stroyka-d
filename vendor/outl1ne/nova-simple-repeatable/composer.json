@@ -1,0 +1,46 @@
+{
+  "name": "outl1ne/nova-simple-repeatable",
+  "description": "A Laravel Nova simple repeatable rows field.",
+  "keywords": [
+    "laravel",
+    "nova",
+    "repeatable",
+    "flexible",
+    "rows",
+    "keyvalue",
+    "field"
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=8.0",
+    "laravel/nova": "^4.0",
+    "outl1ne/nova-translations-loader": "^5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Outl1ne\\NovaSimpleRepeatable\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Outl1ne\\NovaSimpleRepeatable\\SimpleRepeatableServiceProvider"
+      ]
+    }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://nova.laravel.com"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/laravel/nova-dusk-suite"
+    }
+  ],
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

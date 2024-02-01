@@ -8,6 +8,8 @@ use App\Nova\AssociatedCost;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
+use Laravel\Nova\Panel;
 
 class ExcelCosts extends Resource
 {
@@ -49,10 +51,6 @@ class ExcelCosts extends Resource
     {
         return [
     
-            Text::make('File')
-                ->sortable()
-                ->rules('required', 'max:255'),
-    
             Text::make('Type')
                 ->sortable()
                 ->rules('required', 'max:255'),
@@ -60,8 +58,21 @@ class ExcelCosts extends Resource
             Text::make('Subtype')
                 ->sortable()
                 ->rules('required', 'max:255'),
-    
-            HasMany::make('Associated Costs', 'associatedCosts', 'App\Nova\AssociatedCost'),
+                
+            //Original hasmany field
+            //HasMany::make('Associated Costs', 'associatedCosts', 'App\Nova\AssociatedCost'),
+            Panel::make('Associated Costs', [
+            SimpleRepeatable::make('Associated Costs', 'associatedCosts', [
+                Text::make('Description', 'description'),
+                Text::make('Cell', 'title_cell'),
+                Text::make('Unit', 'unit'),
+                Text::make('Cell', 'unit_cell'),
+                Text::make('Value', 'value'),
+                Text::make('Cell', 'location_cell')->rules('required', 'regex:/^[A-Za-z]+[0-9]+$/', 'max:10'),
+                
+            ])->canAddRows(true)->addRowLabel("+ добавить поле"),
+        ]),
+            
 
         ];
     }

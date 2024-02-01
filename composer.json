@@ -26,7 +26,8 @@
         "symfony/browser-kit": "^6.3",
         "twbs/bootstrap": "5.3.0",
         "vyuldashev/nova-permission": "^3.2",
-        "yassi/nova-nested-form": "^3.0"
+        "yassi/nova-nested-form": "^3.0",
+        "borodin-services/design-files": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -107,6 +108,10 @@
         "5": {
             "type": "path",
             "url": "./nova-components/ExportTool"
+        },
+        "6": {
+            "type": "path",
+            "url": "./nova-components/DesignFiles"
         }
     }
 }

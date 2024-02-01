@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\File;
+use App\Models\AssociatedCosts as AssociatedCostModel;
 
 class Design extends Model implements HasMedia
 {
@@ -110,11 +111,11 @@ public function registerMediaCollections(): void
     $this->addMediaCollection('my_multi_collection');
 }
 
-public function setImages(Design $design)
+public function setImages()
     {
         // Get media entries for this design
         $mediaEntries = Media::where('model_type', 'App\Models\Design')
-                             ->where('model_id', $design->id)
+                             ->where('model_id', $this->id)
                              ->orderBy('order_column')
                              ->get();
 
@@ -126,7 +127,7 @@ public function setImages(Design $design)
             $url = 'storage/' . $entry->order_column . '/conversions/' . $fileName . '-mild.jpg';
             if ($entry->order_column == 1) {
                 // Set the main image URL
-                $design->image_url = $url;
+                $this->image_url = $url;
             } else {
                 // Add to the images array
                 $imageUrls[] = $url;
@@ -134,7 +135,7 @@ public function setImages(Design $design)
         }
 
         // Set the images property
-        $design->images = $imageUrls;
+        $this->images = $imageUrls;
     }
     
     public function setDetails() {
@@ -244,16 +245,16 @@ public function setShortDescriptionAttribute($values)
         $this->meta->short_description = $values;
 }
 
-public function foundationLentaExcel($width)
+public function foundationLentaExcel($tape)
     {
         // Load the template file
-        $tapeLength = $width[0];
-        $tapeLength = $tapeLength/10-0.1;
-        $tapeWidth = $width[4];
+        
+        $tapeWidth = $tape[4];
         if ($tapeWidth == 1) {
              $tapeWidth = 10;
         }
         $tapeWidth = $tapeWidth/10;
+        $tapeLength = $tapeWidth-0.1;
         $spreadsheet = IOFactory::load(storage_path('templates/foundation_lenta_tmp.xlsx'));
         
         // Manipulate the spreadsheet
@@ -267,6 +268,17 @@ public function foundationLentaExcel($width)
         $sheet->setCellValue('D12', $this->lfAngle45);
         $sheet->setCellValue('D14', 0.2);
         $sheet->setCellValue('D16', $this->mfSquare);
+        
+
+        // Fetch associated costs and set values in the spreadsheet
+        $associatedCosts = AssociatedCostModel::where('filename', 'foundation_lenta_tmp.xlsx')->get();
+        foreach ($associatedCosts as $cost) {
+            $cell = $cost->location_cell;
+            $value = $cost->value;
+            $sheet->setCellValue($cell, $value);
+        }
+        
+        //dd($sheet);
         
         // Create a writer to save the spreadsheet
         $writer = new Xlsx($spreadsheet);

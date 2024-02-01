@@ -32,6 +32,7 @@ use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
 use HasTranslations;
 use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
+
 class Design extends Resource
 {
 	/**

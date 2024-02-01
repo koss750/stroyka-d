@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('subtype');
             $table->string('file');
+            $table->longText('associatedCosts')->nullable();
             $table->timestamps();
         });
 

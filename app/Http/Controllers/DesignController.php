@@ -365,21 +365,21 @@ $html .= '<thead class="thead-dark">';
     
     
     public function countRooms($design)
-{
-    // Check if floorsList is already an array
-    if (is_array($design->floorsList)) {
-        // Count only the first level elements
-        return count(array_filter($design->floorsList, 'is_array'));
-    }
-
-    // Check if floorsList is a JSON string and decode it
-    if (is_string($design->floorsList)) {
-        $floorsList = json_decode($design->floorsList, true);
-        if (is_array($floorsList)) {
+    {
+        // Check if floorsList is already an array
+        if (is_array($design->floorsList)) {
+            // Count only the first level elements
             return count(array_filter($design->floorsList, 'is_array'));
         }
+    
+        // Check if floorsList is a JSON string and decode it
+        if (is_string($design->floorsList)) {
+            $floorsList = json_decode($design->floorsList, true);
+            if (is_array($floorsList)) {
+                return count(array_filter($design->floorsList, 'is_array'));
+            }
+        }
     }
-}
 
     private function transformDesign($design, $lang = 'ru-ru')
     {

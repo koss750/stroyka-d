@@ -10,7 +10,9 @@
         "build-design-form": "cd nova-components/DesignForm && npm run dev",
         "build-design-form-prod": "cd nova-components/DesignForm && npm run prod",
         "build-ExportTool": "cd nova-components/ExportTool && npm run dev",
-        "build-ExportTool-prod": "cd nova-components/ExportTool && npm run prod"
+        "build-ExportTool-prod": "cd nova-components/ExportTool && npm run prod",
+        "build-design-files": "cd nova-components/DesignFiles && npm run dev",
+        "build-design-files-prod": "cd nova-components/DesignFiles && npm run prod"
     },
     "devDependencies": {
         "axios": "^1.4.0",

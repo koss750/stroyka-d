@@ -273,6 +273,8 @@ class RuTranslationController extends Controller
           "Types" => "Комната",
           "id" => 'ID',
           "floorsList" => "Список этажей",
+          "foundation_action" => "Расчет Фундамента",
+          "details" => "Описание"
           
         ];
     
