@@ -2,38 +2,67 @@
 
 namespace App\Nova;
 
-use App\Models\AssociatedCosts as AssociatedCostModel; // Import the AssociatedCost model
+use App\Models\ExcelFileType; // Assuming this is the correct namespace
 use Laravel\Nova\Fields\ID;
+use App\Nova\AssociatedCost;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\HasMany;
+use App\Http\Controllers\RuTranslationController as Translator;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
+use Laravel\Nova\Panel;
 
 class AssociatedCost extends Resource
 {
+
+    /**
+     * Get the displayable label of the resource.
+     *
+     * @return string
+     */
+    public static function label()
+    {
+        $labelCaption = 'templates_and_costs_nova';
+        return Translator::translate($labelCaption); 
+    }
+
+    /**
+     * Get the singular label of the resource.
+     *
+     * @return string
+     */
+    public static function singularLabel()
+    {
+        $labelCaption = 'templates_and_costs_nova';
+        return Translator::translate($labelCaption); 
+    }
+
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\AssociatedCost>
+     * @var class-string<\App\Models\ExcelCosts>
      */
-    public static $model = AssociatedCostModel::class;
-    
-    public static $perPageViaRelationship = 200;
+    public static $model = \App\Models\ExcelFileType::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'location_cell';
+    public static $title = 'subtype';
+
 
     /**
      * The columns that should be searched.
      *
      * @var array
      */
-    public static $search = [
-        'location_cell', 'description'
-    ];
+    public static function search(NovaRequest $request, $query)
+    {
+        return $query->where('type', 'like', $request->search . '%')
+                     ->orWhere('subtype', 'like', $request->search . '%')
+                     ->orWhere('file', 'like', $request->search . '%');
+    }
 
     /**
      * Get the fields displayed by the resource.
@@ -44,25 +73,29 @@ class AssociatedCost extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-    
-            BelongsTo::make('Excel File Type', 'excelFileType', ExcelCosts::class),
-    
-            Text::make('Description')
+            Text::make(Translator::translate('tmp_type_label'), 'type')
                 ->sortable()
-                ->rules('required', 'max:255'),
+                ->rules('required', 'max:30'),
     
-            Text::make('Location Cell')
+            Text::make(Translator::translate('tmp_stype_label'), "subtype")
                 ->sortable()
-                ->rules('required', 'max:255'),
-    
-            Text::make('Value')
-                ->sortable()
-                ->rules('required', 'max:255'),
-    
-            // Add more fields as needed...
+                ->rules('required', 'max:30'),
+                
+            //Original hasmany field
+            //HasMany::make(Translator::translate('ass_co_panel_label'), 'associatedCosts', 'App\Nova\AssociatedCost'),
+            Panel::make(Translator::translate('ass_co_panel_label'), [
+            SimpleRepeatable::make(Translator::translate('ass_co_repeatable_label'), 'associatedCosts', [
+                Text::make(Translator::translate('ass_co_type_label'), 'type'),
+                Text::make(Translator::translate('ass_co_descr_label'), 'description'),
+                Text::make(Translator::translate('ass_co_unit_label'), 'unit'),
+                //Text::make(Translator::translate('ass_co_row_label'), 'cell'),
+                Text::make(Translator::translate(Translator::translate('ass_co_val_label'), 'value'))
+            ])->canAddRows(true)->addRowLabel(Translator::translate('table_add_field_label')),
+        ]),
+            
+
         ];
     }
-
 
     /**
      * Get the cards available for the request.

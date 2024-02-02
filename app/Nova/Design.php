@@ -30,6 +30,7 @@ use Laravel\Nova\Card;
 use Laravel\Nova\Panel;
 use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
 use HasTranslations;
+use Laravel\Nova\Fields\Heading;
 use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
 
@@ -216,7 +217,7 @@ class Design extends Resource
             ID::make()->sortable()->hide(),
             
             Panel::make(Translator::translate('documentation_files'), [
-                Text::make(Translator::translate('title'), 'title')->onlyOnDetail(),
+                Heading::make(Translator::translate('use_documents_tab_prompt')),
             ]),
             
             Panel::make('Главное', [
@@ -228,11 +229,11 @@ class Design extends Resource
                 Textarea::make(Translator::translate('details'), 'details')->onlyOnDetail()->alwaysShow(),
                 
     
-                SimpleRepeatable::make(__('Category'), 'category', [
-                    Select::make(__('Category'), 'category')->options($this->translatedSelects("category")),
+                SimpleRepeatable::make(Translator::translate('Category'), 'category', [
+                    Select::make(Translator::translate('Category'), 'category')->options($this->translatedSelects("category")),
                 ])->rules('required')->onlyOnForms(),
                     
-                Text::make(__('Main_category'), 'category')->exceptOnForms()->displayUsing(function ($value) {
+                Text::make(Translator::translate('Main_category'), 'category')->exceptOnForms()->displayUsing(function ($value) {
                 
                     if (!is_array($value) && !empty($value)) {
                         return null;
@@ -245,7 +246,7 @@ class Design extends Resource
                         $additionalCount = count($value) - 1;
                     
                         if ($additionalCount > 0) {
-                            return $firstCategory . " + " . $additionalCount . " " . __('others');
+                            return $firstCategory . " + " . $additionalCount . " " . Translator::translate('others');
                         } else {
                             return $firstCategory;
                         }
@@ -253,7 +254,7 @@ class Design extends Resource
                     
                 }),
                 
-                Text::make(__('Main_category'), fn () => $this->formatCategoryList($this->category))
+                Text::make(Translator::translate('Main_category'), fn () => $this->formatCategoryList($this->category))
                 ->onlyOnExport(),
                 
                 //size (Площадь)
@@ -275,8 +276,8 @@ class Design extends Resource
                 
                 Text::make(Translator::translate('code'), 'code')->hideFromIndex()->showOnExport(),
                 Text::make(Translator::translate('numOrders'), 'numOrders')->hideFromIndex()->showOnExport(),
-                Select::make(__('materialType'), 'materialType')->options($this->translatedSelects("materialType"))->hideFromIndex()->showOnExport(),
-                Select::make(__('baseType'), 'baseType')->options($this->translatedSelects("baseType"))->hideFromIndex()->showOnExport(),
+                Select::make(Translator::translate('materialType'), 'materialType')->options($this->translatedSelects("materialType"))->hideFromIndex()->showOnExport(),
+                Select::make(Translator::translate('baseType'), 'baseType')->options($this->translatedSelects("baseType"))->hideFromIndex()->showOnExport(),
                 //Text::make(Translator::translate('baseType'), 'baseType')->exceptOnForms()->hideFromIndex()->showOnExport(),
                 //Text::make(Translator::translate('roofType'), 'roofType'),
                 Text::make(Translator::translate('roofSquare'), 'roofSquare')->hideFromIndex()->showOnExport(),
@@ -545,6 +546,8 @@ class Design extends Resource
             //->rules('required'), // validation rules
     //    NestedForm::make('Floors')->heading("helo")
                 ]),
+
+                
                 
         ];
     }

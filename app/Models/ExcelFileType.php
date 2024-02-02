@@ -19,16 +19,4 @@ class ExcelFileType extends Model
     protected $casts = [
 	    'associatedCosts' => 'json',
 	    ];
-    
-    /*
-    // The table associated with the model.
-    protected $table = 'excel_file_types';
-
-    // The attributes that are mass assignable.
-    protected $fillable = ['code', 'type', 'subtype', 'file', 'associated_costs'];
-    
-    protected $casts = [
-	    'associated_costs' => 'json',
-	    ];
-	    */
 }

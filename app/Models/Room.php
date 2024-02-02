@@ -15,7 +15,9 @@ class Room extends Model
      * @var string
      */
     public function floor()
-{
-    return $this->belongsTo(Floor::class);
-}
+    {
+        return $this->belongsTo(Floor::class);
+    }
+
+    
 }

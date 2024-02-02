@@ -19,7 +19,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\File;
-use App\Models\AssociatedCosts as AssociatedCostModel;
+use App\Models\ExcelFileType as AssociatedCostModel;
 
 class Design extends Model implements HasMedia
 {
@@ -259,22 +259,29 @@ public function foundationLentaExcel($tape)
         
         // Manipulate the spreadsheet
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('D4', $this->lfLength);
-        $sheet->setCellValue('D5', $tapeWidth);
-        $sheet->setCellValue('D8', $tapeLength);
-        $sheet->setCellValue('D9', $this->lfAngleX);
-        $sheet->setCellValue('D10', $this->lfAngleT);
-        $sheet->setCellValue('D11', $this->lfAngleG);
-        $sheet->setCellValue('D12', $this->lfAngle45);
-        $sheet->setCellValue('D14', 0.2);
-        $sheet->setCellValue('D16', $this->mfSquare);
+        $sheet->setCellValue('E3', $this->lfLength);
+        $sheet->setCellValue('E4', $tapeWidth);
+        $sheet->setCellValue('E5', $tapeLength);
+        $sheet->setCellValue('E6', $this->lfAngleX);
+        $sheet->setCellValue('E7', $this->lfAngleT);
+        $sheet->setCellValue('E8', $this->lfAngleG);
+        $sheet->setCellValue('E9', $this->lfAngle45);
+        $sheet->setCellValue('E10', 0.2);
+        $sheet->setCellValue('E11', $this->mfSquare);
         
 
         // Fetch associated costs and set values in the spreadsheet
-        $associatedCosts = AssociatedCostModel::where('filename', 'foundation_lenta_tmp.xlsx')->get();
+        $template = AssociatedCostModel::where('id', 1)->firstOrFail();
+        $associatedCosts = $template->associatedCosts;
         foreach ($associatedCosts as $cost) {
-            $cell = $cost->location_cell;
-            $value = $cost->value;
+            $cell = "B" . $cost["cell"];
+            $value = $cost["description"];
+            $sheet->setCellValue($cell, $value);
+            $cell = "D" . $cost["cell"];
+            $value = $cost["unit"];
+            $sheet->setCellValue($cell, $value);
+            $cell = "E" . $cost["cell"];
+            $value = $cost["value"];
             $sheet->setCellValue($cell, $value);
         }
         
