@@ -20,6 +20,7 @@ use Laravel\Nova\Menu\MenuSection;
 use App\Nova\AssociatedCost;
 use App\Nova\Supplier;
 use App\Nova\User;
+use App\Nova\Document;
 use App\Nova\Order;
 use Illuminate\Http\Request;
 
@@ -41,11 +42,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(Translator::translate('inventory_menu'), [
                     MenuItem::resource(NovaDesign::class),
                     MenuItem::resource(AssociatedCost::class),
+                    MenuItem::resource(Document::class),
                 ])->icon('library')->collapsable(),
 
                 MenuSection::make(Translator::translate('orders_menu'), [
                     MenuItem::resource(Order::class),
-                    //MenuItem::resource(Documents::class),
                     //MenuItem::resource(AssociatedCost::class),
                 ])->icon('shopping-cart')->collapsable(),
 

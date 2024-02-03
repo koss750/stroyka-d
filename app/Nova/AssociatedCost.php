@@ -7,6 +7,7 @@ use Laravel\Nova\Fields\ID;
 use App\Nova\AssociatedCost;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\Hidden;
 use App\Http\Controllers\RuTranslationController as Translator;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
@@ -49,7 +50,7 @@ class AssociatedCost extends Resource
      *
      * @var string
      */
-    public static $title = 'subtype';
+    public static $title = 'file';
 
 
     /**
@@ -74,26 +75,28 @@ class AssociatedCost extends Resource
     {
         return [
             Text::make(Translator::translate('tmp_type_label'), 'type')
-                ->sortable()
+            ->displayusing(function($value) {
+                return Translator::translate($value);
+            })->sortable()
                 ->rules('required', 'max:30'),
     
             Text::make(Translator::translate('tmp_stype_label'), "subtype")
-                ->sortable()
+            ->displayusing(function($value) {
+                return Translator::translate($value);
+            })->sortable()
                 ->rules('required', 'max:30'),
                 
             //Original hasmany field
             //HasMany::make(Translator::translate('ass_co_panel_label'), 'associatedCosts', 'App\Nova\AssociatedCost'),
-            Panel::make(Translator::translate('ass_co_panel_label'), [
-            SimpleRepeatable::make(Translator::translate('ass_co_repeatable_label'), 'associatedCosts', [
-                Text::make(Translator::translate('ass_co_type_label'), 'type'),
+            SimpleRepeatable::make(Translator::translate('ass_co_panel_label'), 'associatedCosts', [
+                Text::make(Translator::translate('ass_co_type_label'), 'type')->displayusing(function($value) {
+                    return Translator::translate($value);
+                }),
                 Text::make(Translator::translate('ass_co_descr_label'), 'description'),
                 Text::make(Translator::translate('ass_co_unit_label'), 'unit'),
-                //Text::make(Translator::translate('ass_co_row_label'), 'cell'),
-                Text::make(Translator::translate(Translator::translate('ass_co_val_label'), 'value'))
-            ])->canAddRows(true)->addRowLabel(Translator::translate('table_add_field_label')),
-        ]),
-            
-
+                Text::make(Translator::translate('ass_co_val_label'), 'value'),
+                Hidden::make('','cell'),
+            ])->stacked()->canAddRows(true)->addRowLabel(Translator::translate('table_add_field_label')),
         ];
     }
 

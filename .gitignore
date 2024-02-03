@@ -86,3 +86,6 @@ Homestead.json
 /public/.htaccess
 storage/logs
 storage/*.key
+storage/logs/laravel.log
+/.c9
+/storage/logs/laravel.log
