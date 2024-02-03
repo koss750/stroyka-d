@@ -26,7 +26,7 @@ class DatabaseBackupCommand extends Command
         $dbPort = env('DB_PORT', 3306); // Default MySQL port
         $backupPath = storage_path('backups/' . date('Y-m-d_His') . '_backup.sql');
 
-        $command = "mysqldump -h{$dbHost} -P{$dbPort} -u{$dbUsername} -p {$dbName} > {$backupPath}";
+        $command = "mysqldump --set-gtid-purged=OFF -h{$dbHost} -P{$dbPort} -u{$dbUsername} -p {$dbName} > {$backupPath}";
 
         $process = Process::fromShellCommandline($command);
         try {
