@@ -69,6 +69,7 @@ class Design extends Model implements HasMedia
         'stropList',
         'stropValue',
         'endovList',
+        'areafl0',
         'metaList',
         // ... include other fields as needed
     ];
@@ -78,6 +79,7 @@ class Design extends Model implements HasMedia
 	    'category' => 'json',
 	    'skatList' => 'json',
 	    'stropList' => 'json',
+	    'areafl0' => 'json',
         'endovList' => 'json',
         'metaList' => 'json',
         'krovlaList' => 'json',

@@ -282,6 +282,7 @@ class Design extends Resource
                 //Text::make(Translator::translate('roofType'), 'roofType'),
                 Text::make(Translator::translate('roofSquare'), 'roofSquare')->hideFromIndex()->showOnExport(),
                 Text::make(Translator::translate('mainSquare'), 'mainSquare')->hideFromIndex()->showOnExport(),
+                Text::make(Translator::translate('stolby'), 'stolby')->hideFromIndex()->showOnExport(),
                 Text::make(Translator::translate('baseLength'), 'baseLength')->hideFromIndex()->showOnExport(),
                 Text::make(Translator::translate('baseD20'), 'baseD20')->hideFromIndex()->showOnExport(),
                 Text::make(Translator::translate('baseD20F'), 'baseD20F')->hideFromIndex()->showOnExport(),
@@ -289,6 +290,20 @@ class Design extends Resource
                 Text::make(Translator::translate('baseD20RubF'), 'baseD20RubF')->hideFromIndex()->showOnExport(),
                 Text::make(Translator::translate('baseBalk1'), 'baseBalk1')->hideFromIndex()->showOnExport(),
                 ]),
+                
+            // Areas of floors as a SimpleRepeatable
+            Panel::make(Translator::translate('areafl'), [
+                
+            SimpleRepeatable::make(Translator::translate('areafl'), 'areafl0', [
+                Text::make(Translator::translate('areaflB'), 'Sfl0'),
+                Text::make(Translator::translate('areafl1'), 'Sfl1'),
+                Text::make(Translator::translate('areafl2'), 'Sfl2'),
+                Text::make(Translator::translate('areafl3'), 'Sfl3'),
+                Text::make(Translator::translate('areaflA'), 'Sfl4'),
+              ])
+                  ->canAddRows(false) // Optional, true by default
+                  //->addRowLabel("добавить площади")
+                  ]),
                 
             Panel::make('Помещения', [
                 
@@ -345,7 +360,9 @@ class Design extends Resource
                 
             Text::make('floorsList', fn () => $this->formatJson($this->floorsList))
                 ->onlyOnExport(),
-                    
+                
+            
+                  
             Panel::make('Стены и перерубы', [
                 
                 Text::make(Translator::translate('wallsOut'), 'wallsOut')->hideFromIndex()->showOnExport(),
