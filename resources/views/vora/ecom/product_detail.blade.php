@@ -36,7 +36,7 @@
 	</div>
 	<div class="page-titles">
 		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="javascript:void(0)">Layout</a></li>
+			<li class="breadcrumb-item"><a href="javascript:void(0)">Проекты</a></li>
 			<li class="breadcrumb-item active"><a href="javascript:void(0)">Blank</a></li>
 		</ol>
 	</div>
@@ -46,22 +46,40 @@
 				<div class="card-body">
 					<div class="row">
 						<div class="col-xl-3 col-lg-6  col-md-6 col-xxl-5 ">
+						<div class="new-arrival-content pr">
+									<h4>Дом из Бруса (225)
+									</h4>
+									<div class="star-rating mb-2">
+										<ul class="produtct-detail-tag">
+											<li><i class="fa fa-star"></i></li>
+											<li><i class="fa fa-star"></i></li>
+											<li><i class="fa fa-star"></i></li>
+											<li><i class="fa fa-star"></i></li>
+											<li><i class="fa fa-star"></i></li>
+										</ul>
+										<span class="review-text">(34 отзыва) / </span><a class="product-review" href=""  data-bs-toggle="modal" data-bs-target="#reviewModal">Write a review?</a>
+									</div>
+									<div class="d-block clearfix mb-2">
+										<p class="price float-start">1 050 400 руб.</p>
+									</div>
+							</div>
 							<!-- Tab panes -->
 							<div class="tab-content ">
 								<div role="tabpanel" class="tab-pane fade active show " id="first">
-									<img class="img-fluid b-radius" src="{{ asset('images/product/1.jpg')}}" alt="">
+									<img class="img-fluid b-radius" src="{{ asset('http://delta.borodin.services/storage/6/conversions/photo_2023-07-01-17.22.38-mild.jpg')}}" alt="">
 								</div>
 								<div role="tabpanel" class="tab-pane fade" id="second">
-									<img class="img-fluid b-radius" src="{{ asset('images/product/2.jpg')}}" alt="">
+									<img class="img-fluid b-radius" src="{{ asset('http://delta.borodin.services/storage/6/conversions/photo_2023-07-01-17.22.38-mild.jpg')}}" alt="">
 								</div>
 								<div role="tabpanel" class="tab-pane fade" id="third">
-									<img class="img-fluid b-radius" src="{{ asset('images/product/3.jpg')}}" alt="">
+									<img class="img-fluid b-radius" src="{{ asset('http://delta.borodin.services/storage/6/conversions/photo_2023-07-01-17.22.38-mild.jpg')}}" alt="">
 								</div>
 								<div role="tabpanel" class="tab-pane fade" id="for">
-									<img class="img-fluid b-radius" src="{{ asset('images/product/4.jpg')}}" alt="">
+									<img class="img-fluid b-radius" src="{{ asset('http://delta.borodin.services/storage/6/conversions/photo_2023-07-01-17.22.38-mild.jpg')}}" alt="">
 								</div>
 							</div>
 							<div class="tab-slide-content new-arrival-product mb-4 mb-xl-0">
+								
 								<!-- Nav tabs -->
 								<ul class="nav slide-item-list mt-3" role="tablist">
 									<li role="presentation" class="show">
@@ -80,61 +98,154 @@
 									</li>
 								</ul>
 							</div>
+							<div class="shopping-cart mt-3">
+										<a class="btn btn-primary btn-lg" href="javascript:void(0)"><i
+												class="fa fa-shopping-basket me-2"></i>Пример Сметы</a>
+												<a class="btn btn-primary btn-lg" href="javascript:void(0)"><i
+												class="fa fa-shopping-basket me-2"></i>Купить Смету</a>
+									</div>
+							<div class="shopping-cart mt-3">
+								<a class="btn btn-primary btn-lg" href="javascript:void(0)"><i
+										class="fa fa-shopping-basket me-2"></i>Пример Проекта</a>
+										<a class="btn btn-primary btn-lg" href="javascript:void(0)"><i
+										class="fa fa-shopping-basket me-2"></i>Купить Проекта</a>
+							</div>
 						</div>
 						<!--Tab slider End-->
 						<div class="col-xl-9 col-lg-6  col-md-6 col-xxl-7 col-sm-12">
 							<div class="product-detail-content">
 								<!--Product details-->
 								<div class="new-arrival-content pr">
-									<h4>Solid Women's V-neck Dark T-Shirt</h4>
-									<div class="star-rating mb-2">
-										<ul class="produtct-detail-tag">
-											<li><i class="fa fa-star"></i></li>
-											<li><i class="fa fa-star"></i></li>
-											<li><i class="fa fa-star"></i></li>
-											<li><i class="fa fa-star"></i></li>
-											<li><i class="fa fa-star"></i></li>
-										</ul>
-										<span class="review-text">(34 reviews) / </span><a class="product-review" href=""  data-bs-toggle="modal" data-bs-target="#reviewModal">Write a review?</a>
-									</div>
-									<div class="d-block clearfix mb-2">
-										<p class="price float-start">$320.00</p>
-									</div>
-									<p>Availability: <span class="item"> In stock <i
-												class="fa fa-shopping-basket"></i></span>
-									</p>
-									<p>Product code: <span class="item">0405689</span> </p>
-									<p>Brand: <span class="item">Lee</span></p>
-									<p>Product tags:&nbsp;&nbsp;
-										<span class="badge badge-success light">bags</span>
-										<span class="badge badge-success light">clothes</span>
-										<span class="badge badge-success light">shoes</span>
-										<span class="badge badge-success light">dresses</span>
-									</p>
-									<p class="text-content">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.
-										If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing.</p>
+									
+									<p class="text-content">Текст описание для SEO - настраивается в Админке.</p>
 									<div class="filtaring-area my-3">
 										<div class="size-filter">
-											<h4 class="m-b-15">Select size</h4>
-											
+										<p class="text-content">Фундамент</p>
+											<h4 class="m-b-15">Наличие фундамента</h4>
 											<div class="btn-group" data-bs-toggle="buttons">
-												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5"> XS</label>
-												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" checked>SM</label>
-												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option2"> MD</label>
-												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option3"> LG</label>
-												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option4"> XL</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="po-f-y"> Да</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="po-f-n" >Нет</label>
 											</div>
 										</div>
-									</div>
-									<!--Quantity start-->
-									<div class="col-2 px-0">
-										<input type="number" name="num" class="form-control input-btn input-number" value="1">
-									</div>
-									<!--Quanatity End-->
-									<div class="shopping-cart mt-3">
-										<a class="btn btn-primary btn-lg" href="javascript:void(0)"><i
-												class="fa fa-shopping-basket me-2"></i>Add
-											to cart</a>
+										<div class="size-filter">
+										<p class="text-content">Домокомплект</p>
+										<h4 class="m-b-15">Бревно ОЦБ</h4>
+										<div class="btn-group" data-bs-toggle="buttons">
+										<p class="text-content">сосна ель</p>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5" > 200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >220</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >260</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >280</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >300</label>
+												
+												
+											</div>
+										<div class="btn-group" data-bs-toggle="buttons"><label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >Лиственница</label>
+										
+										<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5" > 200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >220</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >260</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >280</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >300</label>
+											</div>
+											<div class="btn-group" data-bs-toggle="buttons">
+										<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >Кедр</label>
+										<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5" > 200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >220</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >260</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >280</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >300</label>
+											</div>
+											<h4 class="m-b-15">Бревно ручной рубки</h4>
+											<p class="text-content">Сосна / Ель</p>
+											<div class="btn-group" data-bs-toggle="buttons">
+												
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5" > 200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >220</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >260</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >280</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >300</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >320</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >340</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >360</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >380</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >400</label>
+												
+												
+											</div><p class="text-content">Лиственница</p>
+											<div class="btn-group" data-bs-toggle="buttons">
+												
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5" > 200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >220</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >260</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >280</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >300</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >320</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >340</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >360</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >380</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >400</label>
+												
+												
+											</div>
+											<p class="text-content">Кедр</p>
+											<div class="btn-group" data-bs-toggle="buttons">
+												
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5" > 200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >220</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >260</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >280</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >300</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >320</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >340</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >360</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >380</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >400</label>
+												
+												
+											</div>
+											<h4 class="m-b-15">Проф.брус есть. влажность</h4>
+											<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5"> 145х160</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >145х45</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >145x95</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >145x145</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >145х195</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >195x195</label>
+												<h4 class="m-b-15">Проф.брус камерной сушки</h4>
+											<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5"> 145х160</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >145х200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >190х160</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >190х200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >145х240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >190х240</label>
+												<h4 class="m-b-15">Клееный брус</h4>
+											<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5"> 145х160</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >145х200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >190х160</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >190х200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >145х240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >190х240</label>
+												
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >230х160</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >230х240</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >230х200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >250х200</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >280х200</label>
+											
+										<p class="text-content">Кровля</p>
+										<div class="btn-group" data-bs-toggle="buttons">
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option5"> Под рубероид</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >Металлочерепица</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >Мягкая</label>
+												<label class="btn btn-outline-primary light btn-sm"><input type="radio" class="position-absolute invisible" name="options" id="option1" >ЦП</label>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -156,7 +267,7 @@
 						<form>
 							@csrf
 							<div class="text-center mb-4">
-								<img class="img-fluid rounded" width="78" src="{{ asset('images/avatar/1.jpg')}}" alt="DexignLab">
+								<img class="img-fluid rounded" width="78" src="{{ asset('http://delta.borodin.services/storage/6/conversions/photo_2023-07-01-17.22.38-mild.jpg')}}" alt="DexignLab">
 							</div>
 							<div class="form-group">
 								<div class="rating-widget mb-4 text-center">
@@ -172,12 +283,6 @@
 											<li class="star" title="Good" data-value="3">
 												<i class="fa fa-star fa-fw"></i>
 											</li>
-											<li class="star" title="Excellent" data-value="4">
-												<i class="fa fa-star fa-fw"></i>
-											</li>
-											<li class="star" title="WOW!!!" data-value="5">
-												<i class="fa fa-star fa-fw"></i>
-											</li>
 										</ul>
 									</div>
 								</div>
@@ -185,7 +290,6 @@
 							<div class="form-group">
 								<textarea class="form-control" placeholder="Comment" rows="5"></textarea>
 							</div>
-							<button class="btn btn-success btn-block">RATE</button>
 						</form>
 					</div>
 				</div>

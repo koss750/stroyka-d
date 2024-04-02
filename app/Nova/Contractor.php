@@ -5,12 +5,14 @@ namespace App\Nova;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Hidden;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Textarea;
 use App\Http\Controllers\RuTranslationController as Translator;
 use Laravel\Nova\Fields\Email;
+use Outl1ne\NovaHiddenField\HiddenField;
 
-class Supplier extends Resource
+class Contractor extends Resource
 {
     /**
      * The model the resource corresponds to.
@@ -28,7 +30,7 @@ class Supplier extends Resource
     
     public static function label()
     {
-        return Translator::translate('supplier_menu_label');
+        return Translator::translate('contractor_menu_label');
     }
 
     /**
@@ -40,7 +42,7 @@ class Supplier extends Resource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        return $query->where('type', '=', 'supplier'); // or 'contractor' for the ContractorResource
+        return $query->where('type', '=', 'contractor'); // or 'contractor' for the ContractorResource
     }
 
     public function fields(NovaRequest $request)
@@ -74,7 +76,9 @@ class Supplier extends Resource
 
             Textarea::make(Translator::translate('message'), 'message')
                 ->sortable()
-                ->rules('nullable', 'max:255'),
+                ->rules('nullable', 'max:65535'),
+
+            Hidden::make('type')->default('contractor'),
         ];
     }
 

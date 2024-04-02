@@ -126,7 +126,7 @@ public function setImages()
 
         foreach ($mediaEntries as $entry) {
             $fileName = str_replace(' ', '-', $entry->name);
-            $url = 'storage/' . $entry->order_column . '/conversions/' . $fileName . '-mild.jpg';
+            $url = 'storage/' . $entry->id . '/conversions/' . $fileName . '-mild.jpg';
             if ($entry->order_column == 1) {
                 // Set the main image URL
                 $this->image_url = $url;

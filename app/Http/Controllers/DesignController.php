@@ -321,7 +321,7 @@ $html .= '<thead class="thead-dark">';
     
     public function getDemoDesigns($category = "df_cat_4", $limit=10)
     {
-        $designs = Design::take($limit)
+        $designs = Design::where('id', '>', 586)->take($limit)
                          ->get()
                          ->map(function ($design) {
                              $design->rating = 5;
@@ -331,6 +331,48 @@ $html .= '<thead class="thead-dark">';
         $page_title = Translator::translate("listing_page_title");
         $page_description = Translator::translate("listing_page_description");
         return view('vora.ecom.product_list', compact('page_title', 'page_description', 'designs'));
+    }
+
+    public function getDemoDetail($id=220)
+    {
+        $designs = Design::where('id', $id)->take(1)
+                         ->get()
+                         ->map(function ($design) {
+                             $design->rating = 5;
+                             $design->reviewCount = 10;
+                             return $this->transformDesign($design);
+                         });
+        $page_title = Translator::translate("listing_page_title");
+        $page_description = Translator::translate("listing_page_description");
+        return view('vora.ecom.product_detail', compact('page_title', 'page_description', 'designs'));
+    }
+
+    public function getDemoOrder($id=220)
+    {
+        $designs = Design::where('id', $id)->take(1)
+                         ->get()
+                         ->map(function ($design) {
+                             $design->rating = 5;
+                             $design->reviewCount = 10;
+                             return $this->transformDesign($design);
+                         });
+        $page_title = "Заказы";
+        $page_description = Translator::translate("listing_page_description");
+        return view('vora.ecom.product_order', compact('page_title', 'page_description', 'designs'));
+    }
+
+    public function getDemoCheckout($id=220)
+    {
+        $designs = Design::where('id', $id)->take(1)
+                         ->get()
+                         ->map(function ($design) {
+                             $design->rating = 5;
+                             $design->reviewCount = 10;
+                             return $this->transformDesign($design);
+                         });
+        $page_title = "Корзина";
+        $page_description = Translator::translate("listing_page_description");
+        return view('vora.ecom.checkout', compact('page_title', 'page_description', 'designs'));
     }
     
     

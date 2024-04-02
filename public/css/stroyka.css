@@ -1,3 +1,74 @@
+/* Overall card styling */
+.card {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Image styling */
+  .card-image img {
+    width: 100%;
+    display: block;
+    border-radius: 10px 10px 0 0;
+  }
+  
+  /* Title overlay */
+  .card-title-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px 20px; /* Adjust padding as needed */
+    border-radius: 10px 10px 0 0;
+    text-align: center; /* Center the text if needed */
+  }
+  
+  /* Title styling */
+  .main-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+    text-align: left;
+  }
+  
+  /* Details overlay at the bottom */
+  .card-details-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    padding: 5px 20px; /* Less padding for the thin section */
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    justify-content: space-between; /* Spread out the details */
+    align-items: center; /* Vertically center the items */
+  }
+  
+  /* Price styling */
+  .price {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #555; /* Or any highlight color */
+    margin: 0; /* Remove default margins */
+  }
+  
+  /* Dimensions and area styling */
+  .dimensions, .area {
+    font-size: 0.875rem;
+    color: #555;
+  }
+  
+  .area sup {
+    font-size: 0.75rem;
+  }
+  
+  
+
 /* Modern Product Card Style */
 .modern-product-card {
     border: 1px solid #eaeaea;

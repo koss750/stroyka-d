@@ -19,8 +19,9 @@ use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use App\Nova\AssociatedCost;
 use App\Nova\Supplier;
+use App\Nova\Contractor;
 use App\Nova\User;
-use App\Nova\Document;
+use App\Nova\ExcelSheet as ExcelResource;
 use App\Nova\Order;
 use Illuminate\Http\Request;
 
@@ -42,7 +43,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(Translator::translate('inventory_menu'), [
                     MenuItem::resource(NovaDesign::class),
                     MenuItem::resource(AssociatedCost::class),
-                    MenuItem::resource(Document::class),
+                    MenuItem::resource(ExcelResource::class),
                 ])->icon('library')->collapsable(),
 
                 MenuSection::make(Translator::translate('orders_menu'), [
@@ -52,7 +53,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(Translator::translate('users_menu'), [
                     MenuItem::resource(Supplier::class),
-                    
+                    MenuItem::resource(Contractor::class),
                     MenuItem::resource(User::class),
                 ])->icon('user-group')->collapsable(),
             ];

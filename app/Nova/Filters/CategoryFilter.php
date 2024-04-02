@@ -17,7 +17,9 @@ class CategoryFilter extends Filter
      */
     public function apply(Request $request, $query, $value)
     {
-        return $query->where('category', $value);
+        //old filter for when category was not json
+        //return $query
+        return $query->where('category', 'LIKE', '%'.$value.'%');
     }
 
     /**

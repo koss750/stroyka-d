@@ -96,8 +96,7 @@
 												</div>
 											</div>
 											<div class="clearfix mb-3">
-												<a href="javascript:void(0);" class="btn btn-primary px-3 light"><i class="fa fa-reply"></i> </a>
-												<a href="javascript:void(0);" class="btn btn-primary px-3 light ms-2"><i class="fa fa-long-arrow-right"></i> </a>
+												<a href="javascript:void(0);" class="btn btn-primary px-3 light">Ответить </a>
 												<a href="javascript:void(0);" class="btn btn-primary px-3 light ms-2"><i class="fa fa-trash"></i></a>
 											</div>
 										</div>

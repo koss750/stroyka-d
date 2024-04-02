@@ -301,8 +301,8 @@ class Design extends Resource
                 Text::make(Translator::translate('areafl3'), 'Sfl3'),
                 Text::make(Translator::translate('areaflA'), 'Sfl4'),
               ])
-                  ->canAddRows(false) // Optional, true by default
-                  //->addRowLabel("добавить площади")
+                  ->canAddRows(true) // Optional, true by default
+                  ->addRowLabel("указать")
                   ]),
                 
             Panel::make('Помещения', [
@@ -545,6 +545,7 @@ class Design extends Resource
             Panel::make('Фундамент монолитная плита', [
                 
                  Text::make(Translator::translate('mfSquare'), 'mfSquare')->hideFromIndex()->showOnExport(),
+                 Text::make(Translator::translate('outer_p'), 'outer_p')->hideFromIndex()->showOnExport(),
                 
                 ]),
                 

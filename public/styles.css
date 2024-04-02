@@ -1,13 +1,54 @@
+.card {
+    border: none;
+    overflow: hidden;
+  }
+  
+  .card-image img {
+    width: 100%;
+    display: block; /* remove any default margin/padding */
+  }
+  
+  .card-body {
+    padding: 15px; /* adjust as necessary */
+    background: #FFFFFF; /* or any color that matches your design */
+  }
+  
+  .main-title {
+    font-size: 1.5em; /* adjust as necessary */
+    font-weight: bold;
+    margin-bottom: 0.5em; /* adjust as necessary */
+  }
+  
+  .model-name {
+    font-size: 1.2em; /* adjust as necessary */
+    font-weight: bold;
+    margin-bottom: 1em; /* adjust as necessary */
+  }
+  
+  .dimensions-area-container {
+    font-size: 1em; /* adjust as necessary */
+    margin-bottom: 2em; /* space before the price */
+  }
+  
+  .price {
+    font-size: 2em; /* adjust as necessary */
+    font-weight: bold;
+    position: absolute;
+    bottom: 15px; /* adjust as necessary */
+    right: 15px; /* adjust as necessary */
+  }
+  
+  /* Utility class for the square meter notation */
+  .sup-text {
+    vertical-align: super;
+    font-size: smaller;
+  }
+
 .logo-12 {
     width: 100%;
 }
 
-.card-body {
-    background-image: url(https://ask-stroitelstvo.ru/upload/cache/910_99999_1c80940…/iblock/3bb/b92c8b0….jpg);
-    background-position: center;
-    background-size: cover;
-    border-radius: 0.5rem;
-}
+
 
 .card-info {
     background-color: rgba(255,255,255,0.5);

@@ -41,36 +41,31 @@
 		</ol>
 	</div>
 	<div class="row">
-		@foreach ($designs as $design)
-    <div class="col-lg-12 col-xl-6">
+
+	@foreach ($designs as $design)
+    <div class="col-xl-4 col-lg-6 col-md-12">
         <div class="card">
-            <div class="card-body">
-                <div class="row m-b-30">
-                    <div class="col-md-5 col-xxl-12">
-                        <div class="new-arrival-product mb-4 mb-xxl-4 mb-md-0">
-                            <div class="new-arrivals-img-contnent">
-                                <img class="img-fluid" src="{{ asset($design->image_url)}}" alt="">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-7 col-xxl-12">
-                        <div class="new-arrival-content position-relative">
-                            <h4><a href="{{ url('ecom-product-detail', $design->id)}}">{{ $design->title }}</a></h4>
-                            <div class="comment-review star-rating">
-                                <span class="review-text">({{ $design->reviewCount }} reviews) / </span>
-                                <a class="product-review" href="" data-bs-toggle="modal" data-bs-target="#reviewModal">Write a review?</a>
-                            </div>
-                            <p>Product code: <span class="item">{{ $design->id }}</span> </p>
-                            <p>Material: <span class="item">{{ $design->materialType }}</span></p>
-                            <p class="text-content">{{ $design->details }}</p>
-                            <p class="price">от {{ $design->price }}₽</p>
-                        </div>
-                    </div>
+            <!-- Card Image -->
+            <div class="card-image">
+                <img class="img-fluid" src="{{ asset($design->image_url)}}" alt="">
+                <!-- Title Overlay -->
+                <div class="card-title-overlay">
+                    <h2 class="main-title">Дома из бруса</h2>
                 </div>
+            </div>
+
+            <!-- Card Details Overlay -->
+            <div class="card-details-overlay">
+                <span class="model-name">{{ $design->title }}</span>
+                <span class="dimensions-area-container">
+                    <span class="dimensions">{{ $design->dimensions }}</span> m<sup class="sup-text">2</sup>
+                </span>
+                <span class="price">от {{ $designs[0]->price }}₽</span>
             </div>
         </div>
     </div>
 @endforeach
+
 </div>
 		<!-- review -->
 		<div class="modal fade" id="reviewModal">
