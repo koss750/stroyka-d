@@ -88,16 +88,17 @@
 		
 		<!--**********************************
             Chat box start
-		@include('elements.header')
+		
             Header end ti-comment-alt
         ***********************************-->
-
+        @include('elements.header')
         <!--**********************************
             Sidebar start
-        @include('elements.sidebar')
+        
             Sidebar end
         ***********************************-->
-		
+		@include('elements.sidebar')
+
         @php
             $body_class = ''; 
             if($page == 'ui_button'){ $body_class = 'btn-page';} 

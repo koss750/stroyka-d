@@ -30,8 +30,6 @@ return [
 				'bottom'=> [
 					'js/custom.min.js',
 					'js/dlabnav-init.js',
-					'js/demo.js',
-					'js/styleSwitcher.js',
 				],
 			],
 		],

@@ -536,8 +536,8 @@
                                                 <img alt="image" width="50" src="{{ asset('images/avatar/1.jpg')}}">
                                             </div>
                                             <div class="media-body">
-                                                <h6 class="mb-1">Ваш заказ обработан</h6>
-                                                <small class="d-block">25 Марта 2024 - 21:33</small>
+                                                <h6 class="mb-1">Ваша регистрация была одобрена</h6>
+                                                <small class="d-block">1 Апреля 2024 - 21:33</small>
                                             </div>
                                         </div>
                                     </li>
@@ -551,7 +551,7 @@
                             <img src="{{ asset('images/profile/17.jpg')}}" width="20" alt=""/>
                             <div class="header-info">
                                 <span class="text-black">Константин Б.</span>
-                                <p class="fs-12 mb-0">Администратор</p>
+                                <p class="fs-12 mb-0">Поставщик</p>
                             </div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">

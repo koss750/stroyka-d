@@ -19,6 +19,10 @@ use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\KeyValue;
 use App\Nova\Actions\GenerateExcel;
+use App\Nova\Actions\CheckPrices;
+use Eminiarts\Tabs\Traits\HasTabs;
+use Eminiarts\Tabs\Tabs;
+use Eminiarts\Tabs\Tab;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\MorphToMany;
 use Ebess\AdvancedNovaMediaLibrary\Fields\Images;
@@ -36,6 +40,7 @@ use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
 class Design extends Resource
 {
+    use HasTabs;
 	/**
 	 * The model the resource corresponds to.
 	 *
@@ -89,7 +94,7 @@ class Design extends Resource
         $headers = $controller->getHeaders();
         return [
             (new DownloadExcel)->withHeadings(),
-            new GenerateExcel,
+            new GenerateExcel
         ];
     }
     
@@ -546,7 +551,7 @@ class Design extends Resource
                 
                  Text::make(Translator::translate('mfSquare'), 'mfSquare')->hideFromIndex()->showOnExport(),
                  Text::make(Translator::translate('outer_p'), 'outer_p')->hideFromIndex()->showOnExport(),
-                
+
                 ]),
                 
             Panel::make('Изображения', [
@@ -564,7 +569,7 @@ class Design extends Resource
             //->rules('required'), // validation rules
     //    NestedForm::make('Floors')->heading("helo")
                 ]),
-
+            
                 
                 
         ];

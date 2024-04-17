@@ -423,6 +423,10 @@ $html .= '<thead class="thead-dark">';
         }
     }
 
+    public function getById($id) {
+        return Design::where('id', $id)->first();
+    }
+
     private function transformDesign($design, $lang = 'ru-ru')
     {
         if ($lang === 'ru-ru') {

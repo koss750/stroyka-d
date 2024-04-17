@@ -15,12 +15,8 @@
 				</div>
 				<div class="col-xl-6 col-md-6">
 					<div class="sign-in-your py-4 px-2">
-						<h4 class="fs-20">Sign in your account</h4>
-						<span>Welcome back! Login with your data that you entered<br> during registration</span>
-						<div class="login-social">
-							<a href="javascript:void(0);" class="btn d-block btn-primary light my-3"><i class="fa fa-google me-2"></i>Login with Google</a>
-							<a href="javascript:void(0);" class="btn d-block btn-primary light my-3"><i class="fa fa-facebook-f me-2"></i>Login with Facebook</a>
-						</div>
+						<h4 class="fs-20">Войдите в свой аккаунт</h4>
+						<span>Добро пожаловать обратно! Войдите с вашими данными, которые вы указали<br> во время регистрации</span>
 						<form action="{{ url('index')}}">
                         @csrf
 							<div class="mb-3">
@@ -28,22 +24,22 @@
 								<input type="email" class="form-control" value="hello@example.com">
 							</div>
 							<div class="mb-3">
-								<label class="mb-1"><strong>Password</strong></label>
+								<label class="mb-1"><strong>Пароль</strong></label>
 								<input type="password" class="form-control" value="Password">
 							</div>
 							<div class="row d-flex justify-content-between mt-4 mb-2">
 								<div class="mb-3">
 								   <div class="form-check custom-checkbox ms-1">
 										<input type="checkbox" class="form-check-input" id="basic_checkbox_1">
-										<label class="form-check-label" for="basic_checkbox_1">Remember my preference</label>
+										<label class="form-check-label" for="basic_checkbox_1">Запомнить мои предпочтения</label>
 									</div>
 								</div>
 								<div class="mb-3">
-									<a href="{{ url('page-forgot-password')}}">Forgot Password?</a>
+									<a href="{{ url('page-forgot-password')}}">Забыли пароль?</a>
 								</div>
 							</div>
 							<div class="text-center">
-								<button type="submit" class="btn btn-primary btn-block">Sign Me In</button>
+								<button type="submit" class="btn btn-primary btn-block">Войти</button>
 							</div>
 						</form>
 					</div>

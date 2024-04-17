@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DesignController as DC;
 use App\Http\Controllers\RuTranslationController as Translator;
+use App\Http\Controllers\InvoiceController as Invoice;
 
 class UIController extends Controller
 {
@@ -13,7 +14,6 @@ class UIController extends Controller
     
     // Individual Project/Design View
     public function showProject($id){
-        
         $design = DC::show($id);
         $page_title = Translator::translate("project_page_title");
         $page_description = Translator::translate("listing_page_description");
@@ -43,8 +43,8 @@ class UIController extends Controller
 	
     // Contacts
     public function contacts(){
-        $page_title = 'Contacts';
-        $page_description = 'Some description for the page';
+        $page_title = 'Партнёры';
+        $page_description = 'Партнёры';
 		return view('vora.dashboard.contacts', compact('page_title', 'page_description'));
     }
 
@@ -64,8 +64,8 @@ class UIController extends Controller
     }
     // Messages
     public function messages(){
-        $page_title = 'Messages';
-        $page_description = 'Some description for the page';
+        $page_title = 'Сообщения';
+        $page_description = 'Мои сообщения';
 
         return view('vora.dashboard.messages', compact('page_title', 'page_description'));
     }
@@ -78,8 +78,8 @@ class UIController extends Controller
     
     // Profile
     public function app_profile(){
-        $page_title = 'Profile';
-        $page_description = 'Some description for the page';
+        $page_title = 'Поставщики';
+        $page_description = 'Здесь все ваше';
         return view('vora.app.profile', compact('page_title', 'page_description'));
     }
     
@@ -158,6 +158,17 @@ class UIController extends Controller
         $page_title = 'Invoice';
         $page_description = 'Some description for the page';
         return view('vora.ecom.invoice', compact('page_title', 'page_description'));
+    }
+
+    // Ecommerce Invoice
+    public function identifySmeta($foundation="fnone",$comp="dOCBSos240",$roof="rSoft"){
+        $foundationSection = false;
+    }
+    // Ecommerce Invoice
+    public function str($smeta){
+        $page_title = 'Invoice2';
+        $page_description = 'Some description for the page';
+        return view('vora.ecom.str', compact('page_title', 'page_description'));
     }
 	
     // Ecommerce Product Detail
@@ -303,15 +314,29 @@ class UIController extends Controller
 	
     // Page Login
     public function page_login(){
-        $page_title = 'Page Login';
-        $page_description = 'Some description for the page';
+        $page_title = 'Войти';
+        $page_description = 'Вход для зарегестрированных пользователей';
         return view('vora.page.login', compact('page_title', 'page_description'));
     }
 	
     // Page Register
     public function page_register(){
-        $page_title = 'Page Register';
-        $page_description = 'Some description for the page';
+        $page_title = 'Регистрация';
+        $page_description = 'Регистрация для клиентов';
+        return view('vora.page.register', compact('page_title', 'page_description'));
+    }
+
+    // Page Register Supplier
+    public function page_register_supplier(){
+        $page_title = 'Регистрация поставщиков';
+        $page_description = 'Регистрация для поставщиков';
+        return view('vora.page.register', compact('page_title', 'page_description'));
+    }
+
+    // Page Register Contractor
+    public function page_register_contractor(){
+        $page_title = 'Регистрация';
+        $page_description = 'Регистрация для исполнителей';
         return view('vora.page.register', compact('page_title', 'page_description'));
     }
 	

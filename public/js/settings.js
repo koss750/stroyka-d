@@ -7,16 +7,16 @@ var html = $('html');
 function dlabSettings({typography, version, layout, navheaderBg, headerBg, sidebarStyle, sidebarBg, sidebarPosition, headerPosition, containerLayout, direction, primary}) {
     this.typography = typography || "roboto";
     this.version = version || "light";
-    this.layout = layout || "vertical";
-    this.navheaderBg = navheaderBg || "color_1";
-    this.headerBg = headerBg || "color_1";
+    this.layout = "horizontal";
+    this.navheaderBg = navheaderBg || "color_13";
+    this.headerBg = headerBg || "color_13";
     this.sidebarStyle = sidebarStyle || "full";
-    this.sidebarBg = sidebarBg || "color_1";
+    this.sidebarBg = sidebarBg || "color_13";
     this.sidebarPosition = sidebarPosition || "static";
-    this.headerPosition = headerPosition || "static";
-    this.containerLayout = containerLayout || "wide";
+    this.headerPosition = headerPosition || "fixed";
+    this.containerLayout = containerLayout || "full";
     this.direction = direction || "ltr";
-	this.primary = primary || "color_1";
+	this.primary = primary || "color_13";
 
     // this.manageTypography();
     this.manageVersion();

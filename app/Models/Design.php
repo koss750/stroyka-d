@@ -247,6 +247,68 @@ public function setShortDescriptionAttribute($values)
         $this->meta->short_description = $values;
 }
 
+public function fullExcelTest() {
+     // Fetch associated costs and set values in the spreadsheet
+     $template = AssociatedCostModel::where('id', 7)->firstOrFail();
+     $spreadsheet = IOFactory::load(storage_path('templates/late_2.xlsx'));
+    $sheet = $spreadsheet->getActiveSheet();
+     $associatedCosts = $template->associatedCosts;
+     foreach ($associatedCosts as $cost) {
+         $cell = $cost["p_code"];
+         $value = $cost["p_cell"];
+         $sheet->setCellValue($cell, $value);
+     }
+     //Кровля мягкая
+     $sheet->setCellValue('D283', $this->roofSquare);
+     $sheet->setCellValue('D284', $this->srCherep);
+     $sheet->setCellValue('D285', $this->srKover);
+     $sheet->setCellValue('D286', $this->srKonK);
+     $sheet->setCellValue('D287', $this->srMastika1);
+     $sheet->setCellValue('D288', $this->srMastika);
+     $sheet->setCellValue('D289', $this->srKonShir);
+     $sheet->setCellValue('D290', $this->srKonOneSkat);
+     $sheet->setCellValue('D291', $this->srPlanVetr);
+     $sheet->setCellValue('D292', $this->srPlanK);
+     $sheet->setCellValue('D293', $this->srKapelnik);
+     $sheet->setCellValue('D294', $this->srEndn);
+     $sheet->setCellValue('D295', $this->srGvozd);
+     $sheet->setCellValue('D296', $this->srSam70);
+     $sheet->setCellValue('D297', $this->srPack);
+     $sheet->setCellValue('D298', $this->srIzospanAM);
+     $sheet->setCellValue('D299', $this->srIzospanAM35);
+     $sheet->setCellValue('D300', $this->srLenta);
+     $sheet->setCellValue('D301', $this->srRokvul);
+     $sheet->setCellValue('D302', $this->srIzospanB);
+     $sheet->setCellValue('D303', $this->srIzospanB35);
+     $sheet->setCellValue('D304', $this->srPrimUgol);
+     $sheet->setCellValue('D305', $this->srPrimNakl);
+     $sheet->setCellValue('D306', $this->srOSB);
+     $sheet->setCellValue('D307', $this->srAero);
+     $sheet->setCellValue('D308', $this->srAeroSkat);
+     $sheet->setCellValue('D309', $this->srtropValue);
+     
+     //dd($sheet);
+     
+     // Create a writer to save the spreadsheet
+     $writer = new Xlsx($spreadsheet);
+     
+     // Define the file name and path in the storage
+     $fileName = $this->id . '_foundation_lenta_' . time() . '.xlsx';
+     $path = '/app/public/files/' . $this->id;
+     File::ensureDirectoryExists(storage_path($path));
+     $filePath = $path . "/" . $fileName;
+
+     // Save the file to storage
+     $writer->save(storage_path("$filePath"));
+     
+     $returnArray = [
+         "publicPath" => '/storage/files/' . $this->id . '/' . $fileName,
+         "fileName" => $fileName
+         ];
+     // Return a response for download
+     return $returnArray;
+ }
+
 public function foundationLentaExcel($tape)
     {
         // Load the template file
@@ -257,35 +319,57 @@ public function foundationLentaExcel($tape)
         }
         $tapeWidth = $tapeWidth/10;
         $tapeLength = $tapeWidth-0.1;
-        $spreadsheet = IOFactory::load(storage_path('templates/foundation_lenta_tmp.xlsx'));
-        
-        // Manipulate the spreadsheet
+        $spreadsheet = IOFactory::load(storage_path('templates/abc.xlsx'));
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('E3', $this->lfLength);
-        $sheet->setCellValue('E4', $tapeWidth);
-        $sheet->setCellValue('E5', $tapeLength);
-        $sheet->setCellValue('E6', $this->lfAngleX);
-        $sheet->setCellValue('E7', $this->lfAngleT);
-        $sheet->setCellValue('E8', $this->lfAngleG);
-        $sheet->setCellValue('E9', $this->lfAngle45);
-        $sheet->setCellValue('E10', 0.2);
-        $sheet->setCellValue('E11', $this->mfSquare);
+        $sheet->setCellValue('D4', $this->lfLength);
+        $sheet->setCellValue('D5', $tapeWidth);
+        $sheet->setCellValue('D8', $tapeLength);
+        $sheet->setCellValue('D9', $this->lfAngleX);
+        $sheet->setCellValue('D10', $this->lfAngleT);
+        $sheet->setCellValue('D11', $this->lfAngleG);
+        $sheet->setCellValue('D12', $this->lfAngle45);
+        $sheet->setCellValue('D14', 0.2);
+        $sheet->setCellValue('D15', 0.2);
+        $sheet->setCellValue('D16', $this->mfSquare);
+        $sheet->setCellValue('D18', $this->vfCount);
         
-
+        
         // Fetch associated costs and set values in the spreadsheet
-        $template = AssociatedCostModel::where('id', 1)->firstOrFail();
+        $template = AssociatedCostModel::where('id', 7)->firstOrFail();
         $associatedCosts = $template->associatedCosts;
         foreach ($associatedCosts as $cost) {
-            $cell = "B" . $cost["cell"];
-            $value = $cost["description"];
-            $sheet->setCellValue($cell, $value);
-            $cell = "D" . $cost["cell"];
-            $value = $cost["unit"];
-            $sheet->setCellValue($cell, $value);
-            $cell = "E" . $cost["cell"];
-            $value = $cost["value"];
+            $cell = $cost["p_code"];
+            $value = $cost["p_cell"];
             $sheet->setCellValue($cell, $value);
         }
+        //Кровля мягкая
+        $sheet->setCellValue('D283', $this->roofSquare);
+        $sheet->setCellValue('D284', $this->srCherep);
+        $sheet->setCellValue('D285', $this->srKover);
+        $sheet->setCellValue('D286', $this->srKonK);
+        $sheet->setCellValue('D287', $this->srMastika1);
+        $sheet->setCellValue('D288', $this->srMastika);
+        $sheet->setCellValue('D289', $this->srKonShir);
+        $sheet->setCellValue('D290', $this->srKonOneSkat);
+        $sheet->setCellValue('D291', $this->srPlanVetr);
+        $sheet->setCellValue('D292', $this->srPlanK);
+        $sheet->setCellValue('D293', $this->srKapelnik);
+        $sheet->setCellValue('D294', $this->srEndn);
+        $sheet->setCellValue('D295', $this->srGvozd);
+        $sheet->setCellValue('D296', $this->srSam70);
+        $sheet->setCellValue('D297', $this->srPack);
+        $sheet->setCellValue('D298', $this->srIzospanAM);
+        $sheet->setCellValue('D299', $this->srIzospanAM35);
+        $sheet->setCellValue('D300', $this->srLenta);
+        $sheet->setCellValue('D301', $this->srRokvul);
+        $sheet->setCellValue('D302', $this->srIzospanB);
+        $sheet->setCellValue('D303', $this->srIzospanB35);
+        $sheet->setCellValue('D304', $this->srPrimUgol);
+        $sheet->setCellValue('D305', $this->srPrimNakl);
+        $sheet->setCellValue('D306', $this->srOSB);
+        $sheet->setCellValue('D307', $this->srAero);
+        $sheet->setCellValue('D308', $this->srAeroSkat);
+        $sheet->setCellValue('D309', $this->srtropValue);
         
         //dd($sheet);
         
@@ -309,5 +393,53 @@ public function foundationLentaExcel($tape)
         return $returnArray;
     }
     
+
+public function foundationLentaExcelTest($tape)
+    {
+        // Load the template file
+        
+        $tapeWidth = $tape[4];
+        if ($tapeWidth == 1) {
+             $tapeWidth = 10;
+        }
+        $tapeWidth = $tapeWidth/10;
+        $tapeLength = $tapeWidth-0.1;
+        $spreadsheet = IOFactory::load(storage_path('templates/foundation_lenta_tmp2.xlsx'));
+        
+        // Manipulate the spreadsheet
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('D4', $this->lfLength);
+        $sheet->setCellValue('D5', $tapeWidth);
+        $sheet->setCellValue('D8', $tapeLength);
+        $sheet->setCellValue('D9', $this->lfAngleX);
+        $sheet->setCellValue('D10', $this->lfAngleT);
+        $sheet->setCellValue('D11', $this->lfAngleG);
+        $sheet->setCellValue('D12', $this->lfAngle45);
+        $sheet->setCellValue('D14', 0.2);
+        $sheet->setCellValue('D15', 0.2);
+        $sheet->setCellValue('D16', $this->mfSquare);
+        
+        
+        
+        // Create a writer to save the spreadsheet
+        $writer = new Xlsx($spreadsheet);
+        
+        // Define the file name and path in the storage
+        $fileName = $this->id . '_foundation_lenta_' . time() . '.xlsx';
+        $path = '/app/public/files/' . $this->id;
+        File::ensureDirectoryExists(storage_path($path));
+        $filePath = $path . "/" . $fileName;
+
+        // Save the file to storage
+        $writer->save(storage_path("$filePath"));
+        
+        $returnArray = [
+            "publicPath" => '/storage/files/' . $this->id . '/' . $fileName,
+            "fileName" => $fileName
+            ];
+        // Return a response for download
+        return $returnArray;
+    }
+
 }
 

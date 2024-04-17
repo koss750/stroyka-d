@@ -4,10 +4,10 @@
 <div class="col-md-6">
     <div class="form-input-content text-center error-page">
         <h1 class="error-text font-weight-bold">404</h1>
-        <h4><i class="fa fa-exclamation-triangle text-warning"></i> The page you were looking for is not found!</h4>
-        <p>You may have mistyped the address or the page may have moved.</p>
+        <h4><i class="fa fa-exclamation-triangle text-warning"></i> Мы заблудилися!</h4>
+        <p>Скорее всего эта страница еще не сделана или есть опечатка в адресе.. надо бы уточнить</p>
         <div>
-            <a class="btn btn-primary" href="{{ url('index')}}">Back to Home</a>
+            <a class="btn btn-primary" href="{{ url('index')}}">Вернуться обратно</a>
         </div>
     </div>
 </div>

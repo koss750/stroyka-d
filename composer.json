@@ -11,6 +11,7 @@
         "php": "^8.0",
         "borodin-services/design-files": "@dev",
         "ebess/advanced-nova-media-library": "^4.1",
+        "eminiarts/nova-tabs": "^2.2",
         "guzzlehttp/guzzle": "^7.7",
         "handleglobal/nova-nested-form": "dev-master",
         "interaction-design-foundation/nova-html-card": "^3.1",

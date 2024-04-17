@@ -6,6 +6,7 @@ use App\Models\ExcelFileType; // Assuming this is the correct namespace
 use Laravel\Nova\Fields\ID;
 use App\Nova\AssociatedCost;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Hidden;
 use App\Http\Controllers\RuTranslationController as Translator;
@@ -73,31 +74,52 @@ class AssociatedCost extends Resource
      */
     public function fields(NovaRequest $request)
     {
-        return [
-            Text::make(Translator::translate('tmp_type_label'), 'type')
+
+        $static = [
+            Text::make(Translator::translate('tmp_subtype_label'), 'subtype')
             ->displayusing(function($value) {
                 return Translator::translate($value);
             })->sortable()
                 ->rules('required', 'max:30'),
     
-            Text::make(Translator::translate('tmp_stype_label'), "subtype")
+            Text::make(Translator::translate('tmp_file_label'), "file")
             ->displayusing(function($value) {
                 return Translator::translate($value);
             })->sortable()
-                ->rules('required', 'max:30'),
+                ->rules('required', 'max:30')];
+        $fields = [];
+        $fields = array_merge($static, $fields);
+        $associatedCosts = $this->associatedCosts;
+
+    if ($associatedCosts) {
+        // Collect unique p_types
+        $pTypes = collect($associatedCosts)->pluck('p_type')->unique();
+
+        foreach ($pTypes as $pType) {
+            // Filter associatedCosts for this pType
+            $filteredCosts = collect($associatedCosts)->where('p_type', $pType)->values();
+
+            // Add to fields array
+            $fields[] = new Panel(Translator::translate($pType . '_panel_label'), [
+                SimpleRepeatable::make(Translator::translate('ass_co_panel_label_' . $pType), 'associatedCosts', [
+                    Text::make(Translator::translate('ass_co_p_title_label'), 'p_title'),
+                    Number::make(Translator::translate('ass_co_p_value_label'), 'p_value'),
+                    Hidden::make('','p_code'),
+                    Hidden::make('','p_cell')
+                ])->stacked()->canAddRows(true)->addRowLabel(Translator::translate('table_add_field_label'))
+            ]);
+        }
+    }
+
+    
                 
             //Original hasmany field
             //HasMany::make(Translator::translate('ass_co_panel_label'), 'associatedCosts', 'App\Nova\AssociatedCost'),
-            SimpleRepeatable::make(Translator::translate('ass_co_panel_label'), 'associatedCosts', [
-                Text::make(Translator::translate('ass_co_type_label'), 'type')->displayusing(function($value) {
-                    return Translator::translate($value);
-                }),
-                Text::make(Translator::translate('ass_co_descr_label'), 'description'),
-                Text::make(Translator::translate('ass_co_unit_label'), 'unit'),
-                Text::make(Translator::translate('ass_co_val_label'), 'value'),
-                Hidden::make('','cell'),
-            ])->stacked()->canAddRows(true)->addRowLabel(Translator::translate('table_add_field_label')),
-        ];
+            //section	p_type	p_title	p_value	p_cell	p_code
+            return $fields;
+
+            
+        
     }
 
     /**
