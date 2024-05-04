@@ -23,6 +23,7 @@ vendor
 *.jar
 *.rar
 *.tar
+auth.json
 *.zip
 # ignore OS generated files
 ehthumbs.db
