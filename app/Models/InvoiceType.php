@@ -20,10 +20,6 @@ class InvoiceType extends Model
         'params'
     ];
 
-    protected $casts = [
-        'params' => 'array'
-    ];
-
     // Optionally add a recursive relationship to itself
     public function children()
     {

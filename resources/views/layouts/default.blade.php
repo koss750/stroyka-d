@@ -43,7 +43,7 @@
             <link href="{{ asset($style) }}" rel="stylesheet" type="text/css"/>
         @endforeach
     @endif
-	
+	<script src="//code.jivosite.com/widget/Sx4EXfaj86" async></script>
 </head>
 <body>
 

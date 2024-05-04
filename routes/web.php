@@ -9,6 +9,7 @@ use App\Http\Controllers\UIController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceModuleController;
 use App\Http\Controllers\SectionItemController;
+use App\Http\Controllers\ExternalSimulationController;
 
 
 /*
@@ -50,6 +51,9 @@ Route::get('/smeta/{id}', [InvoiceController::class, 'invoiceViewFull']);
 Route::get('/register-supplier', [UIController::class, 'page_register_supplier']);
 Route::get('/register-contractor', [UIController::class, 'page_register_contractor']);
 Route::get('/chats/{conversation}', [ChatController::class, 'show'])->name('chats.show');
+Route::get('/skachatushki', function () {
+    return InvoiceModuleController::downloadInvoiceItemsCsv();
+});
 Route::prefix('invoices')->group(function () {
     Route::post('/process-multiple', [InvoiceModuleController::class, 'processMultiple']);
     Route::get('/{invoice}/sections', [InvoiceModuleController::class, 'gatherSection']);
@@ -58,6 +62,8 @@ Route::prefix('invoices')->group(function () {
     Route::post('/final-calculation', [InvoiceModuleController::class, 'finalCalculation']);
 });
 //Route::get('/metal', [SectionItemController::class, 'addMetal']);
+Route::get('/external', [ExternalSimulationController::class, 'process']);
+
 
 //Route::prefix('vora')->group(function () {
     Route::controller(UIController::class)->group(function() {

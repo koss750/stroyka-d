@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExcelSheet extends Model
 {
-    protected $table = 'excel_sheets'; // The name of the table in the database
+    protected $table = 'excel_sheet_costs';
 
     protected $fillable = [
-        'name', 'description', 'type', 'params'
-    ];
-
-    protected $cast = [
-     //   "params" => "json"
+        'reference',
+        'sheet_title',
+        'sheet_code',
+        'item_title',
+        'current_value',
+        'item_value_cell',
     ];
 }

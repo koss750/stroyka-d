@@ -38,7 +38,7 @@
                                             <td>{{ $sides['L'][$i]['unit'] }}</td>
                                             <td>{{ $sides['L'][$i]['quantity'] }}</td>
                                             <td>{{ $sides['L'][$i]['cost'] }}</td>
-                                            <td>{{ $sides['L'][$i]['cost'] * $sides['L'][$i]['quantity'] }}</td>
+                                            <td>{{ $sides['L'][$i]['total'] }}</td>
                                         @else
                                             <td colspan="5"></td>
                                         @endif
@@ -49,7 +49,7 @@
                                             <td>{{ $sides['R'][$i]['unit'] }}</td>
                                             <td>{{ $sides['R'][$i]['quantity'] }}</td>
                                             <td>{{ $sides['R'][$i]['cost'] }}</td>
-                                            <td>{{ $sides['R'][$i]['cost'] * $sides['R'][$i]['quantity'] }}</td>
+                                            <td>{{ $sides['R'][$i]['total'] }}</td>
                                         @else
                                             <td colspan="5"></td>
                                         @endif

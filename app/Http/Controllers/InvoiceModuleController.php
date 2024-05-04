@@ -10,10 +10,46 @@ use App\Models\Design;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\RuTranslationController as Translator;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoiceModuleController extends Controller
 {
-    public $count = 0;
+    /**
+     * Download the invoice_items table as a CSV file.
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public static function downloadInvoiceItemsCsv(): StreamedResponse
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="invoice_items.csv"',
+        ];
+
+        return response()->stream(function () {
+            // Open output stream
+            $file = fopen('php://output', 'w');
+
+            // Set UTF-8 BOM for Excel compatibility
+            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+
+            // Fetch data
+            $items = DB::table('invoice_items')->get();
+
+            // Set column headers
+            if (!$items->isEmpty()) {
+                fputcsv($file, array_keys((array)$items->first()));
+            }
+
+            // Output data
+            foreach ($items as $item) {
+                fputcsv($file, (array)$item);
+            }
+
+            // Close output stream
+            fclose($file);
+        }, 200, $headers);
+    }
 
     public function setSections ($dReference, $rReference, $fReference=null) {
         //tempfixformixingPrefix
@@ -45,6 +81,7 @@ class InvoiceModuleController extends Controller
                     $details['unit'] = $object->unit;
                     $details['cost'] = $object->default_c;
                     $details['quantity'] = $object->default_q;
+                    $details['total'] = round($object->default_c*$object->default_q,2);
                     $converted[$sectionLabel][$sectionObject->visibility][$object->side][] = $details;
                 }
             }
