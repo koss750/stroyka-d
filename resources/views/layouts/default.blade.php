@@ -69,19 +69,7 @@
         <!--**********************************
             Nav header start
         ***********************************-->
-        <div class="nav-header">
-            <a href="{{ url('index')}}" class="brand-logo">
-				<div class="brand-title">
-					<img class="logo-12" src="index_files/logo.png"/>
-				</div>
-            </a>
-
-            <div class="nav-control">
-                <div class="hamburger">
-                    <span class="line"></span><span class="line"></span><span class="line"></span>
-                </div>
-            </div>
-        </div>
+        @include('components.header')
         <!--**********************************
             Nav header end
         ***********************************-->
@@ -91,13 +79,13 @@
 		
             Header end ti-comment-alt
         ***********************************-->
-        @include('elements.header')
+        
         <!--**********************************
             Sidebar start
         
             Sidebar end
         ***********************************-->
-		@include('elements.sidebar')
+		
 
         @php
             $body_class = ''; 
@@ -108,7 +96,7 @@
 		<!--**********************************
             Content body start
         ***********************************-->
-        <div class="content-body {{$body_class}}">
+        <div class="content-body" style="padding: 0">
             <!-- row -->
 			@yield('content')
         </div>

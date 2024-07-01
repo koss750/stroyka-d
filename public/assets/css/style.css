@@ -1,0 +1,495 @@
+@font-face {
+    font-family: 'tilda-sans_regular';
+    src: url('https://xn--80ardojfh.com/assets/fonts/tilda-sans_regular.woff') format('woff');
+    font-weight: regular;
+}
+@font-face {
+    font-family: 'tilda-sans_semibold';
+    src: url('https://xn--80ardojfh.com/assets/fonts/tilda-sans_semibold.woff') format('woff');
+    font-weight: semibold;
+}
+.container, .container-lg, .container-md, .container-sm, .container-xl {
+        max-width: 1300px;
+}
+body {
+    font-family: 'tilda-sans_regular';
+}
+ul {
+    padding: 0px;
+    margin: 0px;
+    list-style: none;
+}
+.sticky {
+    background: #fff;
+    transition: all 0.5s;
+}
+header#headerBar a {
+    color: #fff;
+}
+.sticky a {
+    color: #000 !important;
+}
+header#headerBar .row {
+    align-items: center;
+}
+::placeholder {
+    color: #585858;
+}
+.searchBar input[type="text"] {
+    border: 2px solid #eeeeee;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #c5c5c5;
+    width: 250px;
+    height: 50px;
+    padding-left: 15px;
+    background: transparent;
+}
+header#headerBar {
+    padding: 10px 0px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1020;
+}
+.headerLogo a {
+    font-family: 'tilda-sans_regular';
+    font-weight: 600;
+    color: #000000;
+    letter-spacing: .03em;
+    font-size: 24px;
+    text-decoration: none;
+}
+.padding5 {
+    padding: -1px;
+}
+.nav {
+    justify-content: flex-end;
+}
+.headerMenu ul.nav li {
+    margin-left: 25px;
+}
+.headerMenu ul.nav li a {
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: 600;
+    color: #000000;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+section#afterHeader {
+    padding: 200px 0px 150px;
+    background-image: linear-gradient(0.06turn, rgba(9, 32, 63, 1) 0%, rgba(40, 60, 70, 0.6) 0%);
+}
+
+.price-tag {
+    color: white;
+    margin: 5px;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.wood-type-row {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 10px;
+    margin-bottom: 10px;
+    margin-top: 5px;
+}
+
+.wood-type {
+    display: flex;
+}
+.image_modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.9);
+}
+
+.image_modal_container {
+    position: relative;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.image_modal_content {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+}
+
+.image_modal_close {
+    position: relative;
+    top: -23%;
+    right: 40px;
+    color: #f1f1f1;
+    font-size: 35px;
+    font-weight: bold;
+    transition: 0.3s;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.image_modal_close:hover,
+.image_modal_close:focus {
+    color: #bbb;
+    text-decoration: none;
+}
+
+.image_modal_prev,
+    .image_modal_next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: auto;
+        padding: 16px;
+        margin-top: -50px;
+        color: white;
+        font-weight: bold;
+        font-size: 40px;
+        transition: 0.6s ease;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+        -webkit-user-select: none;
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .image_modal_prev {
+        left: 0;
+        border-radius: 0 3px 3px 0;
+    }
+
+    .image_modal_next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+
+    .image_modal_prev:hover,
+    .image_modal_next:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+.wood-type-label {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-options .btn {
+    flex: 1 1 auto;
+}
+
+.suboptions {
+    margin-top: 10px;
+}
+
+.simple-options-foundation {
+    display: grid;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.simple-options-dd {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.simple-options-roof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.sizes {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.btn-wood {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#paymentForm {
+    display: flex;
+    flex-direction: column;
+}
+
+#paymentForm label {
+    margin-top: 10px;
+}
+
+#paymentForm input {
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
+#paymentForm button {
+    margin-top: 20px;
+}
+.title-btn {
+    border-width: 3px;
+}
+.option-group {
+    margin-top: 12px;
+    margin-right: 20px;
+}
+.optionsHeadings {
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+.mainHeading {
+    text-align: center;
+    margin-bottom: 90px;
+}
+.mainHeading h1 {
+    font-size: 42px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 40px;
+}
+.mainHeading p {
+    color: #fff;
+    font-size: 25px;
+    line-height: 1;
+    font-weight: 400;
+}
+.flipCard-Image {
+    height: 300px;
+    object-fit: cover;
+    transform: scale(1);
+    transition: all 0.5s;
+}
+.flipCard:hover .flipCard-Image {
+    transform: scale(1.1);
+    transition: all 0.5s;
+}
+.flipCard-Image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.flipCard-Image-small {
+    width: 50px;
+}
+.main-options {
+    margin-top: 10px;
+}
+.carousel-indicators {
+    position: static;
+    margin-top: 20px;
+    margin-left: 9px;
+    margin-right: 9px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.carousel-indicators li {
+    width: 70px !important;
+    height: 75px !important;
+    border: none;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, border 0.2s ease;
+    margin: 0;
+    flex: 0 0 auto;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+.carousel-indicators li.active {
+    opacity: 1;
+    border: 2px solid #007bff;
+}
+  .carousel-indicators button[data-bs-target]{
+    width: 200px;
+  }
+  .carousel-indicators button[data-bs-target]:not(.active){
+    opacity: 0.8;
+  }
+  .carousel-item {
+    max-height: 350px;
+  }
+  .custom-arrow {
+    align-items: end;
+    position: absolute;
+    top: 50%;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+}
+
+.custom-arrow-icon {
+    font-size: 40px;
+    color: black;
+    text-shadow: 
+        -1px -1px 0 white,
+        1px -1px 0 white,
+        -1px 1px 0 white,
+        1px 1px 0 white;
+}
+
+.carousel-control-prev {
+    left: 5px;
+}
+
+.carousel-control-next {
+    right: 5px;
+}
+
+.custom-arrow:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.custom-arrow:hover .custom-arrow-icon {
+    color: #333;
+}
+.flipCard {
+    position: relative;
+    transition: all 0.5s;
+    overflow: hidden;
+}
+.flipCard-Text {
+    position: absolute;
+    top: calc(50% - 40px);
+    width: 100%;
+    text-align: center;
+    z-index: 999;
+    color: #fff;
+}
+.flipCard:after {
+    position: absolute;
+    content: '';
+    width: 100%;
+    height: 100%;
+    background: rgba(000, 000, 000, 0.4);
+    top: 0;
+}
+.suboptions-group {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.flipCard h3 {
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 600;
+}
+.flipCard-Text p {
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+.flipCard-Text a {
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 30px;
+    text-align: center;
+    padding: 15px 30px;
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0;
+    transition: all 0.5s;
+    display: inline-block;
+}
+.flipCard:hover .flipCard-Text a {
+    opacity: 1;
+    transition: all 0.5s;
+}
+footer p {
+    margin-bottom: 0px;
+}
+footer {
+    background-color: #111111;
+    color: #fff;
+    padding: 20px 0px;
+}
+footer ul {
+    display: flex;
+    justify-content: space-around;
+}
+footer ul li a {
+    text-decoration: none;
+    color: #ffffff !important;
+    font-size: 16px;
+    font-weight: 500;
+}
+@media only screen and (max-width: 480px) {
+.flipCard {
+    margin-bottom: 20px;
+}
+.nav {
+    justify-content: left;
+}
+.headerMenu ul.nav li {
+    margin-right: 25px;
+    margin-left: 0px;
+}
+
+}

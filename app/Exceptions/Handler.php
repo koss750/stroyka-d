@@ -27,4 +27,12 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    public function report(Throwable $exception)
+    {
+        if ($exception instanceof \Illuminate\Validation\ValidationException) {
+            \Log::error('Validation error: ' . json_encode($exception->errors()));
+        }
+        parent::report($exception);
+    }
 }

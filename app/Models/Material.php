@@ -15,8 +15,8 @@ class Material extends Model
   *                     */
         protected $fillable = [
 		        'type',
-			        'title',
-				        'price',
-					        'spare',
-						    ];
+			    'title',
+				'price',
+				'spare',
+		];
 }

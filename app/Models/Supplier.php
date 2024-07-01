@@ -14,7 +14,10 @@ class Supplier extends Model
         'phone_1', // телефон 1
         'phone_2', // телефон 2
         'message', // поле для ввода текста/письма
-        'type' // подрядчик или поставщик
+        'type', // подрядчик или поставщик
+        'status', // New status field
+        'type_of_organisation', // New type_of_organisation field
+        'region_code' // New region_code field
     ];
 
     // Include any accessors, mutators, or relationships if needed

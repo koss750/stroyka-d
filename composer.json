@@ -9,6 +9,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
+        "ardenthq/nova-image-gallery-field": "dev-nova-compatibility",
+        "ayvazyan10/nova-imagic": "^1.3",
         "borodin-services/design-files": "@dev",
         "ebess/advanced-nova-media-library": "^4.1",
         "eminiarts/nova-tabs": "^2.2",
@@ -26,6 +28,7 @@
         "musonza/chat": "^6.3",
         "outl1ne/nova-simple-repeatable": "^2.1",
         "phpoffice/phpspreadsheet": "^1.18",
+        "predis/predis": "^2.2",
         "rap2hpoutre/fast-excel": "^5.2",
         "stroyka/exporttool": "@dev",
         "symfony/browser-kit": "^6.3",
@@ -116,6 +119,10 @@
         "6": {
             "type": "path",
             "url": "./nova-components/DesignFiles"
+        },
+        "7": {
+            "type": "path",
+            "url": "./nova-components/RedisKeys"
         }
     }
 }

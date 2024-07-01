@@ -4,36 +4,55 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Project extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'reference',
-        'invoice_id', // Although it's auto-generated, it's listed to enable mass assignment if necessary
-        'section',
-        'side',
-        'title',
-        'unit',
-        'quantity',
-        'cost',
-        'default_q',
-        'default_c',
-        'params'
+        'user_id',
+        'ip_address',
+        'payment_reference',
+        'payment_amount',
+        'design_id',
+        'selected_configuration',
+        'filepath',
     ];
 
     protected $casts = [
-        'params' => 'array', // Cast params to an array
+        'selected_configuration' => 'array',
+        'payment_amount' => 'decimal:2',
     ];
 
-    // Set the auto-generating invoice_id attribute
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function design()
+    {
+        return $this->belongsTo(Design::class);
+    }
+
     public static function boot()
     {
         parent::boot();
         
         static::creating(function ($project) {
-            // Set invoice_id to a formatted timestamp when creating a new Project
-            $project->invoice_id = Carbon::now()->format('YmdHis');
+            if (!$project->payment_reference) {
+                $project->payment_reference = Carbon::now()->format('YmdHis');
+            }
         });
+    }
+
+    public function getFormattedCreatedAtAttribute()
+    {
+        return $this->created_at->format('Y-m-d H:i:s');
+    }
+
+    public function getFormattedUpdatedAtAttribute()
+    {
+        return $this->updated_at->format('Y-m-d H:i:s');
     }
 }

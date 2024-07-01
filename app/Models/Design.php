@@ -11,7 +11,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
 use HasTranslations;
 use Vanilo\Product\Models\Product;
-use App\Moodels\DesignPrice;
+use App\Models\DesignPrice;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -20,15 +20,15 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\File;
 use App\Models\ExcelFileType as AssociatedCostModel;
+use App\Models\ProjectPrice;
+use Spatie\Image\Manipulations;
+
 
 class Design extends Model implements HasMedia
 {
 	use InteractsWithMedia;
-	 /**
-	 *      * The table associated with the model.
-	 *           *
-	 *                * @var string
-	 *                     */
+	 
+    
 	protected $table = 'designs';
 	
 	public $timestamps = true;
@@ -71,6 +71,9 @@ class Design extends Model implements HasMedia
         'endovList',
         'areafl0',
         'metaList',
+        'indexed_prices',
+        'etiketka',
+        'etiketka_seasonal',
         // ... include other fields as needed
     ];
 
@@ -84,12 +87,52 @@ class Design extends Model implements HasMedia
         'metaList' => 'json',
         'krovlaList' => 'json',
         'pvParts' => 'json', // or 'object' if you prefer
-        'mvParts' => 'json' // or 'object' if you prefer
+        'mvParts' => 'json', // or 'object' if you prefer
+        'indexed_prices' => 'array'
     ];
-    
-    public function designPrices()
+
+    /**
+     * Get the project prices for the design
+     * 
+     * @return HasMany
+     */
+    public function projectPrices()
     {
-        return $this->hasMany(DesignPrice::class);
+        return $this->hasMany(ProjectPrice::class)->orderBy('created_at', 'desc')->groupBy('invoice_type_id');
+    }
+
+    /**
+     * Update the indexed prices for the design
+     * 
+     * @return void
+     */
+    public function updateIndexedPrices()
+    {
+        $prices = $this->projectPrices()->pluck('price', 'invoice_type_id')->toArray();
+        $this->indexed_prices = $prices;
+        $this->save();
+    }
+
+    public function getEtiketkaAttribute()
+    {
+        $projectPrice = ProjectPrice::where('design_id', $this->id)->where('invoice_type_id', 187)->first();
+        if($projectPrice) {
+            $prices = json_decode($projectPrice->price, true);
+            return $prices['material'];
+        } else {
+            return 0;
+        }
+    }
+
+    public function getEtiketkaSeasonalAttribute()
+    {
+        $projectPrice = ProjectPrice::where('design_id', $this->id)->where('invoice_type_id', 189)->first();
+        if($projectPrice) {
+            $prices = json_decode($projectPrice->price, true);
+            return $prices['material'];
+        } else {
+            return 0;
+        }
     }
 
 	/**
@@ -98,46 +141,82 @@ class Design extends Model implements HasMedia
 	 *                * @var array
 	 *                     */
 	public function registerMediaConversions(Media $media = null): void
-{
-    $this->addMediaConversion('thumb')
-        ->width(130)
-        ->height(130);
-    $this->addMediaConversion('mild')
-        ->width(1000)
-        ->height(2000);
-}
+    {
+        $this->addMediaConversion('jpg')
+            ->format('jpg')
+            ->quality(99);
+        $this->addMediaConversion('mild')
+            ->width(1000)
+            ->height(2000)
+            ->performOnCollections('images');
+        $this->addMediaConversion('thumb')
+            ->width(500)
+            ->height(500)
+            ->performOnCollections('images');
+        $this->addMediaConversion('watermarked')
+        ->width(900)
+        ->height(450)
+         ->watermark(public_path('watermark.png'))
+         ->watermarkPosition(Manipulations::POSITION_CENTER)
+         ->watermarkOpacity(50)
+         ->watermarkWidth(900, Manipulations::UNIT_PERCENT)
+         ->watermarkHeight(450, Manipulations::UNIT_PERCENT)
+         ->performOnCollections('images');
+    }
 
 public function registerMediaCollections(): void
 {
-    $this->addMediaCollection('main')->singleFile();
-    $this->addMediaCollection('my_multi_collection');
+    try {
+        $this->addMediaCollection('main')->singleFile();
+        $this->addMediaCollection('my_multi_collection');
+    } catch (\Exception $e) {
+        \Log::error('Media collection registration failed: ' . $e->getMessage());
+    }
 }
+    public function watermarkImageUrls()
+    {
+        return $this->getMedia('images')->map(function ($media) {
+                    return $media->getUrl('watermarked');
+                })->all();
+    }
+
+    public function thumbImageUrls()
+    {
+        return $this->getMedia('images')->map(function ($media) {
+                    return $media->getUrl('thumb');
+                })->all();
+    }
 
 public function setImages()
     {
-        // Get media entries for this design
-        $mediaEntries = Media::where('model_type', 'App\Models\Design')
-                             ->where('model_id', $this->id)
-                             ->orderBy('order_column')
-                             ->get();
+        try {
+            // Get media entries for this design
+            $mediaEntries = Media::where('model_type', 'App\Models\Design')
+                                 ->where('model_id', $this->id)
+                                 ->orderBy('order_column')
+                                 ->get();
 
-        // Initialize an array to hold image URLs
-        $imageUrls = [];
+            // Initialize an array to hold image URLs
+            $imageUrls = [];
 
-        foreach ($mediaEntries as $entry) {
-            $fileName = str_replace(' ', '-', $entry->name);
-            $url = 'storage/' . $entry->id . '/conversions/' . $fileName . '-mild.jpg';
-            if ($entry->order_column == 1) {
-                // Set the main image URL
-                $this->image_url = $url;
-            } else {
-                // Add to the images array
-                $imageUrls[] = $url;
+            foreach ($mediaEntries as $entry) {
+                $fileName = str_replace(' ', '-', $entry->name);
+                $url = 'storage/' . $entry->id . '/' . $fileName . '.jpg';
+                if ($entry->order_column == 1) {
+                    // Set the main image URL
+                    $this->image_url = $url;
+                } else {
+                    // Add to the images array
+                    $imageUrls[] = $url;
+                }
             }
-        }
 
-        // Set the images property
-        $this->images = $imageUrls;
+            // Set the images property
+            $this->images = $imageUrls;
+        } catch (\Exception $e) {
+            \Log::error('Image processing failed: ' . $e->getMessage());
+            throw $e; // Re-throw the exception if needed
+        }
     }
     
     public function setDetails() {
@@ -165,6 +244,35 @@ public function setImages()
     protected function generatePrompt() {
         // Generate a prompt based on the product's existing attributes
         return "Write a 150 character product description for a random house";
+    }
+
+    public function setMaterialDescription() {
+        $code = $this->category[0]["category"];
+        $materialDescriptions = [
+            "df_cat_1" => "Дом из профилированного бруса",
+              "df_cat_2" => "Баня из клееного бруса",
+              "df_cat_3" => "Дом из блоков",
+              "df_cat_4" => "Дом из бревна",
+              "df_cat_5" => "Баня из бруса",
+              "df_cat_6" => "Баня из бруса",
+              "df_cat_7" => "Баня из бревна",
+              "df_cat_8" => "Дом-баня из бруса",
+              "df_cat_9" => "Дом из бруса камерной сушки",
+              "df_cat_10" => "Дом из клееного бруса",
+              "df_cat_11" => "Баня с бассейном",
+              "df_cat_12" => "Каркасный дом",
+              "df_cat_13" => "Баня из бревна",
+              "df_cat_14" => "Баня из бревна",
+              "df_cat_15" => "Баня из бруса",
+              "df_cat_16" => "Баня из бруса",
+              "df_cat_17" => "Дачный дом",
+              "df_cat_18" => "Дом-баня из бревна",
+              "df_cat_19" => "Дом из бревна",
+              "df_cat_20" => "Дом из бревна",
+              "df_cat_21" => "Дом из бруса",
+              "df_cat_22" => "Дом из бруса"
+            ];
+        $this->materialDescription = $materialDescriptions[$code];
     }
     
     public function setDescription(Design $design) {
@@ -206,12 +314,11 @@ public function setImages()
     }
     
     public function setPrice(Design $design) {
-        $price[0] = $design->size*9870;
-        //$step = $price[0]/20;
-        //for ($x=1;$x++;$x<3) {
-        //    $price[$x] = $price[0]+$step*($x+1);
-        //}
-        $design->price = $this->formatPrice($price[0]);
+        //details is a json that contains price element that should be set as "price"
+        $details = json_decode($design->details, true);
+        $price = $details['price'];
+        $price = round($price, 0);
+        $design->price = $this->formatPrice($price);
     }
     
     public function formatPrice($price) {
@@ -219,8 +326,11 @@ public function setImages()
         return number_format($price / 1000000, 1, '.', '') . ' млн';
         }
         // If the price is less than a million, format as thousands (XXX тыс.)
-        else {
+        else if($price >= 1000){
             return number_format($price / 1000, 0) . ' тыс.';
+        }
+        else {
+            return number_format($price, 0);
         }
     }
     

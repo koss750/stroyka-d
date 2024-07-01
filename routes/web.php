@@ -10,6 +10,12 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceModuleController;
 use App\Http\Controllers\SectionItemController;
 use App\Http\Controllers\ExternalSimulationController;
+use Illuminate\Support\Facades\Redis;
+use App\Http\Controllers\OrderController;
+use App\Models\Project;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 
 /*
@@ -24,15 +30,22 @@ use App\Http\Controllers\ExternalSimulationController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/site');
+});
+
+//under construction - переделать
+Route::prefix('projects')->middleware('check.redirection')->group(function () {
+    Route::view('/{slug}', 'under-construction')->middleware('counter');
+});
+Route::prefix('fundament')->middleware('check.redirection')->group(function () {
+    Route::view('/{slug}', 'under-construction')->middleware('counter');
 });
 
 Route::get('/forex', [ExchangeRateController::class, 'index']);
 Route::get('/export', [DesignController::class, 'exportAll']);
 Route::get('/forex-day', [DailyAverageRateController::class, 'index']);
-Route::get('/project/{id}', [UIController::class, 'showProject']);
-Route::get('/browse', [DesignController::class, 'getDemoDesigns']);
-Route::get('/browse/{id}', [DesignController::class, 'getDemoDetail']);
+Route::get('/browse/{category?}', [DesignController::class, 'getDemoDesigns']);
+Route::get('/project/{id}', [DesignController::class, 'getDemoDetail'])->middleware('counter');
 Route::get('/order', [DesignController::class, 'getDemoOrder']);
 Route::get('/checkout', [DesignController::class, 'getDemoCheckout']);
 Route::get('/email-inbox', [UIController::class, 'email_inbox']);
@@ -61,16 +74,64 @@ Route::prefix('invoices')->group(function () {
     Route::get('/{invoice}/variables', [InvoiceModuleController::class, 'getVariables']);
     Route::post('/final-calculation', [InvoiceModuleController::class, 'finalCalculation']);
 });
+/*
+Route::middleware(['check.redirection'])->group(function () {
+    Route::get('/projects/{slug}', [UIController::class, 'showProjects'])->middleware('counter');
+});
+*/
 //Route::get('/metal', [SectionItemController::class, 'addMetal']);
-Route::get('/external', [ExternalSimulationController::class, 'process']);
+//Route::get('/external', [ExternalSimulationController::class, 'process']);
+Route::get('/simulate', [App\Http\Controllers\BetSimulationController::class, 'simulate']);
+Route::prefix('site')->group(function () {
+    Route::get('/', function () {
+        return view('index');
+    //    $foundations = DynamicPageCard::where('type', 'foundation')->get()->toArray();
+    //    $cards = DynamicPageCard::where('type', 'home')->get()->toArray();
+
+//        return view('index', compact('cards', 'foundations'));
+    });
+});
 
 
-//Route::prefix('vora')->group(function () {
+Route::get('/keys/{designId}', function ($designId) {
+    $keys = Redis::connection('external')->keys("*");
+    return $keys;
+});
+
+Route::post('/register-order', function (Request $request) {
+    $project = Project::create([
+        'user_id' => Auth::id(),
+        'ip_address' => $request->ip(),
+        'payment_reference' => 'test',
+        'payment_amount' => 200.00,
+        'design_id' => $request->input('designId'),
+        'selected_configuration' => json_decode($request->input('selectedOptions')),
+    ]);
+
+    // Send request to external API
+    $response = Http::post("http://tmp.mirsmet.com/process-order/{$project->id}");
+    $fileLink = $response->json('file_link');
+
+    // Update project with file link
+    $project->update(['filepath' => $fileLink]);
+
+    return response()->json([
+        'message' => 'Скачать смету',
+        'orderId' => $project->id,
+        'fileLink' => $fileLink
+    ]);
+});
+
+
+
+
+
+Route::prefix('vora')->group(function () {
     Route::controller(UIController::class)->group(function() {
         Route::get('/','dashboard_1');
         Route::get('/index','dashboard_1');
         Route::get('/index-2','dashboard_2');
-        Route::get('/projects','projects');
+        //Route::get('/projects','projects');
         Route::get('/contacts','contacts');
         Route::get('/kanban','kanban');
         Route::get('/calendar','calendar');
@@ -139,4 +200,7 @@ Route::get('/external', [ExternalSimulationController::class, 'process']);
         Route::post('/ajax/recent-activities','recent_activities_ajax');
         Route::post('/ajax/contacts','contacts_ajax');
     });
-//});
+});
+
+
+

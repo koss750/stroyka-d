@@ -1,5 +1,6 @@
 @extends('layouts.default')
 
+
 @section('content')
 <div class="container-fluid">
     <!-- Add Order -->

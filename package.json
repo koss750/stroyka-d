@@ -12,7 +12,11 @@
         "build-ExportTool": "cd nova-components/ExportTool && npm run dev",
         "build-ExportTool-prod": "cd nova-components/ExportTool && npm run prod",
         "build-design-files": "cd nova-components/DesignFiles && npm run dev",
-        "build-design-files-prod": "cd nova-components/DesignFiles && npm run prod"
+        "build-design-files-prod": "cd nova-components/DesignFiles && npm run prod",
+        "build-RedisKeys": "cd nova-components/RedisKeys && npm run dev",
+        "build-RedisKeys-prod": "cd nova-components/RedisKeys && npm run prod",
+        "build-RedisKeysCard": "cd nova-components/RedisKeysCard && npm run dev",
+        "build-RedisKeysCard-prod": "cd nova-components/RedisKeysCard && npm run prod"
     },
     "devDependencies": {
         "axios": "^1.4.0",

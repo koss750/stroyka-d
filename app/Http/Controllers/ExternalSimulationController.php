@@ -10,12 +10,20 @@ use App\Models\InvoiceType;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
+
 class ExternalSimulationController extends Controller
 {
     public function process(Request $request)
     {
+        
+        //establishing where the request is from
+        if ($request->has('debug') && $request->debug > 0) {
+            $debug = $request->debug;
+        } else {
+            
+        }
         // Check if debugging is enabled
-        $debug = $request->has('debug') && $request->debug == 1;
+        
 
         $designId = $request->design;
         $variant = $request->variant;
@@ -153,7 +161,7 @@ class ExternalSimulationController extends Controller
                 $startingIndex++;
             }
             $sheet->setCellValue('P15', "=UNIQUE(E15:E40)");
-            
+
             Log::info("Balki completed");
 
 

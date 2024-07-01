@@ -25,7 +25,7 @@ class CheckPrices extends Action
      */
     public function name()
     {
-        return Translator::translate('check_prices');
+        return Translator::translate('check_prices_action');
     }
     /**
      * Perform the action on the given models.

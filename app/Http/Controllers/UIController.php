@@ -6,18 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\DesignController as DC;
 use App\Http\Controllers\RuTranslationController as Translator;
 use App\Http\Controllers\InvoiceController as Invoice;
+//use Illuminate\Support\Facades\Redis;
 
 class UIController extends Controller
 {
 	
 	
-    
-    // Individual Project/Design View
-    public function showProject($id){
+    public function showProject(Request $request, $id)
+    {
+        $fullUrl = $request->fullUrl();
+        //$count = Redis::get("visits:$fullUrl") ?? 0;
+        $count = 10;
         $design = DC::show($id);
         $page_title = Translator::translate("project_page_title");
         $page_description = Translator::translate("listing_page_description");
-        return view('vora.ecom.product_list', compact('page_title', 'page_description', $design));
+        return view('vora.ecom.product_list', compact('page_title', 'page_description', 'count', $design));
     }
 	
     // Dashboard

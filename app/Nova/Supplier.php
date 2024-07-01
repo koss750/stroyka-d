@@ -9,6 +9,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Textarea;
 use App\Http\Controllers\RuTranslationController as Translator;
 use Laravel\Nova\Fields\Email;
+use Laravel\Nova\Fields\Select;
 
 class Supplier extends Resource
 {
@@ -75,6 +76,27 @@ class Supplier extends Resource
             Textarea::make(Translator::translate('message'), 'message')
                 ->sortable()
                 ->rules('nullable', 'max:255'),
+
+            Select::make('Status', 'status')
+                ->options([
+                    Translator::translate('applied_label') => Translator::translate('applied_label'),
+                    Translator::translate('pending_label') => Translator::translate('pending_label'),
+                    Translator::translate('approved_label') => Translator::translate('approved_label'),  
+                ]),
+
+            Select::make('Type of Organisation', 'type_of_organisation')
+                ->options([
+                    'llc' => Translator::translate('LLC_label'),
+                    'brigade' => Translator::translate('Brigade_label'),
+                    'sole_trader' => Translator::translate('Sole_Trader_label'),
+                ])
+                ->displayUsingLabels()
+                ->sortable()
+                ->rules('required', 'max:255'),
+
+            Text::make('Region Code', 'region_code')
+                ->sortable()
+                ->rules('required', 'max:255'),
         ];
     }
 

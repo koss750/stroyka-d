@@ -20,9 +20,9 @@ class DatabaseBackupCommand extends Command
     {
         $this->info('Starting remote database backup...');
 
-        $dbUsername = env('DB_USERNAME', 'your_db_username');
-        $dbName = env('DB_DATABASE', 'your_db_name');
-        $dbHost = env('DB_HOST', 'your_db_host');
+        $dbUsername = env('DB_USERNAME', 'alex_client');
+        $dbName = env('DB_DATABASE', 'stroyka_dev');
+        $dbHost = env('DB_HOST', '127.0.0.1');
         $dbPort = env('DB_PORT', 3306); // Default MySQL port
         $backupPath = storage_path('backups/' . date('Y-m-d_His') . '_backup.sql');
 

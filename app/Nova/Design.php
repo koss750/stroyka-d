@@ -19,6 +19,7 @@ use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\KeyValue;
 use App\Nova\Actions\GenerateExcel;
+use App\Nova\Actions\GenerateOSExcel;
 use App\Nova\Actions\CheckPrices;
 use Eminiarts\Tabs\Traits\HasTabs;
 use Eminiarts\Tabs\Tabs;
@@ -35,7 +36,9 @@ use Laravel\Nova\Panel;
 use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
 use HasTranslations;
 use Laravel\Nova\Fields\Heading;
+use App\Nova\Filters\ActiveFilterAlt;
 use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
+use App\Nova\Filters\AlmostReady;
 
 
 class Design extends Resource
@@ -93,8 +96,8 @@ class Design extends Resource
         $controller = new DesignController;
         $headers = $controller->getHeaders();
         return [
-            (new DownloadExcel)->withHeadings(),
-            new GenerateExcel
+            new GenerateExcel,
+            (new DownloadExcel)->withHeadings()
         ];
     }
     
@@ -220,10 +223,6 @@ class Design extends Resource
         $controller = new DesignController;
         return [
             ID::make()->sortable()->hide(),
-            
-            Panel::make(Translator::translate('documentation_files'), [
-                Heading::make(Translator::translate('use_documents_tab_prompt')),
-            ]),
             
             Panel::make('Главное', [
                 
@@ -556,7 +555,7 @@ class Design extends Resource
                 
             Panel::make('Изображения', [
                 Images::make('Изображения', 'images') // second parameter is the media collection name
-            ->conversionOnIndexView('thumb'),
+            ->conversionOnIndexView('jpg'),
         /*    ->withMeta(['extraAttributes' => [
         'fileInfo' => [
             'name' => function ($value, $disk, $resource) {
@@ -569,6 +568,8 @@ class Design extends Resource
             //->rules('required'), // validation rules
     //    NestedForm::make('Floors')->heading("helo")
                 ]),
+
+               
             
                 
                 
@@ -578,7 +579,8 @@ class Design extends Resource
     public function filters(Request $request)
         {
             return [
-                new CategoryFilter(),
+                new ActiveFilterAlt,
+                new AlmostReady
             ];
         }
     

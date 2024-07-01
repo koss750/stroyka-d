@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Design;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 use App\Models\Image;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\RuTranslationController as Translator;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Models\InvoiceType;
+use App\Models\ProjectPrice;
+use Illuminate\Support\Facades\Auth;
 
 class DesignController extends Controller
 {
@@ -319,33 +324,129 @@ $html .= '<thead class="thead-dark">';
         //
     }
     
-    public function getDemoDesigns($category = "df_cat_4", $limit=10)
+    public function getDemoDesigns($category_group = 'doma_iz_brevna')
     {
-        $designs = Design::where('id', '>', 586)->take($limit)
-                         ->get()
-                         ->map(function ($design) {
-                             $design->rating = 5;
-                             $design->reviewCount = 10;
-                             return $this->transformDesign($design);
-                         });
+        $category_groups = [
+            'doma_iz_brevna' => ['df_cat_4', 'df_cat_19', 'df_cat_20'],
+            'doma_iz_brusa' => ['df_cat_1', 'df_cat_9', 'df_cat_21', 'df_cat_22'],
+            'bani_iz_brevna' => ['df_cat_7', 'df_cat_13', 'df_cat_14'],
+            'bani_iz_brusa' => ['df_cat_2', 'df_cat_5', 'df_cat_6', 'df_cat_15', 'df_cat_16'],
+        ];
+        foreach ($category_groups[$category_group] as $category) {
+            $designs[] = Design::where('category', 'LIKE', '%"category":"' . $category . '"%')
+                    ->where('active', 1)
+                    ->get()
+                    ->map(function ($design) {
+                        $design->rating = 5;
+                        $design->reviewCount = 10;
+                        return $this->transformDesign($design);
+                    });
+        }
+        $designs = collect($designs)->flatten();
+        //$fullUrl = $request->fullUrl();
+        //$count = Redis::get("visits:$fullUrl") ?? 0;
         $page_title = Translator::translate("listing_page_title");
         $page_description = Translator::translate("listing_page_description");
-        return view('vora.ecom.product_list', compact('page_title', 'page_description', 'designs'));
+        return view('alternative_index', compact('page_title', 'page_description', 'designs'));
     }
 
-    public function getDemoDetail($id=220)
-    {
-        $designs = Design::where('id', $id)->take(1)
-                         ->get()
-                         ->map(function ($design) {
-                             $design->rating = 5;
-                             $design->reviewCount = 10;
-                             return $this->transformDesign($design);
-                         });
-        $page_title = Translator::translate("listing_page_title");
-        $page_description = Translator::translate("listing_page_description");
-        return view('vora.ecom.product_detail', compact('page_title', 'page_description', 'designs'));
+    public function getDemoDetail($id = 220, Request $request)
+{
+    $design = Design::where('id', $id)->firstOrFail();
+    $design->rating = 5;
+    $design->etiketka = json_decode($design->details, true)["price"];
+    $design->etiketka = round($design->etiketka, -3);
+    $design->etiketka = number_format($design->etiketka, 0, ',', ' ');
+    $design->reviewCount = 10;
+    $design = $this->transformDesign($design);
+
+    $data = InvoiceType::all();
+
+    $user = Auth::user();
+    if($user){
+        $design->user = $user;
+    } else {
+        $design->user = false;
     }
+
+
+    $foundations = $this->buildNestedOptions($data->where('parent', 102), $data, $id);
+    $dd_options = $this->buildNestedOptions($data->where('parent', 103), $data, $id);
+    $roofs = $this->buildNestedOptions($data->where('parent', 101), $data, $id);
+
+    $nestedData = [
+        'foundations' => $foundations,
+        'dd_options' => $dd_options,
+        'roofs' => $roofs,
+    ];
+    //comment out below while it is not working
+
+    /*foreach($nestedData as $group) {
+        foreach ($group as $option) {   
+            if($option->unique_btn_group) {
+                $nestedData[$option->unique_btn_group] = $option;
+                unset($nestedData[$key]);
+            }
+            foreach($option->suboptions as $suboption) {
+                if($suboption->unique_btn_group) {
+                    $nestedData[$suboption->unique_btn_group] = $suboption;
+                    unset($nestedData[$key]);
+                }
+            }
+        }
+    }
+    */
+    $fullUrl = $request->fullUrl();
+    $page_title = Translator::translate("listing_page_title");
+    $page_description = Translator::translate("listing_page_description");
+    $jpgImageUrls = $design->watermarkImageUrls();
+    $thumbImageUrls = $design->thumbImageUrls();
+    return view('alternative_detail', compact('page_title', 'page_description', 'design', 'nestedData', 'user', 'jpgImageUrls', 'thumbImageUrls'));
+}
+
+private function getPriceFromDb($id, $invoice_type_id)
+{
+    try {
+        $invoice_type_id = InvoiceType::where('label', $invoice_type_id)->first()->id;
+        $price = ProjectPrice::where('design_id', $id)->where('invoice_type_id', $invoice_type_id)->first();
+        $price = json_decode($price->price, true);
+        return $price["material"];
+    } catch (\Exception $e) {
+        Log::error("Unable to find the price for design $id and invoice type $invoice_type_id");
+        throw $e;
+    }
+}
+
+private function buildNestedOptions($options, $allData, $id, $seasonal = false)
+{
+    $options = $options->filter(function ($option) use ($seasonal) {
+        return $option->site_sub_label !== 'FALSE' && ($option->seasonal != 1);
+    })->sortBy('unique_order');
+
+    foreach ($options as $option) {
+        if ($option->site_level4_label === 'FALSE') {
+            $suboptions = $allData->where('parent', $option->ref);
+            $option->suboptions = $this->buildNestedOptions($suboptions, $allData, $id, $seasonal);
+            foreach ($option->suboptions as $suboption) {
+                $suboption->parent_ref = $option->ref;
+            }
+        } else {
+            //get price from Redis
+            $redisKey = "stroyka_$id" . "_" . $option->label;
+            $prices = json_decode(Redis::get($redisKey), true);
+            try {
+                $option->data_price = $prices["material"];
+            } catch (\Exception $e) {
+                $option->data_price = $this->getPriceFromDb($id, $option->label);
+            }
+            $option->suboptions = collect($option->suboptions)
+                ->keyBy('unique_btn_group')
+                ->sortBy('unique_order');
+        }
+    }
+
+    return $options;
+}
 
     public function getDemoOrder($id=220)
     {
@@ -440,7 +541,7 @@ $html .= '<thead class="thead-dark">';
         
         $design->setImages();
         $design->setPrice($design);
-        $design->setDescription($design);
+        $design->setMaterialDescription();
         return $design;
     }
     

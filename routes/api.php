@@ -23,5 +23,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/process', [DesignController::class, 'create'])->name('designs.create');
 Route::get('/demo/designs/{category}/{limit}', [DesignController::class, 'getDemoDesigns'])->name('designs.getDemo');
 Route::get('/designs/list', [DesignController::class, 'getList'])->name('designs.getList');
-Route::get('/process', [DesignController::class, 'create'])->name('designs.create');
 Route::post('/designs/{id}/update-order', [DesignController::class, 'updateOrder']);

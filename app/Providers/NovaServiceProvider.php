@@ -23,7 +23,10 @@ use App\Nova\Contractor;
 use App\Nova\User;
 use App\Nova\ExcelSheet as ExcelResource;
 use App\Nova\Order;
+//use App\Nova\DynamicPageCard;
+use App\Nova\Cards\RedisKeysCard;
 use Illuminate\Http\Request;
+use App\Nova\DesignNonAdmin;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -41,9 +44,12 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 //MenuSection::dashboard(Main::class)->icon('chart-bar'),
 
                 MenuSection::make(Translator::translate('inventory_menu'), [
+           //         MenuItem::resource(DynamicPageCard::class),
                     MenuItem::resource(NovaDesign::class),
-                    MenuItem::resource(AssociatedCost::class),
+                    //MenuItem::resource(AssociatedCost::class),
                     MenuItem::resource(ExcelResource::class),
+                    MenuItem::resource(DesignNonAdmin::class),
+                   // MenuItem::resource(DesignCache::class),
                 ])->icon('library')->collapsable(),
 
                 MenuSection::make(Translator::translate('orders_menu'), [
@@ -145,6 +151,13 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 	    return [
             new CustomTab(),
 	    ];
+    }
+
+    public function cards()
+    {
+        return [
+          //  new RedisKeysCard(),
+        ];
     }
 
     /**

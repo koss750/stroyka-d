@@ -17,7 +17,12 @@ class InvoiceType extends Model
         'depth',
         'parent',
         'label',
-        'params'
+        'params',
+        'sheetnames'
+    ];
+
+    protected $casts = [
+        'properties' => 'array'
     ];
 
     // Optionally add a recursive relationship to itself
@@ -26,6 +31,25 @@ class InvoiceType extends Model
         return $this->hasMany(InvoiceType::class, 'parent', 'ref');
     }
 
+    // Define the relationship method
+    public function parent()
+    {
+        return $this->belongsTo(InvoiceType::class, 'parent', 'ref');
+    }
 
-    // At this point, no relationships are defined as you mentioned.
+    // Add oldestParent method to return the relationship instance
+    public function oldestParent()
+    {
+        return $this->parent();
+    }
+
+    // Add a computed attribute to get the oldest parent model instance
+    public function getOldestParentAttribute()
+    {
+        $parent = $this->parent()->first();
+        while ($parent && $parent->parent()->exists()) {
+            $parent = $parent->parent()->first();
+        }
+        return $parent;
+    }
 }

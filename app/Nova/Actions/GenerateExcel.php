@@ -17,6 +17,7 @@ use App\Models\InvoiceType;
 use App\Models\Project;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\RuTranslationController as Translator;
 use App\Http\Controllers\InvoiceController as IC;
@@ -66,6 +67,34 @@ class GenerateExcel extends Action
         $data = [$design->title, $data];
         $encryptedData = (base64_encode(serialize($data)));
         Session::put('invoiceData', $encryptedData);
+        
+
+        $response = Http::withHeaders([
+        ])->get("https://cloud-api.yandex.net/v1/disk/resources/upload", [
+            'path' => '/path/to/your/folder/' . $filePath,
+            'overwrite' => 'true'
+        ]);
+
+        if ($response->failed()) {
+            return Action::danger('Failed to request upload URL.');
+        }
+
+        $uploadUrl = $response->json()['href'];
+
+        // Upload the file using the obtained URL
+        $uploadResponse = Http::put($uploadUrl, $fileContent);
+
+        if ($uploadResponse->failed()) {
+            return Action::danger('Failed to upload file to Yandex Disk.');
+        }
+
+        /* Optionally, email the file as well
+        Mail::send('emails.invoice', [], function ($message) use ($fileContent) {
+            $message->to('user@example.com')
+                    ->subject('Generated Invoice')
+                    ->attachData($fileContent, 'invoice.xlsx');
+        });*/
+
 
         // You need a URL to redirect to that will trigger the POST request.
         // This will be a route that returns a view with JavaScript to auto-submit the form.
@@ -154,13 +183,12 @@ class GenerateExcel extends Action
                 $optionsToAdd = [];
              }
              }
-             
+   
         }
-        return $field;
-        /*
+        
         return [
             
-            Select::make('Фундамент', 'sheet_type')
+            Select::make('Фундамент', 'f')
                 ->options([
                     'fnone' => 'Без Фундамента',
                     'fLenta' => 'Ленточный тест',
@@ -170,7 +198,7 @@ class GenerateExcel extends Action
                     // You can add more sheet types here in the future
                 ])->help('Выберите тип фундамента')
                 ->displayUsingLabels(),
-            Select::make('Сечения', 'tape_width')
+            Select::make('Сечения', 'variation')
             ->options([
                 '300x600' => '300x600',
                 '300x700' => '300x700',
@@ -228,7 +256,7 @@ class GenerateExcel extends Action
                     ])->help('Выберите диаметр')
                     ->displayUsingLabels(),
                 ];
-            }*/
+            }
         }
-    }
+    
         
