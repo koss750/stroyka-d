@@ -1,6 +1,7 @@
 node_modules
 storage/framework
 storage/logs
+storage/public/
 public/vendor
 vendor
 /node_modules
