@@ -12,35 +12,22 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <link rel="font" href="https://xn--80ardojfh.com/assets/fonts/font.ttf"/>
+    <script src="https://xn--80ardojfh.com/assets/js/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="https://xn--80ardojfh.com/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://xn--80ardojfh.com/assets/css/style.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}?v={{ time() }}">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     @yield('additional_head')
 </head>
 <body>
-    <header id="headerBar">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-2">
-                    <div class="headerLogo"><a href="/">Стройка.com</a></div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="searchBar"><input type="text" placeholder="Поиск по сайту..."></div>
-                </div>
-                <div class="col-sm-7">
-                    <x-menu />
-                </div>
-            </div>
-        </div>
-    </header>
+    @include('components.top')
 
     <section id="afterHeader">
         <div class="container">
             <div class="row">
                 <div class="col-sm-12">
                     <div class="mainHeading">
-                        <h1>@yield('main_heading', 'Профессиональное строительство')</h1>
-                        <p>@yield('sub_heading', 'Проекты строительства домов и бань для проживания')</p>
                     </div>
                 </div>
             </div>
@@ -52,17 +39,26 @@
 
     <script src="https://xn--80ardojfh.com/assets/js/jquery.min.js"></script>
     <script src="https://xn--80ardojfh.com/assets/js/bootstrap.min.js"></script>
-    @yield('additional_scripts')
-
+    <script src="{{ asset('js/custom.js') }}?v={{ time() }}"></script>
     <script>
-        window.onscroll = function () {
-            var header = document.querySelector("header");
-            if (window.pageYOffset > 0) {
-                header.classList.add("sticky");
-            } else {
-                header.classList.remove("sticky");
-            }
-        };
+    <!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();
+   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(97430601, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true,
+        webvisor:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/97430601" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
     </script>
+    @yield('additional_scripts')
 </body>
 </html>

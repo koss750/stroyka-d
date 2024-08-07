@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\File;
 use App\Models\ExcelFileType as AssociatedCostModel;
 use App\Models\ProjectPrice;
 use Spatie\Image\Manipulations;
+use signifly\Nova\Fields\ProgressBar\ProgressBar;
+use App\Http\Controllers\RuTranslationController as Translator;
 
 
 class Design extends Model implements HasMedia
@@ -91,6 +93,21 @@ class Design extends Model implements HasMedia
         'indexed_prices' => 'array'
     ];
 
+    private $completionFields = [
+        'lfLength', 'lfAngleX', 'lfAngleT', 'lfAngleG', 'lfAngle45', 'mfSquare', 'vfCount',
+        'vfBalk', 'outer_p', 'baseD20RubF', 'baseBalk1', 'stolby', 'baseLength', 'baseD20', 'roofSquare', 'srCherep', 'srKover',
+        'srKonK', 'srMastika1', 'srMastika', 'mrKon', 'srKonOneSkat', 'srPlanVetr',
+        'srPlanK', 'srKapelnik', 'mrEndv', 'srGvozd', 'mrSam70', 'mrPack', 'mrIzospanAM',
+        'mrIzospanAM35', 'mrLenta', 'mrRokvul', 'mrIzospanB', 'mrIzospanB35', 'mrPrimUgol',
+        'mrPrimNakl', 'srOSB', 'srAero', 'srAeroSkat', 'stropValue',
+        'pvPart1', 'pvPart2', 'pvPart3', 'pvPart4', 'pvPart5', 'pvPart6', 'pvPart7',
+        'pvPart8', 'pvPart9', 'pvPart10', 'pvPart11', 'pvPart12', 'pvPart13',
+        'mvPart2', 'mvPart3', 'mvPart4', 'mvPart5', 'mvPart6', 'mvPart7', 'mvPart8',
+        'mvPart9', 'mvPart10', 'mvPart11', 'mvPart12', 'mvPart13',
+        'srKonShir', 'srEndn', 'srEndv', 'mrSam35', 'srSam70', 'srPack', 'srIzospanAM',
+        'srIzospanAM35', 'srPrimUgol', 'srPrimNakl', 'metaList', 'floorsList', 'stropList', 'areafl0'
+    ];
+
     /**
      * Get the project prices for the design
      * 
@@ -124,6 +141,42 @@ class Design extends Model implements HasMedia
         }
     }
 
+    public function getProgressAttribute()
+    {
+        $totalFields = count($this->completionFields);
+        $filledFields = 0;
+
+        foreach ($this->completionFields as $field) {
+            if ($this->$field !== null) {
+                $filledFields++;
+            }
+        }
+
+        // Calculate progress for fields (90% of total progress)
+        $fieldProgress = ($filledFields / $totalFields) * 0.9;
+
+        // Calculate progress for images (10% of total progress)
+        $imageCount = $this->getMedia('images')->count();
+        $imageProgress = min($imageCount * 0.025, 0.1);  // Cap at 0.1 (4 images)
+
+        // Total progress
+        $totalProgress = $fieldProgress + $imageProgress;
+
+        // Round to 2 decimal places
+        return round($totalProgress, 2);
+    }
+
+    public function getIncompleteFieldsAttribute()
+    {
+        $incompleteFields = [];
+        foreach ($this->completionFields as $field) {
+            if ($this->$field === null) {
+                $incompleteFields[] = Translator::translate($field);
+            }
+        }
+        return $incompleteFields;
+    }
+
     public function getEtiketkaSeasonalAttribute()
     {
         $projectPrice = ProjectPrice::where('design_id', $this->id)->where('invoice_type_id', 189)->first();
@@ -154,14 +207,16 @@ class Design extends Model implements HasMedia
             ->height(500)
             ->performOnCollections('images');
         $this->addMediaConversion('watermarked')
-        ->width(900)
-        ->height(450)
-         ->watermark(public_path('watermark.png'))
-         ->watermarkPosition(Manipulations::POSITION_CENTER)
-         ->watermarkOpacity(50)
-         ->watermarkWidth(900, Manipulations::UNIT_PERCENT)
-         ->watermarkHeight(450, Manipulations::UNIT_PERCENT)
-         ->performOnCollections('images');
+            ->width(1200)
+            ->height(1200)
+            ->performOnCollections('images')
+            ->watermark(public_path('watermark.png'))
+            ->watermarkPosition(Manipulations::POSITION_CENTER)
+            ->watermarkHeight(100, Manipulations::UNIT_PERCENT)
+            ->watermarkWidth(100, Manipulations::UNIT_PERCENT)
+            ->watermarkFit(Manipulations::FIT_STRETCH)
+            ->watermarkPadding(0, 0, Manipulations::UNIT_PIXELS)
+            ->watermarkOpacity(23);
     }
 
 public function registerMediaCollections(): void
@@ -187,6 +242,12 @@ public function registerMediaCollections(): void
                 })->all();
     }
 
+    public function mildMailImage()
+{
+    $firstMedia = $this->getMedia('images')->first();
+    return $firstMedia ? $firstMedia->getUrl('mild') : null;
+}
+
 public function setImages()
     {
         try {
@@ -200,8 +261,7 @@ public function setImages()
             $imageUrls = [];
 
             foreach ($mediaEntries as $entry) {
-                $fileName = str_replace(' ', '-', $entry->name);
-                $url = 'storage/' . $entry->id . '/' . $fileName . '.jpg';
+                $url = 'storage/' . $entry->id . '/conversions/' . $entry->filename . '-mild.jpg';
                 if ($entry->order_column == 1) {
                     // Set the main image URL
                     $this->image_url = $url;
@@ -239,6 +299,12 @@ public function setImages()
             echo('OpenAI API request failed: ' . $response->body());
             die();
         }
+    }
+
+    public function setDefaultRef() {
+        $json = json_decode($this->details, true);
+        $this->defaultRef = $json['defaultRef'];
+        $this->defaultParent = $json['defaultParent'];
     }
 
     protected function generatePrompt() {
@@ -315,23 +381,18 @@ public function setImages()
     
     public function setPrice(Design $design) {
         //details is a json that contains price element that should be set as "price"
-        $details = json_decode($design->details, true);
-        $price = $details['price'];
-        $price = round($price, 0);
+        try {
+            $details = json_decode($design->details, true);
+            $price = $details['price'];
+            $price = round($price, 0);
+        } catch (\Exception $e) {
+            $price = 99999;
+        }
         $design->price = $this->formatPrice($price);
     }
     
     public function formatPrice($price) {
-        if ($price >= 1000000) {
-        return number_format($price / 1000000, 1, '.', '') . ' млн';
-        }
-        // If the price is less than a million, format as thousands (XXX тыс.)
-        else if($price >= 1000){
-            return number_format($price / 1000, 0) . ' тыс.';
-        }
-        else {
-            return number_format($price, 0);
-        }
+            return number_format($price, 2);
     }
     
     

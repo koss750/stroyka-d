@@ -14,6 +14,7 @@ use App\Nova\Floor;
 use App\Nova\Room;
 use App\Nova\Design as NovaDesign;
 use Laravel\Nova\Dashboards\Main;
+use App\Nova\FormField;
 use Laravel\Nova\Menu\Menu;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
@@ -49,6 +50,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     //MenuItem::resource(AssociatedCost::class),
                     MenuItem::resource(ExcelResource::class),
                     MenuItem::resource(DesignNonAdmin::class),
+                    MenuItem::resource(FormField::class),
                    // MenuItem::resource(DesignCache::class),
                 ])->icon('library')->collapsable(),
 

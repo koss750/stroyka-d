@@ -47,5 +47,6 @@ class Kernel extends ConsoleKernel
 
     protected $commands = [
         Commands\UpdateDesignDetails::class,
+        Commands\ContinueMediaConversions::class,
     ];
 }

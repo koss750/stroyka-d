@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a53183ec4ba7aee5bd22ee390893518",
+    "content-hash": "80359600586c7760e35b85fd0ad41aa2",
     "packages": [
         {
             "name": "Stroyka/ExportTool",
@@ -4658,6 +4658,72 @@
             "time": "2024-02-15T13:30:24+00:00"
         },
         {
+            "name": "outl1ne/nova-table-field",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/outl1ne/nova-table-field.git",
+                "reference": "b12cf96a7af39123660bfef745711d5441c92946"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/outl1ne/nova-table-field/zipball/b12cf96a7af39123660bfef745711d5441c92946",
+                "reference": "b12cf96a7af39123660bfef745711d5441c92946",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/nova": "^4.16",
+                "nova-kit/nova-packages-tool": "^1.2",
+                "php": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Outl1ne\\NovaTableField\\FieldServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Outl1ne\\NovaTableField\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kaspar Rosin",
+                    "email": "kaspar.rosin@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "outl1ne",
+                    "email": "info@outl1ne.com",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Tarvo Reinpalu",
+                    "email": "tarvoreinpalu@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Table field for Laravel Nova",
+            "keywords": [
+                "laravel",
+                "nova",
+                "outl1ne",
+                "tables"
+            ],
+            "support": {
+                "issues": "https://github.com/outl1ne/nova-table-field/issues",
+                "source": "https://github.com/outl1ne/nova-table-field/tree/2.1.0"
+            },
+            "time": "2023-09-29T13:54:43+00:00"
+        },
+        {
             "name": "outl1ne/nova-translations-loader",
             "version": "5.0.2",
             "source": {
@@ -5780,6 +5846,60 @@
                 }
             ],
             "time": "2024-06-03T08:00:43+00:00"
+        },
+        {
+            "name": "signifly/nova-progressbar-field",
+            "version": "v0.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/signifly/nova-progressbar-field.git",
+                "reference": "1f7b638d7c725e103c50901caa6488a150c3b526"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/signifly/nova-progressbar-field/zipball/1f7b638d7c725e103c50901caa6488a150c3b526",
+                "reference": "1f7b638d7c725e103c50901caa6488a150c3b526",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Signifly\\Nova\\Fields\\ProgressBar\\FieldServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Signifly\\Nova\\Fields\\ProgressBar\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ro Kleine Sonne",
+                    "email": "ro@signifly.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Laravel Nova progress bar field.",
+            "keywords": [
+                "fields",
+                "laravel",
+                "nova",
+                "progressbar"
+            ],
+            "support": {
+                "issues": "https://github.com/signifly/nova-progressbar-field/issues",
+                "source": "https://github.com/signifly/nova-progressbar-field/tree/master"
+            },
+            "time": "2019-09-27T12:42:26+00:00"
         },
         {
             "name": "spatie/fractalistic",

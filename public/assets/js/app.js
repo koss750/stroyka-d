@@ -53,7 +53,7 @@ function updateSelectedOption(element, optionType) {
 }
 
 function updateTotalPrice() {
-    var totalPrice = {{ $design->etiketka }}; // Start with the base price
+    var totalPrice = 999; // Start with the base price
     console.log(totalPrice);
     var selectedLabels = document.querySelectorAll('.btn-outline-primary.active');
     selectedLabels.forEach(function(label) {

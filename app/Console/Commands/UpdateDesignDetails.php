@@ -21,7 +21,7 @@ class UpdateDesignDetails extends Command
      *
      * @var string
      */
-    protected $description = 'Use AI to update a specific design description';
+    protected $description = 'Current custom script';
 
     /**
      * Execute the console command.
@@ -37,110 +37,35 @@ class UpdateDesignDetails extends Command
     }
 
     public function updateOne($id) {
-            $design = Design::find($id);
-            if ($design && empty($design->details)) {
-                $imageUrl = $design->getImageUrl();
-                //dd($design);
-                if ($imageUrl) {
-                    $this->info("Updating details for design ID {$design->id}...");
-                    $formattedFloor = [];
-                    foreach ($design->floorsList as $floors) {
-                        foreach ($floors as $propKey => $propVal) {
-                            $formattedFloor[] = Translator::translate($propKey) . ': ' . $propVal;
-                        }
-                    }
-                    
-                    $floors = implode(', ', $formattedFloor);
-                    $prompt = "Please give me a description in Russian of around 100-150 characters about this house plan. It looks like {$imageUrl}, it's area is {$design->size} and here is a php implode of the array of rooms it has {$floors}. Description should be styled for a sales channel such as a website";
-
-                    $response = Http::withHeaders([
-                        'Content-Type' => 'application/json',
-                        'Authorization' => 'Bearer '  . config('services.openai.api_key')
-                    ])->post('https://api.openai.com/v1/chat/completions', [
-                        'model' => 'gpt-3.5-turbo',
-                        'messages' => [
-                            ["role" => "user", "content" => $prompt]
-                        ],
-                        'temperature' => 0.7
-                    ]);
-
-                    if ($response->successful()) {
-                        $design->details = $response->json()['choices'][0]['message']['content'];
-                        unset($design->imageUrl);
-                        $design->save();
-                        $this->info("Updated details for design ID {$design->id}");
-                    } else {
-                        // Extracting the error message from the response
-                        $errorMessage = $response->json()['error']['message'] ?? 'Unknown error';
-                        $this->error("Failed to update design ID {$design->id}. Error: {$errorMessage}");
-
-                        // Reconstructing the raw request body for display
-                        $requestBody = json_encode([
-                            'model' => 'gpt-3.5-turbo',
-                            'messages' => [
-                                ["role" => "user", "content" => $prompt]
-                            ],
-                            'temperature' => 0.7
-                        ], JSON_PRETTY_PRINT);
-
-                        $this->line("Request Body: " . $requestBody);
-                    }
-                } else {
-                    $this->error("Design ID {$id} does not have an image URL.");
-                }
-            } else {
-                $this->error("Design ID {$id} not found or already has details.");
+        $design = Design::find($id);
+        $currentDetails = $design->details;
+        $newArray = [];
+        if (is_array($currentDetails)) {
+            foreach ($currentDetails as $key => $value) {
+                $newArray[$key] = $value;
             }
-
-            $this->info('Design details update attempt complete.');
+        }
+        $this->info("Updating details for design ID {$design->id} ($design->title)...");
+        if (strpos($design->title, 'ОЦБ') !== false) {
+            $newArray['defaultRef'] = 471;
+            $newArray['defaultParent'] = 211;
+        } else if (strpos($design->title, 'ПБ') !== false) {
+            $newArray['defaultRef'] = 456;
+            $newArray['defaultParent'] = 213;
+        }
+        if (!isset($newArray['price'])) {
+            $newArray['price'] = 999;
+        }
+        $design->details = json_encode($newArray);
+        $design->save();
+        $this->info("Details updated for design ID {$design->id} ($design->title)");
     }
 
     public function updateAll() {
             $this->info("Updating details for all designs...");
-            $designs = Design::whereNull('details')->get();
+            $designs = Design::all();
             foreach ($designs as $design) {
-                $this->info("Updating details for design ID {$design->id} ($design->title)...");
-                $formattedFloor = [];
-                foreach ($design->floorsList as $floors) {
-                    foreach ($floors as $propKey => $propVal) {
-                        $formattedFloor[] = Translator::translate($propKey) . ': ' . $propVal;
-                    }
-                }
-                
-                $floors = implode(', ', $formattedFloor);
-                $prompt = "Please give me a description in Russian of around 100-150 characters about this house plan. It's area is {$design->size} and here is a php implode of the array of rooms it has {$floors}. Description should be styled for a sales channel such as a website";
-
-                $response = Http::withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer '  . config('services.openai.api_key')
-                ])->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => 'gpt-3.5-turbo',
-                    'messages' => [
-                        ["role" => "user", "content" => $prompt]
-                    ],
-                    'temperature' => 0.7
-                ]);
-
-                if ($response->successful()) {
-                    $design->details = $response->json()['choices'][0]['message']['content'];
-                    $design->save();
-                    $this->info("Nice! :)");
-                } else {
-                    // Extracting the error message from the response
-                    $errorMessage = $response->json()['error']['message'] ?? 'Unknown error';
-                    $this->error("Failed to update design ID {$design->id}. Error: {$errorMessage}");
-
-                    // Reconstructing the raw request body for display
-                    $requestBody = json_encode([
-                        'model' => 'gpt-3.5-turbo',
-                        'messages' => [
-                            ["role" => "user", "content" => $prompt]
-                        ],
-                        'temperature' => 0.7
-                    ], JSON_PRETTY_PRINT);
-
-                    $this->line("Request Body: " . $requestBody);
-                }
-            }
+                $this->updateOne($design->id);
+        }
     }
 }

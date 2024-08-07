@@ -16,7 +16,7 @@ use Eminiarts\Tabs\Tabs;
 use Eminiarts\Tabs\Tab;
 use App\Models\ProjectPrice;
 use App\Nova\Filters\AlmostReady;
-
+use Laravel\Nova\Fields\BooleanGroup;
 
 class DesignNonAdmin extends Resource
 {
@@ -55,7 +55,7 @@ class DesignNonAdmin extends Resource
             }),
             Number::make('Этикетка (сезонные)', function () use ($etiketkaSeasonal) {
                 return $etiketkaSeasonal;
-            }),
+            })
         ];
 
         $priceObjects = $this->getPriceObjects();
@@ -131,8 +131,9 @@ class DesignNonAdmin extends Resource
                 $fields[$area][$section][] = Text::make($label['title'], function () use ($value) {
                     $value = json_decode($value, true);
                     $material = number_format($value['material'], 0, ',', ' ');
+                    $labour = number_format($value['labour'], 0, ',', ' ');
                     $total = number_format($value['total'], 0, ',', ' ');
-                    return $material . " ($total с работами)";
+                    return $material . " + $labour работы. Итого: $total";
                 })->hideFromIndex();
             }
         }

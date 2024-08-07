@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Lang;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Markdown;
+use Laravel\Nova\Fields\Hidden;
 use Laravel\Nova\Fields\KeyValue;
 use App\Nova\Actions\GenerateExcel;
 use App\Nova\Actions\GenerateOSExcel;
@@ -223,16 +224,28 @@ class Design extends Resource
         $controller = new DesignController;
         return [
             ID::make()->sortable()->hide(),
+
+            // Add this Hidden field near the top of your fields array
+            Hidden::make('details')->default(json_encode([
+                "defaultRef" => 471,
+                "defaultParent" => 211,
+                "price" => 999
+            ]))->hideFromIndex(),
             
             Panel::make('Главное', [
                 
                 Text::make(Translator::translate('title'), 'title')->rules('required')->sortable(),
-                
+
                 Boolean::make('Активен', 'active')->trueValue(true)->falseValue(false)->onlyOnForms(),
-                //Описание
-                Textarea::make(Translator::translate('details'), 'details')->onlyOnDetail()->alwaysShow(),
+
+                Text::make('Прогресс', 'progress')->onlyOnIndex()->displayUsing(function ($value) {
+                    return round($value * 100, 0) . '%';
+                }),
                 
-    
+                Text::make('Незаполненные поля', 'incompleteFields')->onlyOnDetail()->displayUsing(function ($value) {
+                    return implode(', ', $value);
+                }),
+
                 SimpleRepeatable::make(Translator::translate('Category'), 'category', [
                     Select::make(Translator::translate('Category'), 'category')->options($this->translatedSelects("category")),
                 ])->rules('required')->onlyOnForms(),

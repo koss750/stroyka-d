@@ -18,11 +18,13 @@ class InvoiceType extends Model
         'parent',
         'label',
         'params',
-        'sheetnames'
+        'sheetnames',
+        'sheet_spec'
     ];
 
     protected $casts = [
-        'properties' => 'array'
+        'properties' => 'array',
+        'sheet_spec' => 'array'
     ];
 
     // Optionally add a recursive relationship to itself

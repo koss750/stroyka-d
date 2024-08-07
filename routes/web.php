@@ -37,9 +37,6 @@ Route::get('/', function () {
 Route::prefix('projects')->middleware('check.redirection')->group(function () {
     Route::view('/{slug}', 'under-construction')->middleware('counter');
 });
-Route::prefix('fundament')->middleware('check.redirection')->group(function () {
-    Route::view('/{slug}', 'under-construction')->middleware('counter');
-});
 
 Route::get('/forex', [ExchangeRateController::class, 'index']);
 Route::get('/export', [DesignController::class, 'exportAll']);
@@ -73,6 +70,14 @@ Route::prefix('invoices')->group(function () {
     Route::post('/sections/{section}', [InvoiceModuleController::class, 'fillSections']);
     Route::get('/{invoice}/variables', [InvoiceModuleController::class, 'getVariables']);
     Route::post('/final-calculation', [InvoiceModuleController::class, 'finalCalculation']);
+});
+Route::prefix('fundament')->group(function () {
+    Route::get('/fundament-lentochnyj', [UIController::class, 'lentaFoundationCalculator']);
+    Route::get('/fundament-svayno-rostverkovyy-s-plitoy', [UIController::class, 'SRPFoundationCalculator']);
+    Route::get('/fundament-svayno-rostverkovyy', [UIController::class, 'SRFoundationCalculator']);
+    Route::get('/fundament-lentochniy-s-plitoy', [UIController::class, 'LPFoundationCalculator']);
+    Route::get('/fundament-monolitnaya-plita', [UIController::class, 'MPFoundationCalculator']);
+    Route::view('/{slug}', 'under-construction')->middleware('counter');
 });
 /*
 Route::middleware(['check.redirection'])->group(function () {
@@ -122,6 +127,8 @@ Route::post('/register-order', function (Request $request) {
     ]);
 });
 
+Route::get('/search-designs', [DesignController::class, 'search']);
+
 
 
 
@@ -137,7 +144,7 @@ Route::prefix('vora')->group(function () {
         Route::get('/calendar','calendar');
         Route::get('/messages','messages');
         Route::get('/app-calender','app_calender');
-        Route::get('/app-profile','app_profile');
+        Route::get('/app-profile','app_profile'); // сделать форму более подходящей к настоящему использованию. кнопку заблокировать заменить на редактировать и убрать остальныке, имейл убрать нафиг. адерса разделить на юридический и фактический адрес.
         Route::get('/edit-profile','edit_profile');
         Route::match(['get','post'], '/post-details','post_details');
         Route::get('/chart-chartist','chart_chartist');

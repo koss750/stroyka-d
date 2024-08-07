@@ -1,3 +1,4 @@
+@include('components.top')
 <div id="allrecords" data-tilda-export="yes" class="t-records" data-hook="blocks-collection-content-node" data-tilda-project-id="8683967" data-tilda-page-id="44160913" data-tilda-formskey="b7c2abff9663579673a008ea48683967" data-tilda-cookie="no" data-tilda-lazy="yes" data-tilda-root-zone="com">
 
     @include('partials.header')

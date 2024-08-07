@@ -25,15 +25,11 @@ class Order extends Model implements HasMedia
         'mvParts[]' => 'JSON' // or 'object' if you prefer
     ];
     public function registerMediaConversions(Media $media = null): void
-{
-    $this->addMediaConversion('thumb')
-        ->width(130)
-        ->height(130);
-}
+    {
+    }
 
 public function registerMediaCollections(): void
 {
     $this->addMediaCollection('main')->singleFile();
-    $this->addMediaCollection('my_multi_collection');
 }
 }

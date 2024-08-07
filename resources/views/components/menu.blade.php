@@ -1,7 +1,7 @@
 <div class="headerMenu">
     <ul class="nav">
         @auth
-            <li><a href="{{ route('dashboard') }}">Личный Кабинет</a></li>
+            <li><a href="">Личный Кабинет</a></li>
         @else
             <li><a href="">Регистрация</a></li>
             <li><a href="">Войти</a></li>

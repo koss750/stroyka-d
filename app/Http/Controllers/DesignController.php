@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\InvoiceType;
 use App\Models\ProjectPrice;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Project;
 
 class DesignController extends Controller
 {
@@ -233,7 +234,7 @@ $html .= '<thead class="thead-dark">';
         $design->pvPart1 = $serializePv;
         $design->mvPart1 = $serializeMv;
         $design->Meta = $serializeMeta;
-        $design->title = "avd";
+        $design->details = '{"defaultRef":471,"defaultParent":211,"price":999}';
         // Save the design to the database
         $design->save();
         
@@ -249,6 +250,26 @@ $html .= '<thead class="thead-dark">';
                 $design->images()->save($imageModel);
             }
         }
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $designs = Design::where(function($q) use ($query) {
+            $q->where('title', 'like', "%{$query}%")
+              ->orWhere('title', 'like', "%{$query}.%")
+              ->orWhere('title', 'like', "%{$query},%");
+        })
+        ->where('active', 1)
+        ->whereRaw("title NOT LIKE ?", ['%.'. $query .'%'])
+        ->whereRaw("title NOT LIKE ?", ['%,'. $query .'%'])
+        ->select('id', 'title')
+        ->orderByRaw("CAST(REGEXP_SUBSTR(title, '[0-9]+(\.[0-9]+)?') AS DECIMAL(10,2)) DESC")
+        ->limit(10)
+        ->get();
+
+        return response()->json($designs);
     }
          
  public function store(Request $request)
@@ -336,6 +357,7 @@ $html .= '<thead class="thead-dark">';
             $designs[] = Design::where('category', 'LIKE', '%"category":"' . $category . '"%')
                     ->where('active', 1)
                     ->get()
+                    ->sortBy('size')
                     ->map(function ($design) {
                         $design->rating = 5;
                         $design->reviewCount = 10;
@@ -409,8 +431,13 @@ private function getPriceFromDb($id, $invoice_type_id)
     try {
         $invoice_type_id = InvoiceType::where('label', $invoice_type_id)->first()->id;
         $price = ProjectPrice::where('design_id', $id)->where('invoice_type_id', $invoice_type_id)->first();
-        $price = json_decode($price->price, true);
-        return $price["material"];
+        try {
+            $price = json_decode($price->price, true);
+            return $price["material"];
+        } catch (\Exception $e) {
+            Log::error("Unable to find the price for design $id and invoice type $invoice_type_id");
+            return 999;
+        }
     } catch (\Exception $e) {
         Log::error("Unable to find the price for design $id and invoice type $invoice_type_id");
         throw $e;
@@ -448,20 +475,46 @@ private function buildNestedOptions($options, $allData, $id, $seasonal = false)
     return $options;
 }
 
-    public function getDemoOrder($id=220)
+    
+    public function getDemoOrder(Request $request)
     {
-        $designs = Design::where('id', $id)->take(1)
-                         ->get()
-                         ->map(function ($design) {
-                             $design->rating = 5;
-                             $design->reviewCount = 10;
-                             return $this->transformDesign($design);
-                         });
+        $user = Auth::user();
+        $ip = $request->ip();
+
+        $projects = Project::where(function($query) use ($user, $ip) {
+                        $query->where('ip_address', $ip)
+                              ->orWhere('user_id', $user ? $user->id : null);
+                    })
+                    ->with('design')
+                    ->orderBy('created_at', 'desc')
+                    ->get()
+                    ->map(function ($project) {
+                        return $this->transformProject($project);
+                    });
+
         $page_title = "Заказы";
         $page_description = Translator::translate("listing_page_description");
-        return view('vora.ecom.product_order', compact('page_title', 'page_description', 'designs'));
+        return view('vora.ecom.product_order', compact('page_title', 'page_description', 'projects'));
     }
-
+    
+    private function transformProject($project)
+    {
+        $filepath = "http://tmp.стройка.com/storage";
+        $original = $project->filepath;
+        $project->filepath = str_replace("/var/www/templates/storage/app/public", $filepath, $project->filepath);
+        $project->title = Design::where('id', $project->design_id)->first()->title;
+        return [
+            'id' => $project->id,
+            'title' => $project->title,
+            'status' => $project->status,
+            'created_at' => $project->getFormattedCreatedAtAttribute(),
+            'updated_at' => $project->getFormattedUpdatedAtAttribute(),
+            'payment_amount' => $project->payment_amount,
+            'filepath' => $project->filepath,
+            'design' => $project->design ? $this->transformDesign($project->design) : null,
+        ];
+    }
+    
     public function getDemoCheckout($id=220)
     {
         $designs = Design::where('id', $id)->take(1)
@@ -475,6 +528,9 @@ private function buildNestedOptions($options, $allData, $id, $seasonal = false)
         $page_description = Translator::translate("listing_page_description");
         return view('vora.ecom.checkout', compact('page_title', 'page_description', 'designs'));
     }
+    
+     
+    
     
     
     
@@ -542,6 +598,8 @@ private function buildNestedOptions($options, $allData, $id, $seasonal = false)
         $design->setImages();
         $design->setPrice($design);
         $design->setMaterialDescription();
+        $design->setDefaultRef();
+        $design->image_url = $design->mildMailImage();
         return $design;
     }
     

@@ -51,15 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var modal = document.getElementById("paymentModal");
     var btn = document.querySelector(".buyNowBtn");
     var span = document.getElementsByClassName("close")[0];
-
-    var group = [
-        document.getElementById("group_211"),
-        document.getElementById("group_213"),
-        document.getElementById("group_215")
-    ];
-    group.forEach(function(group) {
-            group.remove();
-        });
     
     if (btn) {
         btn.addEventListener('click', function() {
@@ -85,47 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     
 
-    function handleOrderSubmission(isExample = false) {
-
-        if(isExample) {
-            document.getElementById('exampleSmetaBtn').innerHTML = 'Загрузка...';
-        } else {
-            console.log('is not example');
-        }
-    var formData = new FormData();
-    formData.append('selectedOptions', JSON.stringify(selectedOptionRefs));
-    formData.append('selectedOptionPrices', JSON.stringify(selectedOptionPrices));
-    formData.append('totalPrice', document.getElementById('totalPrice').textContent);
-    formData.append('designId', isExample ? '1' : '{{ $design->id }}');
-
-    fetch('/register-order', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (isExample) {
-            // For example Smeta, directly initiate download
-            window.open('http://tmp.mirsmet.com/process-order/' + data.orderId, '_blank');
-        } else {
-            // For paid order, show button in modal
-            var downloadBtn = document.createElement('a');
-            downloadBtn.href = 'http://tmp.mirsmet.com/process-order/' + data.orderId;
-            downloadBtn.textContent = 'Перейти в Личный Кабинет';
-            downloadBtn.className = 'btn btn-primary';
-            document.getElementById('orderStatus').innerHTML = '';
-            document.getElementById('orderStatus').appendChild(downloadBtn);
-        }
-    })
-    .catch(error => {
-            console.error('Error:', error);
-        });
-
     
-}
 
 var form = document.getElementById("paymentForm");
 if (form) {

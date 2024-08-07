@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\DesignController as DC;
 use App\Http\Controllers\RuTranslationController as Translator;
 use App\Http\Controllers\InvoiceController as Invoice;
+use App\Models\FormField;
 //use Illuminate\Support\Facades\Redis;
 
 class UIController extends Controller
@@ -21,6 +22,40 @@ class UIController extends Controller
         $page_title = Translator::translate("project_page_title");
         $page_description = Translator::translate("listing_page_description");
         return view('vora.ecom.product_list', compact('page_title', 'page_description', 'count', $design));
+    }
+
+    public function lentaFoundationCalculator()
+    {
+        $formFields = FormField::where('form_type', 'lenta')->orderBy('order')->get();
+        return view('foundation.lenta', compact('formFields'));
+    }
+
+    public function SRPFoundationCalculator()
+    {
+        $page_title = 'Свайно-ростверковый фундамент';
+        $page_description = 'Расчёт свайно-ростверкового фундамента';
+        return view('foundation.srp', compact('page_title', 'page_description'));
+    }
+
+    public function SRFoundationCalculator()
+    {
+        $page_title = 'Свайный фундамент';
+        $page_description = 'Расчёт свайный фундамент';
+        return view('foundation.sr', compact('page_title', 'page_description'));
+    }
+
+    public function LPFoundationCalculator()
+    {
+        $page_title = 'Ленточный фундамент с плитой';
+        $page_description = 'Расчёт ленточного фундамента с плитой';
+        return view('foundation.lp', compact('page_title', 'page_description'));
+    }
+
+    public function MPFoundationCalculator()
+    {
+        $page_title = 'Монолитная плита';
+        $page_description = 'Расчёт монолитной плиты';
+        return view('foundation.mp', compact('page_title', 'page_description'));
     }
 	
     // Dashboard

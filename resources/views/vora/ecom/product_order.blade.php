@@ -1,4 +1,5 @@
 @extends('layouts.default')
+@include('components.top')
 
 @section('content')
 <div class="container-fluid">
@@ -43,60 +44,75 @@
 		<div class="col-lg-12">
 			<div class="card">
 				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<div id="bulkDeleteContainer" style="display: none;">
+							<a href="#" id="bulkDeleteBtn" class="text-danger">
+								<i class="fas fa-trash-alt"></i> Удалить
+							</a>
+						</div>
+						<!-- Add any other buttons or elements you want here -->
+					</div>
 					<div class="table-responsive">
-						<table class="table table-sm table-responsive-lg mb-0 text-black">
+						@if($projects->isNotEmpty())
+
+						<table class="table table-sm table-responsive-lg table-bordered border solid text-black">
 							<thead>
 								<tr>
-									<th class="align-middle">
-										<div class="custom-control custom-checkbox ms-1">
-											<input type="checkbox" class="form-check-input" id="checkAll">
+									<th class="align-middle text-center checkbox-column">
+										<div class="custom-control custom-checkbox">
+											<input type="checkbox" class="custom-control-input" id="checkAll">
 											<label class="custom-control-label" for="checkAll"></label>
 										</div>
 									</th>
-									<th class="align-middle">Order</th>
-									<th class="align-middle pe-7">Date</th>
-									<th class="align-middle minw200">Ship To</th>
-									<th class="align-middle text-end">Status</th>
-									<th class="align-middle text-end">Amount</th>
-									<th class="no-sort"></th>
+									<th class="align-middle text-center order-column">Заказ</th>
+									<th class="align-middle text-center">Дата</th>
+									<th class="align-middle text-center minw200">Исполнители</th>
+									<th class="align-middle text-center minw200">Сумма</th>
+									<th class="align-middle text-center minw200">Файлы</th>
 								</tr>
 							</thead>
 							<tbody id="orders">
-								<tr class="btn-reveal-trigger">
-									<td class="py-2">
-										<div class="custom-control custom-checkbox checkbox-success">
-											<input type="checkbox" class="form-check-input" id="checkbox">
-											<label class="custom-control-label" for="checkbox"></label>
+							@foreach($projects as $project)
+								<tr>
+									<td class="py-2 text-center checkbox-column">
+										<div class="custom-control custom-checkbox">
+											<input type="checkbox" class="custom-control-input" id="customCheckBox{{ $project['id'] }}" required="">
+											<label class="custom-control-label" for="customCheckBox{{ $project['id'] }}"></label>
 										</div>
 									</td>
-									<td class="py-2">
+									<td class="py-2 order-column">
 										<a href="#">
-											<strong>#181</strong></a> by <strong>Проект 220</strong> Смета <br /></td>
-									<td class="py-2">20/04/2020</td>
-									<td class="py-2">Электронная доставка
-										<p class="mb-0 text-500">customer@email.com</p>
+											<strong>{{ $project['id'] }}</strong>
+										</a> by <strong>{{ $project['title'] }}</strong> Смета <br />
 									</td>
-									<td class="py-2 text-end"><span class="badge badge-success">Готово<span
-												class="ms-1 fa fa-check"></span></span>
+									<td class="py-2 text-center">{{ $project['created_at'] }}</td>
+									<td class="py-2 text-center">
+										<button class="btn btn-sm btn-primary">Выбрать исполнителя</button>
 									</td>
-									<td class="py-2 text-end">249 руб.
-									</td>
-									<td class="py-2 text-end">
-										<div class="dropdown text-sans-serif">
-										<svg width="90" height="90">       
-     <image xlink:href="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" src="yourfallback.png" width="90" height="90"/>    
-</svg>
-											<div class="dropdown-menu dropdown-menu-right border py-0" aria-labelledby="order-dropdown-0">
-												<div class="py-2"><a class="dropdown-item" href="#!">Скачать</a><a class="dropdown-item" href="#!">Processing</a><a class="dropdown-item" href="#!">On Hold</a><a class="dropdown-item" href="#!">Pending</a>
-													<div class="dropdown-divider"></div><a class="dropdown-item text-danger" href="#!">Delete</a>
-												</div>
+									<td class="py-2 text-center">{{ $project['payment_amount'] }} руб.</td>
+									<td class="py-2 text-center">
+										<div class="dropdown ms-auto text-centre">
+										@if($project['filepath'])
+											<div class="btn-link" data-bs-toggle="dropdown">
+											<i class="fas fa-file-excel fa-lg" style="color: #217346;"></i>
 											</div>
+											<div class="dropdown-menu">
+												<a class="dropdown-item" href="{{ $project['filepath'] }}" download>Скачать</a>
+											</div>
+										@else
+											<i class="fas fa-spinner fa-spin"></i>
+										@endif
 										</div>
 									</td>
 								</tr>
-								
+							@endforeach
 							</tbody>
 						</table>
+						@else
+							<div class="alert alert-info" role="alert">
+								Заказов нет
+							</div>
+						@endif
 					</div>
 				</div>
 			</div>
@@ -104,3 +120,40 @@
 	</div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        const bulkDeleteContainer = $('#bulkDeleteContainer');
+        const checkboxes = $('input[type="checkbox"]');
+        const checkAll = $('#checkAll');
+
+        function updateBulkDeleteVisibility() {
+            const checkedBoxes = checkboxes.filter(':checked').not('#checkAll');
+            bulkDeleteContainer.toggle(checkedBoxes.length > 0);
+        }
+
+        checkboxes.on('change', updateBulkDeleteVisibility);
+
+        checkAll.on('change', function() {
+            checkboxes.not(this).prop('checked', this.checked);
+            updateBulkDeleteVisibility();
+        });
+
+        $('#bulkDeleteBtn').on('click', function(e) {
+            e.preventDefault();
+            const selectedIds = checkboxes.filter(':checked').not('#checkAll').map(function() {
+                return $(this).attr('id').replace('customCheckBox', '');
+            }).get();
+            
+            if (selectedIds.length > 0) {
+                if (confirm('Вы точно хотите удалить выбранные заказы?')) {
+                    // Implement your delete logic here
+                    console.log('Deleting items:', selectedIds);
+                    // After deletion, you might want to refresh the table or remove the deleted rows
+                }
+            }
+        });
+    });
+</script>
+@endpush
