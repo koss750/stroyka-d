@@ -6,7 +6,7 @@
     <main>
         <section class="section-main">
             <section class="section-01">
-                <div style="margin-top:50px" >
+                <div class="container_new_section" style="margin-top:105px" >
                     <h1>
                         Проекты и сметы
                     </h1>
@@ -58,7 +58,7 @@
                     </div>
                 </div>
                 <div class="container_new_section">
-                    <h2>Расчет фундаментов</h2>
+                    <h1>Расчет фундаментов</h1>
                     <div class="inner">
                         <div class="box">
                             <div class="image">
@@ -127,7 +127,7 @@
         // Existing JavaScript
     </script>
 
-    @include('components.footer')
+    @include('components.podval')
 
     <script type="application/ld+json">
     {

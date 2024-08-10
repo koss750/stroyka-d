@@ -54,8 +54,8 @@
                     
                   
                   <div class="buttons col-12">
-                  <button class="btn btn-outline-light" id="exampleSmetaBtn">Пример сметы (скачать)</button>
-                  <button class="btn btn-outline-light buyNowBtn" id="buyNow">Купить смету (тест без платежа)</button>
+                  <button class="btn btn-outline-light" id="exampleSmetaBtn">Пример сметы</button>
+                  <button class="btn btn-outline-light buyNowBtn" id="buyNow">Купить смету</button>
                   </div>
                </div>
                <div class="col-lg-6 col-md-12">

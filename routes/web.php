@@ -8,6 +8,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\UIController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceModuleController;
+use App\Http\Controllers\FulfillmentController;
 use App\Http\Controllers\SectionItemController;
 use App\Http\Controllers\ExternalSimulationController;
 use Illuminate\Support\Facades\Redis;
@@ -16,6 +17,8 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TemplateController;
 
 
 /*
@@ -129,10 +132,6 @@ Route::post('/register-order', function (Request $request) {
 
 Route::get('/search-designs', [DesignController::class, 'search']);
 
-
-
-
-
 Route::prefix('vora')->group(function () {
     Route::controller(UIController::class)->group(function() {
         Route::get('/','dashboard_1');
@@ -209,5 +208,71 @@ Route::prefix('vora')->group(function () {
     });
 });
 
+//route group prefix tmp
+Route::prefix('tmp')->group(function () {
+    Route::get('/', [TemplateController::class, 'index']);
+    Route::get('/external', [FulfillmentController::class, 'process']);
+    Route::get('/reindex-prices/{count}', [FulfillmentController::class, 'processLatestProjects'])->name('reindex-prices');
+    Route::post('/store-template', [TemplateController::class, 'storeTemplate'])->name('store-template');
+    Route::put('/update-template/{id}', [TemplateController::class, 'updateTemplate'])->name('update-template');
+    Route::get('/get-template', [TemplateController::class, 'getTemplate']);
+    Route::get('/download-template/{category}', [TemplateController::class, 'downloadTemplate'])->name('download-template');
+    Route::get('/process-order/{id}', function ($id) {
+        $order = Project::find($id);
+        $order->createSmeta($order->selected_configuration);
+        return response()->download($order->filepath);
+        //return response()->download($order->filepath)->middleware('cors');
+    });
+});
+Route::get('/get-project-title', function (Request $request) {
+    $id = $request->query('id');
+    // Query the Designs table to get the project title based on the $id
+    $project = Design::find($id);
+    if ($project) {
+        return response()->json(['success' => true, 'title' => $project->title]);
+    } else {
+        return response()->json(['success' => false]);
+    }
+});
 
+Route::get('/get-project-id', function (Request $request) {
+    $title = $request->query('title');
+    // Query the database to find the project ID based on the title
+    $project = DB::table('designs')->where('title', $title)->first();
+    if ($project) {
+        return response()->json(['success' => true, 'id' => $project->id]);
+    } else {
+        return response()->json(['success' => false]);
+    }
+});
 
+// New route to check for sheetname in the invoice_structures table
+Route::get('/get-sheetname', function (Request $request) {
+    $name = $request->query('name');
+    // Query the database to find the sheetname
+    $sheet = DB::table('invoice_structures')->where('sheetname', $name)->first();
+    if ($sheet) {
+        return response()->json(['success' => true, 'name' => $sheet->label]);
+    } else {
+        return response()->json(['success' => false]);
+    }
+});
+
+// New route to get sheetname suggestions
+Route::get('/get-sheetname-suggestions', function (Request $request) {
+    $query = $request->query('query');
+    // Query the database to find matching sheetnames
+    $suggestions = DB::table('invoice_structures')
+        ->where('sheetname', 'like', '%' . $query . '%')
+        ->orWhere('label', 'like', '%' . $query . '%')
+        ->pluck('sheetname');
+    return response()->json(['success' => true, 'suggestions' => $suggestions]);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::get('/get-foundation-file', [FulfillmentController::class, 'foundationFullFile']);

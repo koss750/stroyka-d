@@ -1,8 +1,8 @@
-<footer>
+<footer class="footer">
     <div class="container">
         <div class="row">
             <div class="col-sm-4">
-                <p>© 2021 Your Company</p>
+                <p>© {{ date('Y') }} Your Company</p>
             </div>
             <div class="col-sm-4">
                 <ul>

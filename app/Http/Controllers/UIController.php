@@ -27,35 +27,41 @@ class UIController extends Controller
     public function lentaFoundationCalculator()
     {
         $formFields = FormField::where('form_type', 'lenta')->orderBy('order')->get();
-        return view('foundation.lenta', compact('formFields'));
+        $page_title = 'Калькулятор ленточного фундамента';
+        $page_description = 'Рассчитайте стоимость ленточного фундамента';
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
     }
 
     public function SRPFoundationCalculator()
     {
-        $page_title = 'Свайно-ростверковый фундамент';
-        $page_description = 'Расчёт свайно-ростверкового фундамента';
-        return view('foundation.srp', compact('page_title', 'page_description'));
+        $formFields = FormField::where('form_type', 'srp')->orderBy('order')->get();
+        $page_title = 'Калькулятор свайно ростверкового фундамента с плитой перекрытия';
+        $page_description = 'Расчёт свайно-ростверкового фундамента с плитой перекрытия';
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
     }
 
     public function SRFoundationCalculator()
     {
-        $page_title = 'Свайный фундамент';
-        $page_description = 'Расчёт свайный фундамент';
-        return view('foundation.sr', compact('page_title', 'page_description'));
+        $formFields = FormField::where('form_type', 'sr')->orderBy('order')->get();
+        $page_title = 'Калькулятор свайно ростверкового фундамента';
+        $page_description = 'Расчёт свайно-ростверкового фундамента';
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
     }
 
     public function LPFoundationCalculator()
     {
-        $page_title = 'Ленточный фундамент с плитой';
-        $page_description = 'Расчёт ленточного фундамента с плитой';
-        return view('foundation.lp', compact('page_title', 'page_description'));
+        $formFields = FormField::where('form_type', 'lp')->orderBy('order')->get();
+        $page_title = 'Калькулятор ленточного фундамента с плитой перекрытия';
+        $page_description = 'Рассчитайте стоимость ленточного плитного фундамента';
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
     }
 
     public function MPFoundationCalculator()
     {
-        $page_title = 'Монолитная плита';
-        $page_description = 'Расчёт монолитной плиты';
-        return view('foundation.mp', compact('page_title', 'page_description'));
+        $formFields = FormField::where('form_type', 'mp')->orderBy('order')->get();
+        $page_title = 'Калькулятор фундамента монолитная плита';
+        $page_description = 'Калькулятор фундамента монолитная плита';
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
     }
 	
     // Dashboard

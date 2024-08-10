@@ -26,6 +26,23 @@
         max-width: 1700px;
     }
 }
+
+html, body {
+    height: 100%;
+}
+
+.light-placeholder::placeholder {
+    color: #ababab !important;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
 body {
     font-family: 'tilda-sans_regular';
 }

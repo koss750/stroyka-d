@@ -9,6 +9,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Number;
+use App\Nova\Filters\FoundationFilter;
 
 class FormField extends Resource
 {
@@ -78,6 +79,8 @@ class FormField extends Resource
             ])->onlyOnForms(),
             Text::make('Excel ячейка', 'excel_cell'),
             Textarea::make('Подсказка', 'tooltip'),
+            Text::make('Значение в поле', 'default'),
+            Text::make('Варианты', 'options'),
             Text::make('Валидация', 'validation')->onlyOnForms(),
             Number::make('Порядок', 'order')->sortable(),
         ];
@@ -102,7 +105,9 @@ class FormField extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new FoundationFilter,
+        ];
     }
 
     /**
@@ -125,5 +130,12 @@ class FormField extends Resource
     public function actions(NovaRequest $request)
     {
         return [];
+    }
+
+    public static $defaultSort = null;
+
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        return $query->orderBy('order');
     }
 }
