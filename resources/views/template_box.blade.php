@@ -80,9 +80,8 @@
             @endif
             @if($category == 'main')
             <a class="btn btn-success mt-2" style="display: none;" href="{{ route('download-template', ['category' => $category]) }}">Скачать шаблон</a>
-                <button class="btn btn-secondary mt-2" data-toggle="modal" data-target="#{{ $category }}Modal">Сгенерировать смету</button>
-                
             @endif
+            <button class="btn btn-secondary mt-2" data-toggle="modal" data-target="#{{ $category }}Modal">Заполнить Шаблон</button>
         </div>
     </div>
 </div>

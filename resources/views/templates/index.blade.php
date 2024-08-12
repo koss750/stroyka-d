@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление шаблонами</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <meta name="robots" content="noindex, nofollow">
@@ -114,306 +114,147 @@
     </div>
 </div>
 
-<!-- pLenta Template Modal -->
-<div class="modal fade" id="pLentaModal" tabindex="-1" role="dialog" aria-labelledby="pLentaModalLabel" aria-hidden="true">
+<!-- Dynamic Template Modals -->
+@foreach(['pLenta' => 'lp', 'fLenta' => 'lenta', 'plita' => 'mp', 'srs' => 'srp', 'sr' => 'sr'] as $category => $formType)
+<div class="modal fade" id="{{ $category }}Modal" tabindex="-1" role="dialog" aria-labelledby="{{ $category }}ModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="pLentaModalLabel">Сгенерировать смету (Ленточный с плитой)</h5>
+                <h5 class="modal-title" id="{{ $category }}ModalLabel">Сгенерировать смету ({{ $category }})</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/external" method="GET">
-                    <div class="form-group">
-                        <label for="design">Номер проекта:</label>
-                        <input type="text" class="form-control" name="design" required>
-                    </div>
-                    <!-- Add pLenta template-specific form fields here -->
-                    <input type="hidden" name="category" value="pLenta">
+                <form class="dynamic-form" data-category="{{ $category }}">
+                    @foreach(collect($formFields[$formType])->sortBy('order') as $field)
+                        <div class="form-group" id="group-{{ $field->name }}" 
+                             @if($field->depends_on) 
+                                 data-depends-on="{{ $field->depends_on }}" 
+                                 data-depends-value="{{ $field->depends_value }}" 
+                                 style="display: none;" 
+                             @endif>
+                            <label for="{{ $field->name }}">
+                                <i class="fas fa-info-circle text-primary mr-1" data-toggle="tooltip" title="{{ $field->tooltip }}"></i>
+                                {{ $field->label }}
+                                @if(strpos($field->validation, 'required') !== false)
+                                    <span class="text-danger">*</span>
+                                @endif
+                            </label>
+                            @if(!empty($field->image))
+                                <img src="{{ $field->image }}" alt="{{ $field->label }} image" class="img-helper">
+                            @endif
+                            @php
+                                $isDisabled = strpos($field->validation, 'disabled') !== false ? 'disabled' : '';
+                                $isRequired = strpos($field->validation, 'required') !== false ? 'required' : '';
+                            @endphp
+                            @if($field->type == 'number')
+                                <input type="number" class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" step="0.01" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" placeholder="{{ $field->default }}" {{ $isDisabled }}>
+                            @elseif($field->type == 'select')
+                                <select class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" {{ $isDisabled }}>
+                                    @php
+                                        $options = explode(',', $field->options);
+                                        $firstOption = true;
+                                    @endphp
+                                    @foreach($options as $option)
+                                        @php
+                                            list($optionLabel, $optionValue) = explode(':', $option);
+                                        @endphp
+                                        <option value="{{ $optionValue }}" {{ $firstOption ? 'selected' : '' }}>{{ $optionLabel }}</option>
+                                        @php
+                                            $firstOption = false;
+                                        @endphp
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="text" class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" placeholder="{{ $field->default }}" {{ $isDisabled }}>
+                            @endif
+                        </div>
+                    @endforeach
+                    <input type="hidden" name="category" value="{{ $category }}">
                     <input type="hidden" name="debug" value="1"/>
-                    <button type="submit" class="btn btn-primary">Сгенерировать</button>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-primary generate-template">Заполнить шаблон</button>
+                        <button type="button" class="btn btn-secondary generate-smeta">Сгенерировать Смету</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-<!-- fLenta Template Modal -->
-<div class="modal fade" id="fLentaModal" tabindex="-1" role="dialog" aria-labelledby="fLentaModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="fLentaModalLabel">Сгенерировать смету (Ленточный фундамнт)</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="/external" method="GET">
-                    <div class="form-group">
-                        <label for="design">Номер проекта:</label>
-                        <input type="text" class="form-control" name="design" required>
-                    </div>
-                    <!-- Add fLenta template-specific form fields here -->
-                    <input type="hidden" name="category" value="fLenta">
-                    <input type="hidden" name="debug" value="1"/>
-                    <button type="submit" class="btn btn-primary">Сгенерировать</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- plita Template Modal -->
-<div class="modal fade" id="plitaModal" tabindex="-1" role="dialog" aria-labelledby="plitaModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="plitaModalLabel">Сгенерировать смету (Расчет плиты)</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="/external" method="GET">
-                    <div class="form-group">
-                        <label for="design">Номер проекта:</label>
-                        <input type="text" class="form-control" name="design" required>
-                    </div>
-                    <!-- Add plita template-specific form fields here -->
-                    <input type="hidden" name="category" value="plita">
-                    <input type="hidden" name="debug" value="1"/>
-                    <button type="submit" class="btn btn-primary">Сгенерировать</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- srs Template Modal -->
-<div class="modal fade" id="srsModal" tabindex="-1" role="dialog" aria-labelledby="srsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="srsModalLabel">Сгенерировать смету (Свайно-растверковый с плитой перекрытия)</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="/external" method="GET">
-                    <div class="form-group">
-                        <label for="design">Номер проекта:</label>
-                        <input type="text" class="form-control" name="design" required>
-                    </div>
-                    <!-- Add srs template-specific form fields here -->
-                    <input type="hidden" name="category" value="srs">
-                    <input type="hidden" name="debug" value="1"/>
-                    <button type="submit" class="btn btn-primary">Сгенерировать</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- sr Template Modal -->
-<div class="modal fade" id="srModal" tabindex="-1" role="dialog" aria-labelledby="srModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="srModalLabel">Сгенерировать смету (Свайно-растверковый)</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="/external" method="GET">
-                    <div class="form-group">
-                        <label for="design">Номер проекта:</label>
-                        <input type="text" class="form-control" name="design" required>
-                    </div>
-                    <!-- Add sr template-specific form fields here -->
-                    <input type="hidden" name="category" value="sr">
-                    <input type="hidden" name="debug" value="1"/>
-                    <button type="submit" class="btn btn-primary">Сгенерирова��ь</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+@endforeach
 
     </div>
 </body>
 </html>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const designInput = document.getElementById('designInput');
-        const designIdInput = document.getElementById('designId');
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        designInput.parentNode.insertBefore(messageElement, designInput.nextSibling);
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
 
-        const labourCheckbox = document.getElementById('labourCheckbox');
-    const wholeTemplateRadio = document.getElementById('wholeTemplate');
-    const singlePageRadio = document.getElementById('singlePage');
-    const sheetnameGroup = document.getElementById('sheetnameGroup');
-    const sheetnameInput = document.getElementById('sheetnameInput');
-    const sheetnameHidden = document.getElementById('sheetnameHidden');
-    const sheetnameSuggestions = document.getElementById('sheetnameSuggestions');
-    const sheetnameMessage = document.createElement('div');
-    sheetnameMessage.classList.add('message');
-    sheetnameGroup.appendChild(sheetnameMessage);
+    // Handle dependent fields
+    $('[data-depends-on]').each(function() {
+        var $dependentField = $(this);
+        var dependsOn = $dependentField.data('depends-on');
+        var dependsValue = $dependentField.data('depends-value');
 
-    function toggleSheetnameGroup() {
-        console.log('singlePageRadio.checked', singlePageRadio.checked);
-        if (singlePageRadio.checked) {
-            sheetnameGroup.style.display = 'block';
-        } else {
-            sheetnameGroup.style.display = 'none';
-            sheetnameInput.value = '';
-            sheetnameHidden.value = 'all';
-            sheetnameMessage.textContent = '';
-        }
-    }
-
-    wholeTemplateRadio.addEventListener('click', toggleSheetnameGroup);
-    singlePageRadio.addEventListener('click', toggleSheetnameGroup);
-
-    sheetnameInput.addEventListener('input', function() {
-        const sheetname = this.value;
-        if (sheetname) {
-            fetch('/get-sheetname?name=' + encodeURIComponent(sheetname))
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        sheetnameHidden.value = data.name;
-                        sheetnameMessage.textContent = 'Лист найден';
-                        sheetnameMessage.style.color = 'green';
-                    } else {
-                        sheetnameHidden.value = '';
-                        sheetnameMessage.textContent = 'Лист не найден';
-                        sheetnameMessage.style.color = 'red';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    sheetnameMessage.textContent = 'Ошибка при поиске листа';
-                    sheetnameMessage.style.color = 'red';
-                });
-
-            // Fetch suggestions for the sheetname
-            fetch('/get-sheetname-suggestions?query=' + encodeURIComponent(sheetname))
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        sheetnameSuggestions.innerHTML = '';
-                        data.suggestions.forEach(suggestion => {
-                            const option = document.createElement('option');
-                            option.value = suggestion;
-                            sheetnameSuggestions.appendChild(option);
-                        });
-                    } else {
-                        console.error('No suggestions found');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching suggestions:', error);
-                });
-        } else {
-            sheetnameHidden.value = 'all';
-            sheetnameMessage.textContent = '';
-            sheetnameSuggestions.innerHTML = '';
-        }
+        $('#' + dependsOn).on('change', function() {
+            if ($(this).val() == dependsValue) {
+                $dependentField.show();
+            } else {
+                $dependentField.hide();
+            }
+        }).trigger('change'); // Trigger change to set initial state
     });
 
-        labourCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                var currentValue = filenameInput.value;
-                filenameInput.value = currentValue.replace('clean_', '');
-            } else {
-                var currentValue = filenameInput.value;
-                filenameInput.value = 'clean_' + currentValue;
+    $('.dynamic-form').on('click', '.generate-template, .generate-smeta', function(e) {
+        e.preventDefault();
+        var $form = $(this).closest('form');
+        var excelData = {};
+        
+        $form.find('input, select').each(function() {
+            var $input = $(this);
+            var excelCell = $input.data('excel-cell');
+            if (excelCell) {
+                excelData[excelCell] = $input.val();
             }
         });
 
-        designInput.addEventListener('input', function() {
-        const designTitle = this.value;
-        if (designTitle) {
-            fetch('/get-project-id?title=' + encodeURIComponent(designTitle))
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        designIdInput.value = data.id;
-                        messageElement.textContent = 'Проект найден';
-                        messageElement.style.color = 'green';
+        var category = $form.data('category');
+        var isSmeta = $(this).hasClass('generate-smeta');
+
+        var url = isSmeta ? '{{ route('process-foundation-order') }}' : '{{ route('generate-excel') }}';
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                foundation_type: category,
+                excel_data: excelData,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (isSmeta) {
+                    if (response.excel_url && response.smeta_url) {
+                        window.location.href = response.smeta_url;
+                        setTimeout(function() {
+                            window.location.href = response.excel_url;
+                        }, 1000); // Delay to allow the first download to start
                     } else {
-                        designIdInput.value = '';
-                        messageElement.textContent = 'Проект не найден';
-                        messageElement.style.color = 'red';
+                        alert('Ошибка при генерации файлов.');
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    messageElement.textContent = 'Ошибка при поиске проекта';
-                    messageElement.style.color = 'red';
-                });
-        } else {
-            designIdInput.value = '';
-            messageElement.textContent = '';
-        }
-    });
-
-        sheetnameInput.addEventListener('input', function() {
-            const sheetname = this.value;
-            if (sheetname) {
-                fetch('/get-sheetname?name=' + encodeURIComponent(sheetname))
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            sheetnameHidden.value = data.name;
-                            sheetnameMessage.textContent = 'Лист найден';
-                            sheetnameMessage.style.color = 'green';
-                        } else {
-                            sheetnameHidden.value = '';
-                            sheetnameMessage.textContent = 'Лист не найден';
-                            sheetnameMessage.style.color = 'red';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        sheetnameMessage.textContent = 'Ошибка при поиске листа';
-                        sheetnameMessage.style.color = 'red';
-                    });
-
-                // Fetch suggestions for the sheetname
-                fetch('/get-sheetname-suggestions?query=' + encodeURIComponent(sheetname))
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Suggestions response:', data); // Debugging line
-                        if (data.success) {
-                            sheetnameSuggestions.innerHTML = '';
-                            data.suggestions.forEach(suggestion => {
-                                const option = document.createElement('option');
-                                option.value = suggestion;
-                                sheetnameSuggestions.appendChild(option);
-                            });
-                            console.log('Suggestions added to datalist:', sheetnameSuggestions.innerHTML); // Debugging line
-                        } else {
-                            console.error('No suggestions found');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching suggestions:', error);
-                    });
-            } else {
-                sheetnameHidden.value = '';
-                sheetnameMessage.textContent = '';
-                sheetnameSuggestions.innerHTML = '';
+                } else {
+                    if (response.download_url) {
+                        window.location.href = response.download_url;
+                    } else {
+                        alert('Ошибка при генерации файла.');
+                    }
+                }
+            },
+            error: function() {
+                alert('Произошла ошибка при обработке данных.');
             }
         });
     });
+});
 </script>
-
-

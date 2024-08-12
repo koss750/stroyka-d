@@ -21,14 +21,12 @@ class DbRestore extends Command
 
         $backupFile = $this->argument('backupFile') ?? $this->chooseBackupFile();
 
-        
+        $fullPath = storage_path('backups/' . $backupFile);
 
-        if (!$backupFile || !File::exists(storage_path('backups/' . $backupFile))) {
-            $this->error("$backupFile file does not exist.");
+        if (!File::exists($fullPath)) {
+            $this->error("$backupFile file does not exist in the backups folder.");
             return;
         }
-        
-        $backupFile = storage_path('backups/' . $backupFile);
 
         // Drop and recreate the database
         DB::statement("DROP DATABASE IF EXISTS {$databaseName}");
@@ -36,7 +34,7 @@ class DbRestore extends Command
 
         // Import the backup file
         $command = sprintf('mysql -u %s -p%s %s < %s',
-            $userName, $password, $databaseName, $backupFile);
+            $userName, $password, $databaseName, $fullPath);
 
         $process = Process::fromShellCommandline($command);
         $process->run();
@@ -51,9 +49,17 @@ class DbRestore extends Command
     protected function chooseBackupFile()
     {
         $files = File::files(storage_path('backups'));
+        $sqlFiles = array_filter($files, function ($file) {
+            return $file->getExtension() === 'sql';
+        });
         $fileNames = array_map(function ($file) {
             return $file->getFilename();
-        }, $files);
+        }, $sqlFiles);
+
+        if (empty($fileNames)) {
+            $this->error('No .sql files found in the backups folder.');
+            exit(1);
+        }
 
         return $this->choice('Select a backup file', $fileNames, 0);
     }

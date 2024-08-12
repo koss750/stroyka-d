@@ -208,6 +208,8 @@ Route::prefix('vora')->group(function () {
     });
 });
 
+Route::post('/process-foundation-order', [OrderController::class, 'processFoundationOrder'])->name('process-foundation-order');
+Route::post('/generate-excel', [TemplateController::class, 'generateExcel'])->name('generate-excel');
 //route group prefix tmp
 Route::prefix('tmp')->group(function () {
     Route::get('/', [TemplateController::class, 'index']);

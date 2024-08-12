@@ -9,11 +9,14 @@ use App\Models\OrderFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use App\Models\FormField;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\HttpFoundation\Response;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;    
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 class TemplateController extends Controller
 {
@@ -57,12 +60,133 @@ class TemplateController extends Controller
 
             $template->update(['file_path' => $path, 'name' => $request->name]);
         }
-        $this->initialProcessing($template);
+        if ($template->category == 'main') {
+            $this->initialProcessing($template);
+        }
 
         return back()->with('success', 'Template updated successfully.');
     } catch (\Exception $e) {
         return back()->with('error', 'Error updating template: ' . $e->getMessage());
     }
+}
+//foundations only
+public function generateExcel(Request $request)
+{
+    $foundationType = $request->input('foundation_type');
+    $excelData = $request->input('excel_data');
+
+    // Find the template
+    $template = Template::where('category', $foundationType)->first();
+
+    if (!$template) {
+        return response()->json(['error' => 'Template not found'], 404);
+    }
+
+    // Get the file path
+    $filePath = storage_path('app/' . $template->file_path);
+
+    try {
+        // Load the template
+        $spreadsheet = IOFactory::load($filePath);
+
+        $worksheet = $spreadsheet->setActiveSheetIndex(0);
+
+        // Update cells with new data
+        foreach ($excelData as $cell => $value) {
+            $worksheet->setCellValue($cell, $value);
+        }
+
+        // Create a temporary file to save the modified spreadsheet
+        $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        // Generate a unique filename for the download
+        $downloadFilename = 'generated_' . $foundationType . '_' . time() . '.xlsx';
+
+        // Move the temporary file to a publicly accessible location
+        Storage::disk('public')->put($downloadFilename, file_get_contents($tempFile));
+
+        // Delete the temporary file
+        unlink($tempFile);
+
+        // Generate the download URL
+        $downloadUrl = Storage::disk('public')->url($downloadFilename);
+
+        return response()->json([
+            'download_url' => $downloadUrl
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error generating Excel file: ' . $e->getMessage()], 500);
+    }
+}
+
+public function generateFoundationSmeta($spreadsheet)
+{
+    // Create a new spreadsheet
+    $newSpreadsheet = new Spreadsheet();
+    $newWorksheet = $newSpreadsheet->getActiveSheet();
+
+    // Get the third sheet (index 2) from the original spreadsheet
+    $sourceWorksheet = $spreadsheet->getSheet(2);
+
+    // Copy cells A1:M100
+    for ($col = 'A'; $col <= 'M'; $col++) {
+        // Copy column width
+        $columnIndex = Coordinate::columnIndexFromString($col);
+        $columnDimension = $sourceWorksheet->getColumnDimension($col);
+        $newWorksheet->getColumnDimension($col)
+            ->setWidth($columnDimension->getWidth())
+            ->setAutoSize($columnDimension->getAutoSize());
+
+        for ($row = 1; $row <= 100; $row++) {
+            $cell = $col . $row;
+            
+            // Get the calculated value (not the formula)
+            $cellValue = $sourceWorksheet->getCell($cell)->getCalculatedValue();
+            
+            // Set the value as a string to avoid any formula interpretation
+            $newWorksheet->setCellValueExplicit($cell, $cellValue, DataType::TYPE_STRING);
+            
+            // Copy styles
+            $newWorksheet->getStyle($cell)->applyFromArray(
+                $sourceWorksheet->getStyle($cell)->exportArray()
+            );
+
+            // Copy row height
+            if ($col === 'A') {
+                $rowDimension = $sourceWorksheet->getRowDimension($row);
+                $newWorksheet->getRowDimension($row)
+                    ->setRowHeight($rowDimension->getRowHeight())
+                    ->setZeroHeight($rowDimension->getZeroHeight());
+            }
+        }
+    }
+
+    // Copy merged cells
+    foreach ($sourceWorksheet->getMergeCells() as $mergeCell) {
+        $newWorksheet->mergeCells($mergeCell);
+    }
+
+    // Create a temporary file to save the new spreadsheet
+    $tempFile = tempnam(sys_get_temp_dir(), 'smeta_');
+    $writer = new Xlsx($newSpreadsheet);
+    $writer->save($tempFile);
+
+    // Generate a unique filename for the download
+    $downloadFilename = 'foundation_smeta_' . time() . '.xlsx';
+
+    // Move the temporary file to a publicly accessible location
+    Storage::disk('public')->put($downloadFilename, file_get_contents($tempFile));
+
+    // Delete the temporary file
+    unlink($tempFile);
+
+    // Generate the download URL
+    $downloadUrl = Storage::disk('public')->url($downloadFilename);
+
+    return $downloadUrl;
 }
 
     /**
@@ -107,6 +231,7 @@ class TemplateController extends Controller
     public function index()
     {
         // Retrieve each template safely, or return null if not found
+        $formFields = FormField::all()->groupBy('form_type');
         $mainTemplate = Template::where('category', 'main')->first();
         $sr = Template::where('category', 'sr')->first();
         $srs = Template::where('category', 'srs')->first();
@@ -116,7 +241,7 @@ class TemplateController extends Controller
         $templates = Template::all();
         $orderFiles = OrderFile::with('design')->latest()->take(5)->get();
     
-        return view('templates.index', compact('mainTemplate', 'pLenta', 'fLenta', 'plita', 'sr', 'srs', 'orderFiles', 'templates'));
+        return view('templates.index', compact('mainTemplate',  'pLenta', 'fLenta', 'plita', 'sr', 'srs', 'orderFiles', 'templates', 'formFields'));
     }
 
     public function initialProcessing(Template $template)
@@ -299,7 +424,7 @@ class TemplateController extends Controller
                 if (isset($keywords[$value])) {
                     //Log::info("Found phrase '$value' at cell: $cell");
                     $worksheet->setCellValue('N' . ($rowIndex+$startingRow), $keywords[$value]);
-                    if ($value === 'Итого работы' && $cleanUpRows) {
+                    if ($value === 'Итого рботы' && $cleanUpRows) {
                         $dbSheetSpec['index_smeta_alt_end'] = $rowIndex+$startingRow+1;
                         $dbSheetSpec['index_delivery_end'] = $rowIndex+$startingRow;
                     }
