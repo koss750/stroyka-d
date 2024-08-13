@@ -66,3 +66,4 @@ function updateTotalPrice() {
 
     document.getElementById('totalPrice').textContent = totalPrice.toFixed(2);
 }
+

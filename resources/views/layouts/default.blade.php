@@ -11,7 +11,7 @@
 
 	<!-- PAGE TITLE HERE -->
 	<title>{{ config('dz.name') }} | @yield('title', $page_title ?? '')</title>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="keywords" content="" />
@@ -29,7 +29,7 @@
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('index_files/logo.png')}}">
     <link href="{{ asset('css/stroyka.css') }}" rel="stylesheet">
-
+    
     
 	@if(!empty(config('dz.public.pagelevel.css.'.$action))) 
         @foreach(config('dz.public.pagelevel.css.'.$action) as $style)
@@ -44,6 +44,7 @@
         @endforeach
     @endif
 	<script src="//code.jivosite.com/widget/Sx4EXfaj86" async></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>

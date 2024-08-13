@@ -69,6 +69,47 @@ class User extends Authenticatable
     {
         $this->attributes['permissions'] = json_encode(array_keys(array_filter($value)));
     }
+
+    public function hasRole($role)
+    {
+        return in_array($role, $this->getRoles());
+    }
+
+    public function hasAnyRole($roles)
+    {
+        return !empty(array_intersect($roles, $this->getRoles()));
+    }
+
+    public function getRoles()
+    {
+        return $this->roles ? explode(',', $this->roles) : [];
+    }
+
+    public function addRole($role)
+    {
+        $roles = $this->getRoles();
+        if (!in_array($role, $roles)) {
+            $roles[] = $role;
+            $this->roles = implode(',', $roles);
+            $this->save();
+        }
+    }
+
+    public function removeRole($role)
+    {
+        $roles = $this->getRoles();
+        if (($key = array_search($role, $roles)) !== false) {
+            unset($roles[$key]);
+            $this->roles = implode(',', $roles);
+            $this->save();
+        }
+    }
+
+    public function companyProfile()
+    {
+        return $this->hasOne(CompanyProfile::class);
+    }
+
 }
 
 

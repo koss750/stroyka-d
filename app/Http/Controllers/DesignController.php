@@ -494,7 +494,7 @@ private function buildNestedOptions($options, $allData, $id, $seasonal = false)
 
         $page_title = "Заказы";
         $page_description = Translator::translate("listing_page_description");
-        return view('vora.ecom.product_order', compact('page_title', 'page_description', 'projects'));
+        return view('orders', compact('page_title', 'page_description', 'projects'));
     }
     
     private function transformProject($project)

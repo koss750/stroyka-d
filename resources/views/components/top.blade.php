@@ -52,6 +52,69 @@
 </script>
 <script>
       document.addEventListener('DOMContentLoaded', function() {
+        $('.assign-executor').on('click', function() {
+            var projectId = $(this).data('project-id');
+            $('#disclaimerModal').modal('show');
+            $('.modal-backdrop').css('z-index', 0);
+            $('#acceptDisclaimer').off('click').on('click', function() {
+                $('#disclaimerModal').modal('hide');
+                loadExecutors(projectId);
+            });
+        });
+
+        function loadExecutors(projectId) {
+            fetch(`/api/projects/${projectId}/available-executors`)
+                .then(response => response.json())
+                .then(data => {
+                    const executorList = document.getElementById('executorList');
+                    executorList.innerHTML = '';
+                    
+                    data.executors.forEach(executor => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        li.innerHTML = `
+                            ${executor.name}
+                            <button class="btn btn-sm btn-primary select-executor" data-executor-id="${executor.id}" data-project-id="${projectId}">Выбрать</button>
+                        `;
+                        executorList.appendChild(li);
+                    });
+
+                    const executorModal = new bootstrap.Modal(document.getElementById('executorModal'));
+                    executorModal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка при загрузке списка исполнителей');
+                });
+        }
+
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('select-executor')) {
+                const executorId = event.target.getAttribute('data-executor-id');
+                const projectId = event.target.getAttribute('data-project-id');
+                
+                fetch(`/api/projects/${projectId}/assign-executors`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ executor_ids: [executorId] })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    const executorModal = bootstrap.Modal.getInstance(document.getElementById('executorModal'));
+                    executorModal.hide();
+                    // Optionally, refresh the page or update the UI
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка при назначении исполнителя');
+                });
+            }
+        });
          const hamburger = document.querySelector('.hamburger-menu');
          const mobileMenu = document.createElement('div');
          mobileMenu.className = 'mobile-menu';

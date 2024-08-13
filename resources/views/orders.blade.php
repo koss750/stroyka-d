@@ -3,6 +3,9 @@
 
 @section('canonical', '')
 
+
+@section('additional_head')
+
 @section('content')
 <div class="container-fluid">
 	<!-- Add Order -->
@@ -123,19 +126,20 @@
 </div>
 
 <!-- Disclaimer Modal -->
-<div class="modal fade" id="disclaimerModal" tabindex="-1" role="dialog" aria-labelledby="disclaimerModalLabel" aria-hidden="true">
+<div class="modal fade" id="disclaimerModal" style="z-index: 1000;" tabindex="-1" role="dialog" aria-labelledby="disclaimerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="disclaimerModalLabel">Важное уведомление</h5>
-                <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <p>Внимание! Все коммуникации вне этого веб-сайта будут наказываться по всей строгости закона Российской Федерации. Во избежание проблем, пожалуйста, осуществляйте все взаимодействия через наш сайт.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
                 <button type="button" class="btn btn-primary" id="acceptDisclaimer">Принять и продолжить</button>
             </div>
         </div>
@@ -148,7 +152,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="executorModalLabel">Выбрать исполнителя</h5>
-                <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -161,83 +166,103 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const assignButtons = document.querySelectorAll('.assign-executor');
-    
-    assignButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const projectId = this.dataset.projectId;
-            showDisclaimerModal(projectId);
+$(document).ready(function() {
+    const bulkDeleteContainer = $('#bulkDeleteContainer');
+    const checkboxes = $('input[type="checkbox"]');
+    const checkAll = $('#checkAll');
+
+    function updateBulkDeleteVisibility() {
+        const checkedBoxes = checkboxes.filter(':checked').not('#checkAll');
+        bulkDeleteContainer.toggle(checkedBoxes.length > 0);
+    }
+
+    checkboxes.on('change', updateBulkDeleteVisibility);
+
+    checkAll.on('change', function() {
+        checkboxes.not(this).prop('checked', this.checked);
+        updateBulkDeleteVisibility();
+    });
+
+    $('#bulkDeleteBtn').on('click', function(e) {
+        e.preventDefault();
+        const selectedIds = checkboxes.filter(':checked').not('#checkAll').map(function() {
+            return $(this).attr('id').replace('customCheckBox', '');
+        }).get();
+        
+        if (selectedIds.length > 0) {
+            if (confirm('Вы точно хотите удалить выбранные заказы?')) {
+                // Implement your delete logic here
+                console.log('Deleting items:', selectedIds);
+                // After deletion, you might want to refresh the table or remove the deleted rows
+            }
+        }
+    });
+
+    $('.assign-executor').on('click', function() {
+        var projectId = $(this).data('project-id');
+        $('#disclaimerModal').modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $('#disclaimerModal').modal('show');
+
+        // Remove any existing click handlers
+        $('#acceptDisclaimer').off('click');
+        
+        $('#acceptDisclaimer').on('click', function() {
+            $('#disclaimerModal').modal('hide');
+            loadExecutors(projectId);
         });
     });
 
-    function showDisclaimerModal(projectId) {
-        const disclaimerModal = new bootstrap.Modal(document.getElementById('disclaimerModal'));
-        disclaimerModal.show();
-
-        const acceptButton = document.getElementById('acceptDisclaimer');
-        acceptButton.onclick = function() {
-            disclaimerModal.hide();
-            loadExecutors(projectId);
-        };
-    }
+    // Ensure the close button works
+    $('.modal .close, .modal .btn-secondary').on('click', function() {
+        $(this).closest('.modal').modal('hide');
+    });
 
     function loadExecutors(projectId) {
-        fetch(`/api/projects/${projectId}/available-executors`)
-            .then(response => response.json())
-            .then(data => {
-                const executorList = document.getElementById('executorList');
-                executorList.innerHTML = '';
-                
-                data.executors.forEach(executor => {
-                    const li = document.createElement('li');
-                    li.className = 'list-group-item';
-                    li.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5>${executor.name}</h5>
-                                <p>${executor.company_profile ? executor.company_profile.company_name : 'No company name'}</p>
-                            </div>
-                            <button class="btn btn-primary select-executor" data-executor-id="${executor.id}" data-project-id="${projectId}">Выбрать</button>
-                        </div>
-                    `;
-                    executorList.appendChild(li);
+        $.ajax({
+            url: '/api/projects/' + projectId + '/available-executors',
+            method: 'GET',
+            success: function(response) {
+                var executorHtml = '<ul class="list-group">';
+                response.executors.forEach(function(executor) {
+                    executorHtml += '<li class="list-group-item d-flex justify-content-between align-items-center">' +
+                        executor.name +
+                        '<button class="btn btn-sm btn-primary select-executor" data-executor-id="' + executor.id + '" data-project-id="' + projectId + '">Выбрать</button>' +
+                        '</li>';
                 });
-
-                const executorModal = new bootstrap.Modal(document.getElementById('executorModal'));
-                executorModal.show();
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                executorHtml += '</ul>';
+                $('#executorList').html(executorHtml);
+                $('#executorModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $('#executorModal').modal('show');
+            },
+            error: function() {
                 alert('Ошибка при загрузке списка исполнителей');
-            });
+            }
+        });
     }
 
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('select-executor')) {
-            const executorId = event.target.dataset.executorId;
-            const projectId = event.target.dataset.projectId;
-            
-            fetch(`/api/projects/${projectId}/assign-executors`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ executor_ids: [executorId] })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                const executorModal = bootstrap.Modal.getInstance(document.getElementById('executorModal'));
-                executorModal.hide();
+    $(document).on('click', '.select-executor', function() {
+        var executorId = $(this).data('executor-id');
+        var projectId = $(this).data('project-id');
+        $.ajax({
+            url: '/api/projects/' + projectId + '/assign-executor',
+            method: 'POST',
+            data: { executor_id: executorId },
+            success: function(response) {
+                $('#executorModal').modal('hide');
+                alert('Исполнитель успешно назначен');
+                // Optionally, refresh the page or update the UI
                 location.reload();
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            },
+            error: function() {
                 alert('Ошибка при назначении исполнителя');
-            });
-        }
+            }
+        });
     });
 });
 </script>

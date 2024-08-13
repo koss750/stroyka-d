@@ -46,7 +46,7 @@ Route::get('/export', [DesignController::class, 'exportAll']);
 Route::get('/forex-day', [DailyAverageRateController::class, 'index']);
 Route::get('/browse/{category?}', [DesignController::class, 'getDemoDesigns']);
 Route::get('/project/{id}', [DesignController::class, 'getDemoDetail'])->middleware('counter');
-Route::get('/order', [DesignController::class, 'getDemoOrder']);
+Route::get('/orders', [DesignController::class, 'getDemoOrder']);
 Route::get('/checkout', [DesignController::class, 'getDemoCheckout']);
 Route::get('/email-inbox', [UIController::class, 'email_inbox']);
 Route::get('/messages', [UIController::class, 'email_inbox']);
@@ -100,6 +100,12 @@ Route::prefix('site')->group(function () {
     });
 });
 
+//Routes related to project execution -- для выполнения проектов исполнителями
+Route::post('/projects/{project}/assign-executors', [ProjectController::class, 'assignExecutors']);
+Route::get('/projects/{project}/review', [ProjectController::class, 'reviewProject']);
+Route::post('/projects/{project}/submit-offer', [ProjectController::class, 'submitOffer']);
+Route::get('/projects/{project}/available-executors', [ProjectController::class, 'getAvailableExecutors']);
+Route::post('/projects/{project}/assign-executor', [ProjectController::class, 'assignExecutor']);
 
 Route::get('/keys/{designId}', function ($designId) {
     $keys = Redis::connection('external')->keys("*");

@@ -364,6 +364,10 @@ footer .container p {
     }
 }
 
+.modal-backdrop {
+    z-index: 0 !important;
+}
+
 .section-01 {
     padding: 50px 0 130px;
     background: #e8e8e8;

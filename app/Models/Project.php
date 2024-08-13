@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
 class Project extends Model
 {
     use HasFactory;
@@ -29,7 +28,7 @@ class Project extends Model
     ];
 
     protected $casts = [
-        'selected_configuration' => 'json',
+        'selected_configuration' => 'array',
         'payment_amount' => 'decimal:2',
         'size' => 'integer',
     ];
@@ -42,6 +41,13 @@ class Project extends Model
     public function design()
     {
         return $this->belongsTo(Design::class);
+    }
+
+    public function executors()
+    {
+        return $this->belongsToMany(User::class, 'project_executor', 'project_id', 'executor_id')
+            ->withPivot('status', 'price', 'comment')
+            ->withTimestamps();
     }
 
     public static function boot()
