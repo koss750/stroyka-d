@@ -28,6 +28,7 @@ use App\Nova\Order;
 use App\Nova\Cards\RedisKeysCard;
 use Illuminate\Http\Request;
 use App\Nova\DesignNonAdmin;
+use App\Nova\DesignSeo;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -48,10 +49,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
            //         MenuItem::resource(DynamicPageCard::class),
                     MenuItem::resource(NovaDesign::class),
                     //MenuItem::resource(AssociatedCost::class),
-                    MenuItem::resource(ExcelResource::class),
-                    MenuItem::resource(DesignNonAdmin::class),
                     MenuItem::resource(FormField::class),
+                    MenuItem::resource(DesignNonAdmin::class),
+                    
                    // MenuItem::resource(DesignCache::class),
+                    MenuItem::resource(DesignSeo::class),
                 ])->icon('library')->collapsable(),
 
                 MenuSection::make(Translator::translate('orders_menu'), [
@@ -61,7 +63,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(Translator::translate('users_menu'), [
                     MenuItem::resource(Supplier::class),
-                    MenuItem::resource(Contractor::class),
                     MenuItem::resource(User::class),
                 ])->icon('user-group')->collapsable(),
             ];

@@ -6,7 +6,10 @@
 
 @section('additional_head')
 
+@endsection
+
 @section('content')
+
 <div class="container-fluid">
 	<!-- Add Order -->
 	<div class="modal fade" id="addOrderModalside">

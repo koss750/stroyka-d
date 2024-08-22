@@ -13,6 +13,7 @@
     <meta http-equiv="Expires" content="0" />
     <link rel="preload" href="{{ asset('assets/fonts/font.ttf') }}" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <script src="https://xn--80ardojfh.com/assets/js/typeahead.min.js"></script>
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}"/>
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}"/>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

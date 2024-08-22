@@ -82,12 +82,4 @@ class Order extends Resource
         return [
         ];
     }
-
-    public static function indexQuery(NovaRequest $request, $query)
-    {
-        if ($request->user()->superadmin == 1) {
-            return $query;
-        }
-        return $query->where('user_id', $request->user()->id);
-    }
 }

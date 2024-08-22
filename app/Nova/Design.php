@@ -19,8 +19,10 @@ use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\Hidden;
 use Laravel\Nova\Fields\KeyValue;
+use App\Nova\Filters\TypeOfDesign;
 use App\Nova\Actions\GenerateExcel;
 use App\Nova\Actions\GenerateOSExcel;
+//use App\Nova\Filters\DesignSEO;
 use App\Nova\Actions\CheckPrices;
 use Eminiarts\Tabs\Traits\HasTabs;
 use Eminiarts\Tabs\Tabs;
@@ -40,6 +42,7 @@ use Laravel\Nova\Fields\Heading;
 use App\Nova\Filters\ActiveFilterAlt;
 use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 use App\Nova\Filters\AlmostReady;
+use Laravel\Nova\Fields\HasOne;
 
 
 class Design extends Resource
@@ -581,19 +584,27 @@ class Design extends Resource
             //->rules('required'), // validation rules
     //    NestedForm::make('Floors')->heading("helo")
                 ]),
-
+            Panel::make('SEO', [
+                HasOne::make('SEO', 'seo', DesignSeo::class),
+            ]),
                
             
                 
                 
         ];
     }
+    public function seo()
+    {
+        return $this->hasOne(DesignSeo::class);
+    }
 
     public function filters(Request $request)
         {
             return [
                 new ActiveFilterAlt,
-                new AlmostReady
+                new AlmostReady,
+                new TypeOfDesign,
+                //new DesignSEO
             ];
         }
     
@@ -601,5 +612,10 @@ class Design extends Resource
         {
             return $request->user()->hasAccessToNovaResource('Designs');
         }
+
+    public function authorizedToDelete(Request $request)
+    {
+        return true; // Or implement your authorization logic here
+    }
 
 }

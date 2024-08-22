@@ -13,6 +13,7 @@
     <meta http-equiv="Expires" content="0" />
     <link rel="font" href="https://xn--80ardojfh.com/assets/fonts/font.ttf"/>
     <script src="https://xn--80ardojfh.com/assets/js/jquery.min.js"></script>
+    <script src="https://xn--80ardojfh.com/assets/js/typeahead.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="https://xn--80ardojfh.com/assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}?v={{ time() }}">

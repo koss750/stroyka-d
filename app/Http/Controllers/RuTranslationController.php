@@ -290,7 +290,7 @@ class RuTranslationController extends Controller
           "pvPart7" => "Отвод, шт",
           "pvPart8" => "Труба 3м, шт",
           "message" => "Комментарии",
-          "supplier_menu_label" => "Подрядчики",
+          "supplier_menu_label" => "Компании",
           "contractor_menu_label" => "Поставщики",
           "pvPart9" => "Труба 1м, шт",
           "inventory_menu" => "О Проектах",

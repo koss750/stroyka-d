@@ -8,7 +8,11 @@
     <div class="col-sm-12">
         <h2>{{ $page_title }}</h2>
         <form id="stripFoundationForm" class="mt-4">
-            @foreach($formFields as $field)
+            @php
+                // Sort the formFields array by the 'order' attribute
+                $sortedFormFields = $formFields->sortBy('order');
+            @endphp
+            @foreach($sortedFormFields as $field)
                 <div class="form-group" id="group-{{ $field->name }}" 
                      @if($field->depends_on) 
                          data-depends-on="{{ $field->depends_on }}" 
@@ -30,7 +34,7 @@
                         $isRequired = strpos($field->validation, 'required') !== false ? 'required' : '';
                     @endphp
                     @if($field->type == 'number')
-                        <input type="number" class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" step="0.01" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" placeholder="{{ $field->default }}" {{ $isDisabled }}>
+                        <input type="text" class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" placeholder="{{ $field->default }}" {{ $isDisabled }} data-type="number">
                     @elseif($field->type == 'select')
                         <select class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" {{ $isDisabled }}>
                             @php
@@ -87,7 +91,11 @@
                 var $input = $('[name="' + input.name + '"]');
                 var excelCell = $input.data('excel-cell');
                 if (excelCell) {
-                    excelData[excelCell] = input.value;
+                    var value = input.value;
+                    if ($input.data('type') === 'number') {
+                        value = parseFloat(value) || 0;
+                    }
+                    excelData[excelCell] = value;
                 }
             });
 
@@ -112,10 +120,42 @@
                 }
             });
         });
+
+        // Validate number inputs
+        $('input[data-type="number"]').on('input', function() {
+            this.value = this.value.replace(/[^0-9.,]/g, '');
+        });
+
+        // Disable mousewheel on number inputs
+        $('input[type="number"]').on('wheel', function(e) {
+            e.preventDefault();
+        });
+
+        // Disable up and down keys on number inputs
+        $('input[type="number"]').on('keydown', function(e) {
+            if (e.which === 38 || e.which === 40) {
+                e.preventDefault();
+            }
+        });
     });
 </script>
 @endsection
 
 @section('additional_styles')
-
+<style>
+    /* Remove spinner from number inputs */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+    /* Additional styles to override browser defaults */
+    input[type="number"] {
+        padding-right: 0 !important;
+    }
+</style>
 @endsection

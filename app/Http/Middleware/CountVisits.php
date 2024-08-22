@@ -17,7 +17,7 @@ class CountVisits
     public function handle($request, Closure $next)
     {
         $fullUrl = $request->fullUrl();
-        Redis::incr("visits:$fullUrl");
+        //Redis::incr("visits:$fullUrl");
 
         return $next($request);
     }

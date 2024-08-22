@@ -24,6 +24,7 @@ use App\Models\ProjectPrice;
 use Spatie\Image\Manipulations;
 use signifly\Nova\Fields\ProgressBar\ProgressBar;
 use App\Http\Controllers\RuTranslationController as Translator;
+use App\Models\DesignSeo;
 
 
 class Design extends Model implements HasMedia
@@ -206,6 +207,16 @@ class Design extends Model implements HasMedia
             ->width(500)
             ->height(500)
             ->performOnCollections('images');
+        $this->addMediaConversion('watermark-large')
+            ->quality(70)
+            ->performOnCollections('images')
+            ->watermark(public_path('watermark.png'))
+            ->watermarkPosition(Manipulations::POSITION_CENTER)
+            ->watermarkHeight(100, Manipulations::UNIT_PERCENT)
+            ->watermarkWidth(100, Manipulations::UNIT_PERCENT)
+            ->watermarkFit(Manipulations::FIT_STRETCH)
+            ->watermarkPadding(0, 0, Manipulations::UNIT_PIXELS)
+            ->watermarkOpacity(23);
         $this->addMediaConversion('watermarked')
             ->width(1200)
             ->height(1200)
@@ -612,5 +623,10 @@ public function foundationLentaExcelTest($tape)
         return $returnArray;
     }
 
+    // Add this method to the Design model
+    public function seo()
+    {
+        return $this->hasOne(DesignSeo::class);
+    }
 }
 

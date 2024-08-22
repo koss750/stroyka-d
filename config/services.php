@@ -31,6 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'openai' => ['api_key' => env('OPEN_AI_TOKEN')]
+    'openai' => ['api_key' => env('OPEN_AI_TOKEN')],
+
+    'yandex' => [
+        'api_key' => env('YANDEX_API_KEY'),
+    ],
 
 ];

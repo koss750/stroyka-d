@@ -17,6 +17,9 @@ use App\Models\InvoiceType;
 use App\Models\ProjectPrice;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Project;
+use App\Models\DesignSeo;
+use Illuminate\Support\Facades\Http;
+
 
 class DesignController extends Controller
 {
@@ -391,7 +394,7 @@ $html .= '<thead class="thead-dark">';
         $design->user = false;
     }
 
-
+    $meta = DesignSeo::where('design_id', $id)->first();
     $foundations = $this->buildNestedOptions($data->where('parent', 102), $data, $id);
     $dd_options = $this->buildNestedOptions($data->where('parent', 103), $data, $id);
     $roofs = $this->buildNestedOptions($data->where('parent', 101), $data, $id);
@@ -401,23 +404,6 @@ $html .= '<thead class="thead-dark">';
         'dd_options' => $dd_options,
         'roofs' => $roofs,
     ];
-    //comment out below while it is not working
-
-    /*foreach($nestedData as $group) {
-        foreach ($group as $option) {   
-            if($option->unique_btn_group) {
-                $nestedData[$option->unique_btn_group] = $option;
-                unset($nestedData[$key]);
-            }
-            foreach($option->suboptions as $suboption) {
-                if($suboption->unique_btn_group) {
-                    $nestedData[$suboption->unique_btn_group] = $suboption;
-                    unset($nestedData[$key]);
-                }
-            }
-        }
-    }
-    */
     $fullUrl = $request->fullUrl();
     $page_title = Translator::translate("listing_page_title");
     $page_description = Translator::translate("listing_page_description");
@@ -458,6 +444,7 @@ private function buildNestedOptions($options, $allData, $id, $seasonal = false)
                 $suboption->parent_ref = $option->ref;
             }
         } else {
+            /*
             //get price from Redis
             $redisKey = "stroyka_$id" . "_" . $option->label;
             $prices = json_decode(Redis::get($redisKey), true);
@@ -466,6 +453,8 @@ private function buildNestedOptions($options, $allData, $id, $seasonal = false)
             } catch (\Exception $e) {
                 $option->data_price = $this->getPriceFromDb($id, $option->label);
             }
+            */
+            $option->data_price = $this->getPriceFromDb($id, $option->label);
             $option->suboptions = collect($option->suboptions)
                 ->keyBy('unique_btn_group')
                 ->sortBy('unique_order');
@@ -603,4 +592,6 @@ private function buildNestedOptions($options, $allData, $id, $seasonal = false)
         return $design;
     }
     
+    
+
 }

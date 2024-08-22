@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Design;
 use App\Http\Controllers\DesignController;
+use App\Http\Controllers\RegionController;
+use App\Http\Controllers\SupplierController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,3 +26,7 @@ Route::post('/process', [DesignController::class, 'create'])->name('designs.crea
 Route::get('/demo/designs/{category}/{limit}', [DesignController::class, 'getDemoDesigns'])->name('designs.getDemo');
 Route::get('/designs/list', [DesignController::class, 'getList'])->name('designs.getList');
 Route::post('/designs/{id}/update-order', [DesignController::class, 'updateOrder']);
+Route::get('/regions/search', [RegionController::class, 'searchRegions']);
+Route::get('/regions', [RegionController::class, 'getAllRegions']);
+Route::post('/register-legal-entity', [SupplierController::class, 'registerCompany']);
+Route::post('/check-company', [SupplierController::class, 'checkCompany']);

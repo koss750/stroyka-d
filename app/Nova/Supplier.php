@@ -32,18 +32,6 @@ class Supplier extends Resource
         return Translator::translate('supplier_menu_label');
     }
 
-    /**
-     * Build an "index" query for the given resource.
-     *
-     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public static function indexQuery(NovaRequest $request, $query)
-    {
-        return $query->where('type', '=', 'supplier'); // or 'contractor' for the ContractorResource
-    }
-
     public function fields(NovaRequest $request)
     {
         return [

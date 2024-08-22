@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TemplateController;
-
+use App\Http\Controllers\Auth\LoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +40,8 @@ Route::get('/', function () {
 Route::prefix('projects')->middleware('check.redirection')->group(function () {
     Route::view('/{slug}', 'under-construction')->middleware('counter');
 });
+Route::post('/logout', 'Auth\LoginController@logout')->name('logout');
+Route::post('/login', 'Auth\LoginController@login')->name('login');
 
 Route::get('/forex', [ExchangeRateController::class, 'index']);
 Route::get('/export', [DesignController::class, 'exportAll']);
@@ -284,3 +286,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/get-foundation-file', [FulfillmentController::class, 'foundationFullFile']);
+Auth::routes();
+Route::get('/experimental-main', [TemplateController::class, 'experimentalMain'])->name('experimental-main');
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

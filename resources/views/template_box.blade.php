@@ -21,6 +21,7 @@
                     });
                     </script>
                     <button class="btn btn-warning mt-2" id="reindexButton">Индексировать цены</button>
+                    <button class="btn btn-success mt-2" id="experimentalButton">Изучить</button>
                     <div class="progress" id="progressBarContainer" style="display:none; margin-top: 10px; color: green;">
                         <div class="progress-bar bg-success" id="progressBar" role="progressbar" style="width: 10%; padding: 9px; color: green" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" ></div>
                     </div>
@@ -57,6 +58,24 @@
                                     console.log('Reindexing started successfully');
                                 } else {
                                     console.error('Reindexing failed');
+                                }
+                            }).catch(error => {
+                                console.error('Error:', error);
+                            });
+                        });
+
+                        document.getElementById('experimentalButton').addEventListener('click', function() {
+                            fetch('{{ route('experimental-main') }}', {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            }).then(response => {
+                                if (response.ok) {
+                                    console.log('Experimental function executed successfully');
+                                } else {
+                                    console.error('Experimental function execution failed');
                                 }
                             }).catch(error => {
                                 console.error('Error:', error);
