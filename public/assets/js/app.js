@@ -29,28 +29,6 @@ function toggleSuboptions(element) {
     }
   }
 
-function updateSelectedOption(element, optionType) {
-    updateTotalPrice();
-    var selectedLabel = element.textContent;
-    if (element.closest('.suboptions') !== null) {
-        var parentLabel = element.closest('.suboptions').previousElementSibling.textContent;
-    } else {
-        var parentLabel = selectedLabel;
-    }
-    var grandparentLabel = element.closest('.subsuboptions') ? element.closest('.subsuboptions').parentElement.querySelector('label').textContent : '';
-
-    var label = parentLabel;
-    if (grandparentLabel) {
-        label += ' (' + grandparentLabel + ' ' + selectedLabel + ')';
-    } else {
-        label += ' (' + selectedLabel + ')';
-    }
-
-    var labelElement = document.querySelector('.' + optionType + '-label');
-    labelElement.textContent = label;
-
-    selectedOptions[optionType] = label;
-}
 
 function updateTotalPrice() {
     var totalPrice = 999; // Start with the base price

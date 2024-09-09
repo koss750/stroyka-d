@@ -207,19 +207,9 @@ class Design extends Model implements HasMedia
             ->width(500)
             ->height(500)
             ->performOnCollections('images');
-        $this->addMediaConversion('watermark-large')
-            ->quality(70)
-            ->performOnCollections('images')
-            ->watermark(public_path('watermark.png'))
-            ->watermarkPosition(Manipulations::POSITION_CENTER)
-            ->watermarkHeight(100, Manipulations::UNIT_PERCENT)
-            ->watermarkWidth(100, Manipulations::UNIT_PERCENT)
-            ->watermarkFit(Manipulations::FIT_STRETCH)
-            ->watermarkPadding(0, 0, Manipulations::UNIT_PIXELS)
-            ->watermarkOpacity(23);
         $this->addMediaConversion('watermarked')
-            ->width(1200)
-            ->height(1200)
+            ->width(1800)
+            ->height(1800)
             ->performOnCollections('images')
             ->watermark(public_path('watermark.png'))
             ->watermarkPosition(Manipulations::POSITION_CENTER)
@@ -393,9 +383,11 @@ public function setImages()
     public function setPrice(Design $design) {
         //details is a json that contains price element that should be set as "price"
         try {
+            $setting = Setting::where('label', 'display_prices')->first();
+            $displayPrices = $setting->value;
             $details = json_decode($design->details, true);
-            $price = $details['price'];
-            $price = round($price, 0);
+            $price = $details['price'][$displayPrices];
+            $price = round($price, 2);
         } catch (\Exception $e) {
             $price = 99999;
         }

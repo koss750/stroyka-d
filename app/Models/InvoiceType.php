@@ -45,13 +45,23 @@ class InvoiceType extends Model
         return $this->parent();
     }
 
-    // Add a computed attribute to get the oldest parent model instance
-    public function getOldestParentAttribute()
+    // Add oldestParent method to return the relationship instance
+    public function oldestParentType()
     {
         $parent = $this->parent()->first();
         while ($parent && $parent->parent()->exists()) {
             $parent = $parent->parent()->first();
         }
         return $parent;
+    }
+
+    // Add a computed attribute to get the oldest parent model instance
+    public function getOldestParentLabelAttribute()
+    {
+        $parent = $this->parent()->first();
+        while ($parent && $parent->parent()->exists()) {
+            $parent = $parent->parent()->first();
+        }
+        return $parent->label;
     }
 }

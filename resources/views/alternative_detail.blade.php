@@ -26,6 +26,10 @@
     };
     document.addEventListener('DOMContentLoaded', function() {
 
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
         for (let optionType in selectedOptionRefs) {
         let defaultElement = document.querySelector(`[data-ref="${selectedOptionRefs[optionType]}"]`);
         if (defaultElement) {
@@ -55,13 +59,17 @@
                   
                   <div class="buttons col-12">
                   <button class="btn btn-outline-light" id="exampleSmetaBtn">Пример сметы</button>
-                  <button class="btn btn-outline-light buyNowBtn" id="buyNow">Купить смету</button>
+                  <button type="button" class="btn btn-outline-light" data-toggle="modal" data-target="#paymentModal" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                Купить смету
+                </button>
                   </div>
                </div>
                <div class="col-lg-6 col-md-12">
                <div class="price-tag text-black">
-                     <h2>Стоимость: <span id="totalPrice">{{ $design->etiketka }}</span></h2>
-                  </div>
+                    <h2>Стоимость: <span id="totalPrice">{{ $design->etiketka }}</span>
+                        <i class="fas fa-info-circle text-danger" data-toggle="tooltip" data-placement="top" title="{{$toolTipLabel}}"></i>
+                    </h2>
+                </div>
                
 
                @component('components.optionGroup', [
@@ -89,10 +97,8 @@
                </div>
             </div>
       <!-- Payment Modal -->
-      @component('components.payment-modal', [
-                    'id' => $design->id
-                ])
-                @endcomponent
+      @component('components.payment-modal', ['id' => $design->id, 'title' => $design->title, 'image' => $design->image_url])
+@endcomponent
       <x-modal-carousel />
       @endsection
       @section('additional_scripts')
@@ -106,7 +112,8 @@ function openImageModal(imgSrc) {
     var modalImg = document.getElementById("image_modal_img");
     modal.style.display = "block";
     modalImg.src = imgSrc;
-    
+    //add display block to id headerBar
+    document.getElementById("headerBar").style.display = "none";
     // Find the index of the clicked image
     currentImageIndex = imageUrls.indexOf(imgSrc);
 }
@@ -131,12 +138,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // When the user clicks on <span> (x), close the modal
     span.onclick = function() {
         modal.style.display = "none";
+        document.getElementById("headerBar").style.display = "";
     }
 
     // Close the modal when clicking outside the image
     modal.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
+            document.getElementById("headerBar").style.display = "";
         }
     }
 

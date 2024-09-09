@@ -15,10 +15,15 @@ class Supplier extends Model
         'phone_2', // телефон 2
         'message', // поле для ввода текста/письма
         'type', // подрядчик или поставщик
-        'status', // New status field
-        'type_of_organisation', // New type_of_organisation field
-        'region_code' // New region_code field
+        'status',
+        'type_of_organisation',
+        'region_code',
+        'profile_picture_url',
     ];
 
     // Include any accessors, mutators, or relationships if needed
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

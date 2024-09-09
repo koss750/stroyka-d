@@ -13,7 +13,7 @@
                     <div class="inner">
                         <div class="box">
                             <div class="image">
-                                <img src="/assets/images/image-01.jpg" alt="Дом из бревна" loading="lazy">
+                                <img src="/assets/images/OCBd2.jpg" alt="Дом из бревна" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/browse/doma_iz_brevna" aria-label="Перейти к проектам домов из бревна">
@@ -24,7 +24,7 @@
                         </div>
                         <div class="box">
                             <div class="image">
-                                <img src="/assets/images/image-02.jpg" alt="Дом из бруса" loading="lazy">
+                                <img src="/assets/images/PBd.jpg" alt="Дом из бруса" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/browse/doma_iz_brusa" aria-label="Перейти к проектам домов из бруса">
@@ -35,7 +35,7 @@
                         </div>
                         <div class="box">
                             <div class="image">
-                                <img src="/assets/images/image-03.png" alt="Баня из бревна" loading="lazy">
+                                <img src="/assets/images/OCBb.jpg" alt="Баня из бревна" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/browse/bani_iz_brevna" aria-label="Перейти к проектам бань из бревна">
@@ -46,7 +46,7 @@
                         </div>
                         <div class="box">
                             <div class="image">
-                                <img src="/assets/images/image-04.jpeg" alt="Баня из бруса" loading="lazy">
+                                <img src="/assets/images/PBb.jpg" alt="Баня из бруса" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/browse/bani_iz_brusa" aria-label="Перейти к проектам бань из бруса">
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="container_new_section">
+                <div class="container_new_section foundations_section">
                     <h1>Расчет фундаментов</h1>
                     <div class="inner">
                         <div class="box">

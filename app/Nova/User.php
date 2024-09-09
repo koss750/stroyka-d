@@ -7,10 +7,16 @@ use Illuminate\Validation\Rules;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\BooleanGroup;
+use Laravel\Nova\Panel;
+use App\Models\Message;
+use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Http\Requests\NovaRequest;
+
+
 
 class User extends Resource
 {
@@ -36,6 +42,18 @@ class User extends Resource
     public static $search = [
         'id', 'name', 'email',
     ];
+
+    public function listOfConversationsDetail() {
+        $returnArray = [];
+        $allMessages = Message::where('receiver_id', $this->id)->get();
+        foreach ($allMessages as $message) {
+            $count = Message::where('sender_id', $message->sender_id)->count();
+            $returnArray[] = Text::make($message->sender_id, $count);
+        }
+        return $returnArray;
+    }
+
+    public $listOfConversationsDetail;
 
     /**
      * Get the fields displayed by the resource.
@@ -76,8 +94,36 @@ class User extends Resource
                     // Add other resources as necessary
                 ])
                 ->hideFromIndex(),
+
+            Text::make('Переписок', function() {
+                return $this->listOfConversationsIndex();
+            })->onlyOnIndex(),
+            
+            new Panel('Переписки', $this->conversationFields())
         ];
     }
+
+    protected function conversationFields()
+    {
+        $fields = [];
+        $allMessages = Message::where('receiver_id', $this->id)->get();
+        foreach ($allMessages as $message) {
+            $senderString = ($message->sender->name . ' (' . $message->sender->email . ')') ?? 'Unknown';
+            $count = Message::where('sender_id', $message->sender_id)->count();
+            $fields[] = Text::make($senderString, function() use ($count) {
+                return $count;
+            })->readonly()->onlyOnDetail();
+        }
+        return $fields;
+    }
+
+    public function listOfConversationsIndex() {
+        $allMessages = Message::where('receiver_id', $this->id)->get();
+        $uniqueConversations = $allMessages->unique('sender_id');
+        return $uniqueConversations->count();
+    }
+
+    
 
     /**
      * Get the cards available for the request.

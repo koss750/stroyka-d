@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Musonza\Chat\Traits\Messageable;
+use Carbon\Carbon;
+use App\Models\Supplier;
+
 
 class User extends Authenticatable
 {
@@ -23,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'last_seen',
     ];
 
     /**
@@ -46,7 +50,31 @@ class User extends Authenticatable
         'superadmin' => 'boolean',
         'permissions' => 'array',
     ];
-    
+
+    public function setLastSeenAttribute($value)
+    {
+        $this->attributes['last_seen'] = Carbon::now();
+    }
+
+    public function getLastSeenAttribute($value)
+    {
+        $lastSeen = Carbon::parse($value)->format('Y-m-d H:i:s');
+        if (Carbon::now()->diffInMinutes($lastSeen) < 5) {
+            return 'Online';
+        } else if (Carbon::now()->diffInMinutes($lastSeen) < 60) {
+            return 'Был в сети ' . Carbon::now()->diffInMinutes($lastSeen) . ' минут назад';
+        } else if (Carbon::now()->diffInHours($lastSeen) < 24) {
+            return 'Был в сети ' . Carbon::now()->diffInHours($lastSeen) . ' часов назад';
+        } else {
+            return 'Был в сети ' . Carbon::now()->diffInDays($lastSeen) . ' дней назад';
+        }
+    }
+
+    public function supplier()
+    {
+        return $this->hasOne(Supplier::class);
+    }
+
     // Example method to check if user has access to a Nova resource
     public function hasAccessToNovaResource($resource)
     {

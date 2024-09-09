@@ -22,15 +22,18 @@ class Project extends Model
         'design_id',
         'selected_configuration',
         'filepath',
+        'order_type',
+        'human_ref',
+        'payment_provider',
+        'configuration_descriptions',
         'title',
-        'size',
         'status',
     ];
 
     protected $casts = [
         'selected_configuration' => 'array',
+        'configuration_descriptions' => 'array',
         'payment_amount' => 'decimal:2',
-        'size' => 'integer',
     ];
 
     public function user()
@@ -69,5 +72,9 @@ class Project extends Model
     public function getFormattedUpdatedAtAttribute()
     {
         return $this->updated_at->format('Y-m-d H:i:s');
+    }
+    public function executor()
+    {
+        return $this->belongsTo(User::class, 'executor_id');
     }
 }

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use App\Models\Project;
+use App\Models\Region;
 
 
 class SupplierController extends Controller
@@ -68,6 +70,13 @@ class SupplierController extends Controller
         return response()->json(['success' => true, 'message' => 'Регистрация успешно отправлена']);
     }
 
+    // Contacts
+    public function indexSuppliers(){
+        $page_title = 'Исполнители';
+        $page_description = 'Наши партнёры';
+		return view('suppliers-index', compact('page_title', 'page_description'));
+    }
+
     public function checkCompany(Request $request)
     {
         $inn = $request->input('inn');
@@ -99,5 +108,45 @@ class SupplierController extends Controller
                 'success' => false
             ]);
         }
+    }
+
+    public function getExecutors(Request $request)
+    {
+        $region_id = $request->input('region_id');
+        
+        $executors = User::role('executor')
+            ->whereHas('supplier', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->with(['companyProfile', 'supplier'])
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'company_name' => $user->supplier->company_name,
+                    'image' => $user->companyProfile->image ?? null,
+                ];
+            });
+
+        return response()->json($executors);
+    }
+
+    public function getAvailableExecutors($projectId)
+    {
+        $project = Project::find($projectId);
+        $userId = $project->user_id;
+        $userRegion = User::find($userId)->regions;
+        $executors = Supplier::where('region_code', 'like', '%' . $userRegion . '%')->where('status', 'approved')->get();
+        return response()->json($executors);
+    }
+
+    public function assignExecutorModal()
+    {
+        $user = auth()->user();
+        $defaultRegion = Region::find($user->region_id);
+        $regions = Region::all();
+
+        return view('modals.assign-executor', compact('defaultRegion', 'regions'));
     }
 }

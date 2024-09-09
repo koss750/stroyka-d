@@ -8,32 +8,36 @@
                     </a>
                 </div>
             </div>
-            <div class="col-5 col-sm-3 search-container">
-                <div class="searchBar">
-                    <input type="text" id="search-input" placeholder="Поиск по сайту..." autocomplete="off">
-                    <div id="autocomplete-results" class="autocomplete-results"></div>
-                </div>
-            </div>
-            <div class="col-3 col-sm-7">
-                <div class="headerMenu">
-                    <ul class="nav">
-                        @guest
-                            <li><a href="#" class="signup-btn-individual">Физические лица</a></li>
-                            <li><a href="#" class="signup-btn-legal">Юридические лица</a></li>
-                            <li><a href="#" class="login-btn">Войти</a></li>
-                        @endguest
-                        @auth
-                            <li class="dropdown">
-                                <a href="/orders" class="dropdown-toggle">Личный Кабинет</a>
-                                <div class="dropdown-menu">
-                                    <a href="#" class="dropdown-item logout-btn">Выйти</a>
-                                </div>
-                            </li>
-                        @endauth
-                    </ul>
-                </div>
-                <div class="hamburger-menu">
-                    <i class="fas fa-bars"></i>
+            <div class="col-8 col-sm-10">
+                <div class="row align-items-center">
+                    <div class="col-12 col-sm-5 search-container">
+                        <div class="searchBar">
+                            <input type="text" id="search-input" placeholder="Поиск по сайту..." autocomplete="off">
+                            <div id="autocomplete-results" class="autocomplete-results"></div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-7">
+                        <div class="headerMenu">
+                            <ul class="nav">
+                                @guest
+                                    <li><a href="#" class="signup-btn-individual">Физические лица</a></li>
+                                    <li><a href="#" class="signup-btn-legal">Юридические лица</a></li>
+                                    <li><a href="#" class="login-btn">Войти</a></li>
+                                @endguest
+                                @auth
+                                    <li class="dropdown">
+                                        <a href="/my-account" class="dropdown-toggle">Личный Кабинет</a>
+                                        <div class="dropdown-menu">
+                                            <a href="#" class="dropdown-item logout-btn">Выйти</a>
+                                        </div>
+                                    </li>
+                                @endauth
+                            </ul>
+                        </div>
+                        <div class="hamburger-menu">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -49,11 +53,15 @@
             @csrf
             <div class="form-group">
                 <label for="login-email">Email</label>
-                <input type="email" class="form-control" id="login-email" name="email" required>
+                <input type="email" class="form-control no-text-transform" id="login-email" name="email" required>
             </div>
             <div class="form-group">
                 <label for="login-password">Пароль</label>
                 <input type="password" class="form-control" id="login-password" name="password" required>
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input custom-checkbox" id="remember-me" name="remember">
+                <label class="form-check-label" for="remember-me">Запомнить меня</label>
             </div>
             <button type="submit" class="btn btn-primary btn-block">Войти</button>
         </form>
@@ -64,7 +72,7 @@
 <div id="signup-popup-individual" class="popup">
     <div class="popup-content">
         <span class="close">&times;</span>
-        <h2 class="mb-4">Регист��ация физического лица</h2>
+        <h2 class="mb-4">Регистрация физического лица</h2>
         <form id="signup-form-individual">
             <div class="form-group">
                 <label for="individual-name">Имя</label>
@@ -72,7 +80,7 @@
             </div>
             <div class="form-group">
                 <label for="individual-email">E-mail</label>
-                <input type="email" class="form-control" id="individual-email" name="email" required>
+                <input type="email" class="form-control no-text-transform" id="individual-email" name="email" required>
             </div>
             <div class="form-group">
                 <label for="individual-password">Пароль</label>
@@ -130,11 +138,11 @@
                 </div>
                 <div class="form-group">
                     <label for="physical_address">ФИЗ. Адрес</label>
-                    <input type="text" class="form-control" id="physical_address" name="physical_address" required>
+                    <input type="text" class="form-control no-text-transform" id="physical_address" name="physical_address" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Адрес эл. Почты</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control no-text-transform" id="email" name="email" required>
                 </div>
                 <div class="form-group">
                     <label for="phone">Номер телефона организации</label>
@@ -152,8 +160,17 @@
                     <input type="text" class="form-control" id="contact_name" name="contact_name" required>
                 </div>
                 <div class="form-group">
-                    <label for="region-input">Регионы</label>
+                <label for="legal-password">Пароль</label>
+                <input type="password" class="form-control" id="legal-password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="legal-password-confirmation">Подтвердите пароль</label>
+                <input type="password" class="form-control" id="legal-password-confirmation" name="password_confirmation" required>
+            </div>
+                <div class="form-group">
+                    <label for="region-input">Поиск регионов</label>
                     <input type="text" class="form-control" id="region-input" placeholder="Введите регионы предоставления ваших услуг">
+                    <div id="region-suggestions" class="region-suggestions"></div>
                     <div id="selected-regions" class="mt-2"></div>
                     <input type="hidden" id="region-codes" name="region_codes">
                 </div>
@@ -168,68 +185,139 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         $('.assign-executor').on('click', function() {
-            var projectId = $(this).data('project-id');
-            $('#disclaimerModal').modal('show');
-            $('.modal-backdrop').css('z-index', 0);
-            $('#acceptDisclaimer').off('click').on('click', function() {
-                $('#disclaimerModal').modal('hide');
-                loadExecutors(projectId);
-            });
+        var projectId = $(this).data('project-id');
+        $('#disclaimerModal').modal('show');
+
+        $('#acceptDisclaimer').on('click', function() {
+            $('#disclaimerModal').modal('hide');
+            loadExecutors(projectId);
+            loadRegions();
         });
+    });
 
-        function loadExecutors(projectId) {
-            fetch(`/api/projects/${projectId}/available-executors`)
-                .then(response => response.json())
-                .then(data => {
-                    const executorList = document.getElementById('executorList');
-                    executorList.innerHTML = '';
-                    
-                    data.executors.forEach(executor => {
-                        const li = document.createElement('li');
-                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                        li.innerHTML = `
-                            ${executor.name}
-                            <button class="btn btn-sm btn-primary select-executor" data-executor-id="${executor.id}" data-project-id="${projectId}">Выбрать</button>
-                        `;
-                        executorList.appendChild(li);
-                    });
+    // Ensure the close button works
+    $('.modal .close, .modal .btn-secondary').on('click', function() {
+        $(this).closest('.modal').modal('hide');
+    });
 
-                    const executorModal = new bootstrap.Modal(document.getElementById('executorModal'));
-                    executorModal.show();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Ошибка при загрузке списка исполнителей');
+    let currentProjectId;
+    let selectedExecutorId;
+
+    
+
+    function loadRegions() {
+        $.ajax({
+            url: '/api/regions',
+            method: 'GET',
+            success: function(regions) {
+                const regionSelect = $('#region-select');
+                regionSelect.empty();
+                regions.forEach(function(region) {
+                    regionSelect.append($('<option>', {
+                        value: region.id,
+                        text: region.name
+                    }));
                 });
-        }
-
-        document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('select-executor')) {
-                const executorId = event.target.getAttribute('data-executor-id');
-                const projectId = event.target.getAttribute('data-project-id');
-                
-                fetch(`/api/projects/${projectId}/assign-executors`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ executor_ids: [executorId] })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    const executorModal = bootstrap.Modal.getInstance(document.getElementById('executorModal'));
-                    executorModal.hide();
-                    // Optionally, refresh the page or update the UI
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Ошибка при назначении исполителя');
-                });
+                // Set default region (user's region) if authenticated
+                @auth
+                    regionSelect.val('{{ auth()->user()->region_id }}');
+                @endauth
+                $('#executorModal').modal('show');
+            },
+            error: function() {
+                alert('Ошибка при загрузке регионов');
             }
         });
+    }
+
+    $('#confirm-region').on('click', function() {
+        loadExecutors(currentProjectId);
+    });
+
+    function loadExecutors(projectId) {
+        $.ajax({
+            url: '/api/projects/' + projectId + '/available-executors',
+            method: 'GET',
+            success: function(response) {
+                if (Array.isArray(response) && response.length > 0) {
+                    var executorHtml = '';
+                    response.forEach(function(executor) {
+                        executorHtml += `
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card contact-bx">
+                                    <div class="card-body">
+                                        <div class="media">
+                                            <div class="image-bx me-3">
+                                                <img src="${executor.profile_picture_url || '{{ asset('images/users/default.jpg') }}'}" alt="${executor.company_name}" class="rounded-circle" width="90">
+                                                <span class="active"></span>
+                                            </div>
+                                            <div class="media-body">
+                                                <h6 class="fs-18 font-w600 mb-0">${executor.company_name}</h6>
+                                                <p class="fs-14">${executor.type_of_organisation || 'N/A'}</p>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-primary select-executor" data-executor-id="${executor.id}" data-project-id="${projectId}">Запросить</button>
+                                                    <a href="/app-profile/${executor.id}" class="btn btn-sm btn-outline-primary" target="_blank">Профиль</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    $('#executorList').html(executorHtml);
+                } else {
+                    $('#executorList').html('<p>Нет доступных исполнителей в выбранном регионе</p>');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('AJAX error:', textStatus, errorThrown);
+                alert('Ошибка при загрузке списка исполнителей: ' + textStatus);
+            }
+        });
+    }
+
+    $(document).on('click', '.select-executor', function() {
+        selectedExecutorId = $(this).data('executor-id');
+        const executorName = $(this).closest('.card').find('.font-w600').text();
+        const executorImg = $(this).closest('.card').find('img').attr('src');
+
+        $('#executorList').hide();
+        $('#selected-executor').show();
+        $('#selected-executor-img').attr('src', executorImg);
+        $('#selected-executor-name').text(executorName);
+    });
+
+    $('#send-message').on('click', function() {
+        const message = $('#message-to-executor').val();
+        if (!message) {
+            alert('Пожалуйста, введите сообщение для исполнителя');
+            return;
+        }
+
+        $.ajax({
+            url: '/api/projects/' + currentProjectId + '/contact-executor',
+            method: 'POST',
+            data: {
+                executor_id: selectedExecutorId,
+                message: message
+            },
+            success: function(response) {
+                $('#executorModal').modal('hide');
+                alert('Сообщение отправлено исполнителю');
+                updateProjectExecutor(currentProjectId, selectedExecutorId, response.executor_company_name);
+            },
+            error: function() {
+                alert('Ошибка при отправке сообщения исполнителю');
+            }
+        });
+    });
+
+    function updateProjectExecutor(projectId, executorId, executorCompanyName) {
+        const assignButton = $(`.assign-executor[data-project-id="${projectId}"]`);
+        assignButton.replaceWith(`<span class="selected-executor">${executorCompanyName}</span>`);
+    }
+        
          const hamburger = document.querySelector('.hamburger-menu');
          const mobileMenu = document.createElement('div');
          mobileMenu.className = 'mobile-menu';
@@ -238,9 +326,11 @@
                  @guest
                     <li><a href="#" class="signup-btn-individual">Физические лица</a></li>
                     <li><a href="#" class="signup-btn-legal">Юридические лица</a></li>
+                    <li><a href="#" class="login-btn">Войти</a></li>
                 @endguest
                 @auth
                     <li><a href="/orders">Личный Кабинет</a></li>
+                    <a href="#" class="dropdown-item logout-btn">Выйти</a>
                 @endauth
              </ul>
          `;
@@ -293,8 +383,9 @@
              }
          });
 
-         // Initialize Typeahead for region selection
+         // Region selection functionality
          const regionInput = document.getElementById('region-input');
+         const regionSuggestions = document.getElementById('region-suggestions');
          const selectedRegionsContainer = document.getElementById('selected-regions');
          const regionCodesInput = document.getElementById('region-codes');
          let regions = [];
@@ -305,50 +396,225 @@
              .then(response => response.json())
              .then(data => {
                  regions = data;
-                 initTypeahead();
-             });
+                 displayAllRegions();
+             })
+             .catch(error => console.error('Error fetching regions:', error));
 
-         function initTypeahead() {
-             $(regionInput).typeahead({
-                 source: regions,
-                 display: 'name',
-                 items: 'all',
-                 afterSelect: function(item) {
-                     addRegion(item);
-                     this.$element[0].value = '';
+         regionInput.addEventListener('input', function() {
+             const query = this.value.toLowerCase();
+             const filteredRegions = regions.filter(region => 
+                 region.name.toLowerCase().includes(query) ||
+                 region.code.toLowerCase().includes(query)
+             );
+             displayAllRegions(filteredRegions);
+         });
+
+         function displayAllRegions(regionsToDisplay = regions) {
+             regionSuggestions.innerHTML = '';
+             regionsToDisplay.forEach(region => {
+                 const div = document.createElement('div');
+                 div.className = 'region-option';
+                 
+                 const checkbox = document.createElement('input');
+                 checkbox.type = 'checkbox';
+                 checkbox.id = `region-${region.code}`;
+                 checkbox.checked = selectedRegions.has(region.code);
+                 checkbox.addEventListener('change', () => toggleRegion(region));
+
+                 const label = document.createElement('label');
+                 label.htmlFor = `region-${region.code}`;
+                 label.textContent = `${region.name} (${region.code})`;
+
+                 div.appendChild(checkbox);
+                 div.appendChild(label);
+                 regionSuggestions.appendChild(div);
+             });
+         }
+
+         function toggleRegion(region) {
+             if (selectedRegions.has(region.code)) {
+                 selectedRegions.delete(region.code);
+             } else {
+                 selectedRegions.add(region.code);
+             }
+             updateSelectedRegionsDisplay();
+             updateRegionCodes();
+         }
+
+         function updateSelectedRegionsDisplay() {
+             selectedRegionsContainer.innerHTML = '';
+             selectedRegions.forEach(code => {
+                 const region = regions.find(r => r.code === code);
+                 if (region) {
+                     const badge = document.createElement('span');
+                     badge.className = 'badge badge-primary mr-2 mb-2';
+                     badge.style.color = 'black';
+                     badge.textContent = `${region.name} (${region.code})`;
+                     
+                     const removeBtn = document.createElement('span');
+                     removeBtn.className = 'ml-1 cursor-pointer';
+                     removeBtn.innerHTML = '&times;';
+                     removeBtn.onclick = () => {
+                         selectedRegions.delete(code);
+                         updateSelectedRegionsDisplay();
+                         updateRegionCodes();
+                         displayAllRegions();
+                     };
+                     
+                     badge.appendChild(removeBtn);
+                     selectedRegionsContainer.appendChild(badge);
                  }
              });
-         }
-
-         function addRegion(region) {
-             if (!selectedRegions.has(region.code)) {
-                 selectedRegions.add(region.code);
-                 const badge = document.createElement('span');
-                 badge.className = 'badge badge-primary mr-2 mb-2';
-                 badge.style.color = 'black';
-                 badge.textContent = `${region.name} (${region.code})`;
-                 
-                 const removeBtn = document.createElement('span');
-                 removeBtn.className = 'ml-1 cursor-pointer';
-                 removeBtn.innerHTML = '&times;';
-                 removeBtn.onclick = () => removeRegion(region.code, badge);
-                 
-                 badge.appendChild(removeBtn);
-                 selectedRegionsContainer.appendChild(badge);
-                 updateRegionCodes();
-             }
-         }
-
-         function removeRegion(code, element) {
-             selectedRegions.delete(code);
-             element.remove();
-             updateRegionCodes();
          }
 
          function updateRegionCodes() {
              regionCodesInput.value = JSON.stringify(Array.from(selectedRegions));
          }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const individualForm = document.getElementById('signup-form-individual');
+            const legalForm = document.getElementById('signup-form-legal');
+
+            if (individualForm) {
+                individualForm.addEventListener('submit', handleSubmit);
+            }
+
+            if (legalForm) {
+                legalForm.addEventListener('submit', handleLegalSubmit);
+            }
+
+            function handleSubmit(e) {
+                e.preventDefault();
+                
+                // Disable the submit button to prevent double submission
+                const submitButton = this.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+
+                const formData = new FormData(this);
+                const url = this.id === 'signup-form-individual' ? '/api/register' : '/api/register-legal-entity';
+                
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        this.reset(); // Reset the form
+                        this.closest('.popup').style.display = 'none'; // Close the popup
+                    } else {
+                        alert('Ошибка при регистрации: ' + (data.message || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при отправке формы');
+                })
+                .finally(() => {
+                    // Re-enable the submit button
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                    }
+                });
+            }
+
+            function handleLegalSubmit(e) {
+                e.preventDefault();
+                console.log('Form submitted');
+                
+                const formData = new FormData(this);
+                console.log('FormData created', Object.fromEntries(formData));
+                
+                fetch('/api/register-legal-entity', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => {
+                    console.log('Response received', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data received', data);
+                    if (data.success) {
+                        alert(data.message);
+                        this.reset(); // Reset the form
+                        selectedRegions.clear(); // Clear selected regions
+                        updateSelectedRegionsDisplay(); // Update the display
+                        this.closest('.popup').style.display = 'none'; // Close the popup
+                    } else {
+                        alert('Ошибка при регистрации: ' + (data.message || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при отправке формы');
+                });
+            }
+        });
+    });
+</script>
+
+<style>
+    @media (max-width: 575px) {
+        .headerLogo {
+            text-align: left;
+        }
+        .search-container {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .headerMenu {
+            text-align: right;
+        }
+        .headerMenu .nav {
+            justify-content: flex-end;
+        }
+        .headerMenu .nav li {
+            margin-left: 10px;
+        }
+    }
+
+    @media (min-width: 501px) {
+        .hamburger-menu {
+            display: none;
+        }
+    }
+
+    .region-suggestions {
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        background-color: white;
+        width: 100%;
+    }
+
+    .region-option {
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .region-option:hover {
+        background-color: #f0f0f0;
+    }
+
+    .region-option input[type="checkbox"] {
+        margin-right: 10px;
+    }
+</style>
+<script>
+        
+        let selectedRegions = new Set();
+
+         
          // Handle form submission
          document.getElementById('signup-form-legal').addEventListener('submit', function(e) {
              e.preventDefault();
@@ -379,7 +645,7 @@
              .then(response => response.json())
              .then(data => {
                  if (data.success) {
-                     alert('Регистрация успешна!');
+                     alert(data.message);
                      document.getElementById('signup-popup-legal').style.display = 'none';
                  } else {
                      alert('Ошибка при регистрации: ' + data.message);
@@ -467,49 +733,41 @@
                  }
              })
              .catch(error => {
-                 console.error('Error:', error);
-                 alert('Произошла ошибка при входе');
+                window.location.reload();
              });
          });
 
          // Logout functionality
-         const logoutBtn = document.querySelector('.logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Try to get the CSRF token
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                
-                // Prepare headers
-                const headers = {
-                    'Content-Type': 'application/json',
-                };
-                
-                // Add CSRF token if available
-                if (csrfToken) {
-                    headers['X-CSRF-TOKEN'] = csrfToken;
-                }
-
-                fetch('/logout', {
-                    method: 'POST',
-                    headers: headers,
-                })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        throw new Error('Logout failed');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Ошибка при выходе из системы');
-                });
-            });
-        }
 
          $(document).ready(function() {
+
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    fetch('/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            throw new Error('Logout failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Ошибка при выходе из системы');
+                    });
+                });
+            }
+
              const searchInput = $('#search-input');
              const autocompleteResults = $('#autocomplete-results');
 
@@ -594,7 +852,7 @@
              .then(response => response.json())
              .then(data => {
                  if (data.success) {
-                     alert('Регистрация успешна!');
+                     alert(data.message);
                      document.getElementById('signup-popup-individual').style.display = 'none';
                  } else {
                      alert('Ошибка при регистрации: ' + data.message);
@@ -730,11 +988,13 @@
          }
 
          // Close suggestions when clicking outside
+         /*
          document.addEventListener('click', function(event) {
              if (!companyNameInput.contains(event.target) && !companySuggestions.contains(event.target)) {
                  companySuggestions.style.display = 'none';
              }
          });
+         */
 
         const innInput = document.getElementById('inn');
         const checkInnButton = document.getElementById('check-inn');
@@ -792,8 +1052,7 @@
             const form = document.getElementById('signup-form-legal');
             const inputs = form.querySelectorAll('input:not(#inn)');
             inputs.forEach(input => input.value = '');
-            selectedRegions.clear();
-            selectedRegionsContainer.innerHTML = '';
+            
             updateRegionCodes();
         }
 
@@ -819,7 +1078,7 @@
                     }
                     populateFields(data);
                 } else {
-                    alert('Компания не найдена. Пожалуйста, пр��ерьте ИНН и попробуйте снова.');
+                    alert('Компания не найдена. Пожалуйста, проверьте ИНН и опробуйте снова.');
                 }
             })
             .catch(error => {
@@ -838,5 +1097,4 @@
             const ogrnDate = new Date(parseInt(data.ogrn_date));
             document.getElementById('company_age').value = ogrnDate.toLocaleDateString('ru-RU');
         }
-     });
 </script>

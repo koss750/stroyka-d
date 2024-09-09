@@ -2,6 +2,14 @@
 <script>
 
 function updateSelectedOption(element, optionType, parent, grandparent=0, subsuboptionRef=0) {
+    
+    /* REDIS count update
+    var redisKey = 'invoice_views:' + element.getAttribute('data-ref');
+    fetch('/increment-redis-counter?key=' + redisKey, {
+        method: 'GET'
+    }).catch(error => console.error('Error incrementing Redis counter:', error));
+    */
+
     var currentSelection = document.getElementById(optionType + '_' + selectedOptionRefs[optionType]);
     console.log(currentSelection, element, optionType, parent, grandparent, subsuboptionRef);
     if (currentSelection) {
@@ -45,8 +53,8 @@ function calculateTotalPrice() {
     const formattedTotal = new Intl.NumberFormat('ru-RU', {
         style: 'currency',
         currency: 'RUB',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     }).format(total);
     
     document.getElementById('totalPrice').textContent = formattedTotal;

@@ -6,7 +6,10 @@ use App\Models\Design;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\SupplierController;
-
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\MessageController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,3 +33,13 @@ Route::get('/regions/search', [RegionController::class, 'searchRegions']);
 Route::get('/regions', [RegionController::class, 'getAllRegions']);
 Route::post('/register-legal-entity', [SupplierController::class, 'registerCompany']);
 Route::post('/check-company', [SupplierController::class, 'checkCompany']);
+Route::post('register-individual', [RegisterController::class, 'create']);
+Route::post('register-legal-entity', [RegisterController::class, 'registerLegalEntity']);
+Route::post('email/verify/{id}', [VerificationController::class, 'verifyEmail'])
+    ->name('verification.verify');
+Route::post('email/resend', [VerificationController::class, 'sendVerificationEmail'])
+    ->name('verification.resend');
+    Route::get('email/verify/{id}', [VerificationController::class, 'verifyEmail'])
+    ->name('verification.verify');
+    Route::get('/projects/{projectId}/available-executors', [SupplierController::class, 'getAvailableExecutors']);
+    Route::post('/projects/{projectId}/contact-executor', [MessageController::class, 'contactExecutor']);

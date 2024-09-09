@@ -24,6 +24,7 @@ use App\Nova\Contractor;
 use App\Nova\User;
 use App\Nova\ExcelSheet as ExcelResource;
 use App\Nova\Order;
+use App\Nova\Setting;
 //use App\Nova\DynamicPageCard;
 use App\Nova\Cards\RedisKeysCard;
 use Illuminate\Http\Request;
@@ -46,14 +47,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 //MenuSection::dashboard(Main::class)->icon('chart-bar'),
 
                 MenuSection::make(Translator::translate('inventory_menu'), [
-           //         MenuItem::resource(DynamicPageCard::class),
                     MenuItem::resource(NovaDesign::class),
-                    //MenuItem::resource(AssociatedCost::class),
                     MenuItem::resource(FormField::class),
                     MenuItem::resource(DesignNonAdmin::class),
-                    
-                   // MenuItem::resource(DesignCache::class),
                     MenuItem::resource(DesignSeo::class),
+                    MenuItem::resource(Setting::class),
                 ])->icon('library')->collapsable(),
 
                 MenuSection::make(Translator::translate('orders_menu'), [

@@ -18,7 +18,10 @@ use App\Models\ProjectPrice;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Project;
 use App\Models\DesignSeo;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
+use App\Models\Region;
+
 
 
 class DesignController extends Controller
@@ -377,11 +380,16 @@ $html .= '<thead class="thead-dark">';
 
     public function getDemoDetail($id = 220, Request $request)
 {
+    $currentSetting = Setting::where('label', 'display_prices')->first()->value;
+    $toolTipLabel = Setting::where('label', 'tooltip_label_'.$currentSetting)->first()->value;
+    // Increment view count in Redis
+    $redisKey = "design_views:{$id}";
+    Redis::incr($redisKey);
     $design = Design::where('id', $id)->firstOrFail();
     $design->rating = 5;
     $design->etiketka = json_decode($design->details, true)["price"];
-    $design->etiketka = round($design->etiketka, -3);
-    $design->etiketka = number_format($design->etiketka, 0, ',', ' ');
+    $design->etiketka = round($design->etiketka, 2);
+    $design->etiketka = number_format($design->etiketka, 2, '.', ' ');
     $design->reviewCount = 10;
     $design = $this->transformDesign($design);
 
@@ -409,17 +417,19 @@ $html .= '<thead class="thead-dark">';
     $page_description = Translator::translate("listing_page_description");
     $jpgImageUrls = $design->watermarkImageUrls();
     $thumbImageUrls = $design->thumbImageUrls();
-    return view('alternative_detail', compact('page_title', 'page_description', 'design', 'nestedData', 'user', 'jpgImageUrls', 'thumbImageUrls'));
+    return view('alternative_detail', compact('page_title', 'page_description', 'design', 'nestedData', 'user', 'jpgImageUrls', 'thumbImageUrls', 'toolTipLabel'));
 }
 
 private function getPriceFromDb($id, $invoice_type_id)
 {
     try {
+        $setting = Setting::where('label', 'display_prices')->first();
+        $displayPrices = $setting->value;
         $invoice_type_id = InvoiceType::where('label', $invoice_type_id)->first()->id;
         $price = ProjectPrice::where('design_id', $id)->where('invoice_type_id', $invoice_type_id)->first();
         try {
             $price = json_decode($price->price, true);
-            return $price["material"];
+            return $price[$displayPrices];
         } catch (\Exception $e) {
             Log::error("Unable to find the price for design $id and invoice type $invoice_type_id");
             return 999;
@@ -430,67 +440,67 @@ private function getPriceFromDb($id, $invoice_type_id)
     }
 }
 
-private function buildNestedOptions($options, $allData, $id, $seasonal = false)
-{
-    $options = $options->filter(function ($option) use ($seasonal) {
-        return $option->site_sub_label !== 'FALSE' && ($option->seasonal != 1);
-    })->sortBy('unique_order');
+    private function buildNestedOptions($options, $allData, $id, $seasonal = false)
+    {
+        $options = $options->filter(function ($option) use ($seasonal) {
+            return $option->site_sub_label !== 'FALSE' && ($option->seasonal != 1);
+        })->sortBy('unique_order');
 
-    foreach ($options as $option) {
-        if ($option->site_level4_label === 'FALSE') {
-            $suboptions = $allData->where('parent', $option->ref);
-            $option->suboptions = $this->buildNestedOptions($suboptions, $allData, $id, $seasonal);
-            foreach ($option->suboptions as $suboption) {
-                $suboption->parent_ref = $option->ref;
-            }
-        } else {
-            /*
-            //get price from Redis
-            $redisKey = "stroyka_$id" . "_" . $option->label;
-            $prices = json_decode(Redis::get($redisKey), true);
-            try {
-                $option->data_price = $prices["material"];
-            } catch (\Exception $e) {
+        foreach ($options as $option) {
+            if ($option->site_level4_label === 'FALSE') {
+                $suboptions = $allData->where('parent', $option->ref);
+                $option->suboptions = $this->buildNestedOptions($suboptions, $allData, $id, $seasonal);
+                foreach ($option->suboptions as $suboption) {
+                    $suboption->parent_ref = $option->ref;
+                }
+            } else {
+                /*
+                //get price from Redis
+                $redisKey = "stroyka_$id" . "_" . $option->label;
+                $prices = json_decode(Redis::get($redisKey), true);
+                try {
+                    $option->data_price = $prices["material"];
+                } catch (\Exception $e) {
+                    $option->data_price = $this->getPriceFromDb($id, $option->label);
+                }
+                */
                 $option->data_price = $this->getPriceFromDb($id, $option->label);
+                $option->suboptions = collect($option->suboptions)
+                    ->keyBy('unique_btn_group')
+                    ->sortBy('unique_order');
             }
-            */
-            $option->data_price = $this->getPriceFromDb($id, $option->label);
-            $option->suboptions = collect($option->suboptions)
-                ->keyBy('unique_btn_group')
-                ->sortBy('unique_order');
         }
-    }
 
-    return $options;
-}
+        return $options;
+    }
 
     
     public function getDemoOrder(Request $request)
     {
         $user = Auth::user();
-        $ip = $request->ip();
 
-        $projects = Project::where(function($query) use ($user, $ip) {
-                        $query->where('ip_address', $ip)
-                              ->orWhere('user_id', $user ? $user->id : null);
+        $projects = Project::where(function($query) use ($user) {
+                        $query->where('user_id', $user ? $user->id : null);
                     })
-                    ->with('design')
+                    ->with(['design', 'executor'])
                     ->orderBy('created_at', 'desc')
                     ->get()
                     ->map(function ($project) {
                         return $this->transformProject($project);
                     });
 
+        $regions = Region::all();
+        $userRegion = $user ? Region::find($user->region_id) : null;
+
         $page_title = "Заказы";
         $page_description = Translator::translate("listing_page_description");
-        return view('orders', compact('page_title', 'page_description', 'projects'));
+        return view('orders', compact('page_title', 'page_description', 'projects', 'regions', 'userRegion'));
     }
     
     private function transformProject($project)
     {
         $filepath = "http://tmp.стройка.com/storage";
         $original = $project->filepath;
-        $project->filepath = str_replace("/var/www/templates/storage/app/public", $filepath, $project->filepath);
         $project->title = Design::where('id', $project->design_id)->first()->title;
         return [
             'id' => $project->id,
@@ -501,6 +511,11 @@ private function buildNestedOptions($options, $allData, $id, $seasonal = false)
             'payment_amount' => $project->payment_amount,
             'filepath' => $project->filepath,
             'design' => $project->design ? $this->transformDesign($project->design) : null,
+            'executor' => $project->executor ? [
+                'id' => $project->executor->id,
+                'name' => $project->executor->name,
+                'company_name' => $project->executor->supplier->company_name ?? null,
+            ] : null,
         ];
     }
     

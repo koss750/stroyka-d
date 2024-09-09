@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Region;
+
 
 class ProfileController extends Controller
 {
@@ -56,5 +59,40 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    public function settings()
+    {
+        $user = auth()->user();
+        $regions = Region::all();
+        return view('edit_profile', compact('user', 'regions'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'region_id' => 'required|exists:regions,id',
+            'email_notifications' => 'boolean',
+            'sms_notifications' => 'boolean',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->region_id = $request->region_id;
+        $user->email_notifications = $request->has('email_notifications');
+        $user->sms_notifications = $request->has('sms_notifications');
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return redirect()->route('edit_profile')->with('success', 'Настройки успешно обновлены');
     }
 }

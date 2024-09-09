@@ -85,11 +85,10 @@ class UIController extends Controller
 		return view('vora.dashboard.projects', compact('page_title', 'page_description'));
     }
 	
-    // Contacts
-    public function contacts(){
-        $page_title = 'Партнёры';
-        $page_description = 'Партнёры';
-		return view('vora.dashboard.contacts', compact('page_title', 'page_description'));
+    public function my_account(){
+        $page_title = 'Личный кабинет';
+        $page_description = 'Мой аккаунт';
+        return view('my_account', compact('page_title', 'page_description'));
     }
 
     // Kanban

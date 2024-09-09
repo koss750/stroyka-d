@@ -20,7 +20,11 @@ use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\Auth\LoginController;
-
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\ProjectController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,15 +52,15 @@ Route::get('/export', [DesignController::class, 'exportAll']);
 Route::get('/forex-day', [DailyAverageRateController::class, 'index']);
 Route::get('/browse/{category?}', [DesignController::class, 'getDemoDesigns']);
 Route::get('/project/{id}', [DesignController::class, 'getDemoDetail'])->middleware('counter');
-Route::get('/orders', [DesignController::class, 'getDemoOrder']);
+
 Route::get('/checkout', [DesignController::class, 'getDemoCheckout']);
 Route::get('/email-inbox', [UIController::class, 'email_inbox']);
-Route::get('/messages', [UIController::class, 'email_inbox']);
+//Route::get('/messages', [UIController::class, 'email_inbox']);
 Route::get('/email-compose', [UIController::class, 'email_compose']);
 Route::get('/email-read', [UIController::class, 'email_read']);
 Route::get('/page-login', [UIController::class, 'page_login']);
 Route::get('/app-profile', [UIController::class, 'app_profile']);
-Route::get('/contacts', [UIController::class, 'contacts']);
+Route::get('/suppliers', [SupplierController::class, 'indexSuppliers']);
 Route::get('/dashboard', [UIController::class, 'dashboard_1']);
 Route::get('/register', [UIController::class, 'page_register']);
 Route::get('/str', [UIController::class, 'str']);
@@ -114,29 +118,7 @@ Route::get('/keys/{designId}', function ($designId) {
     return $keys;
 });
 
-Route::post('/register-order', function (Request $request) {
-    $project = Project::create([
-        'user_id' => Auth::id(),
-        'ip_address' => $request->ip(),
-        'payment_reference' => 'test',
-        'payment_amount' => 200.00,
-        'design_id' => $request->input('designId'),
-        'selected_configuration' => json_decode($request->input('selectedOptions')),
-    ]);
-
-    // Send request to external API
-    $response = Http::post("http://tmp.mirsmet.com/process-order/{$project->id}");
-    $fileLink = $response->json('file_link');
-
-    // Update project with file link
-    $project->update(['filepath' => $fileLink]);
-
-    return response()->json([
-        'message' => 'Скачать смету',
-        'orderId' => $project->id,
-        'fileLink' => $fileLink
-    ]);
-});
+Route::post('/register-order-smeta', [ProjectController::class, 'createSmetaOrder']);
 
 Route::get('/search-designs', [DesignController::class, 'search']);
 
@@ -283,10 +265,33 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{userId}', [MessageController::class, 'getConversation'])->name('messages.conversation');
+    Route::post('/messages', [MessageController::class, 'sendMessage'])->name('messages.send');
+    Route::put('/messages/{messageId}/read', [MessageController::class, 'markAsRead'])->name('messages.markAsRead');
+    Route::put('/messages/{id}/unread', [MessageController::class, 'markAsUnread'])->name('messages.markAsUnread');
+    Route::put('/messages/{messageId}/archive', [MessageController::class, 'archiveMessage'])->name('messages.archive');
+    Route::get('/profile', [ProfileController::class, 'settings'])->name('user.settings');
+    Route::put('/profile', [ProfileController::class, 'updateSettings'])->name('user.updateSettings');
+    Route::get('/my-account', [UIController::class, 'my_account'])->name('my.account');
+    Route::get('/my-orders', [DesignController::class, 'getDemoOrder']);
 });
-
 Route::get('/get-foundation-file', [FulfillmentController::class, 'foundationFullFile']);
 Auth::routes();
 Route::get('/experimental-main', [TemplateController::class, 'experimentalMain'])->name('experimental-main');
 
+Route::get('/assign-executor', [SupplierController::class, 'assignExecutorModal'])->name('assign.executor');
+Route::get('/assign-executor-modal', [SupplierController::class, 'assignExecutorModal'])->name('assign.executor.modal');
+Route::get('/available-executors/{projectId}', [SupplierController::class, 'getAvailableExecutors']);
+Route::get('/get-executors', [SupplierController::class, 'getExecutors'])->name('get.executors');
+Route::get('/increment-redis-counter', function (Request $request) {
+    $currentViews = Redis::get($request->query('key')) ?? 0;
+    Redis::set($request->query('key'), $currentViews+1);
+    return response()->json(['success' => true]);
+});
+
+Route::get('/messages/{userId}/new', [MessageController::class, 'getNewMessages']);
+Route::post('/messages', [MessageController::class, 'store']);
+Route::get('/messages/{userId}', [MessageController::class, 'getConversation']);
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+

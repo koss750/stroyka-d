@@ -238,7 +238,7 @@ class Design extends Resource
             Panel::make('Главное', [
                 
                 Text::make(Translator::translate('title'), 'title')->rules('required')->sortable(),
-
+                Text::make('Просмотров', 'view_count')->onlyOnIndex(),
                 Boolean::make('Активен', 'active')->trueValue(true)->falseValue(false)->onlyOnForms(),
 
                 Text::make('Прогресс', 'progress')->onlyOnIndex()->displayUsing(function ($value) {

@@ -7,24 +7,39 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\Design;
 use Spatie\MediaLibrary\Conversions\Jobs\PerformConversionsJob;
 use Spatie\MediaLibrary\Conversions\ConversionCollection;
+use Carbon\Carbon;
 
 class ContinueMediaConversions extends Command
 {
-    protected $signature = 'media-library:generate {design_id? : The ID of the specific design to process}';
+    protected $signature = 'media-library:generate {design_id? : The ID of the specific design to process} {--recent : Process designs from the last 7 days}';
+
     protected $description = 'Generate conversions for all missing media attached to Design models';
+
+    public $timeout = 130; // 2 minutes
+
+    public function retryUntil()
+    {
+        return Carbon::now()->addMinutes(1);
+    }
 
     public function handle()
     {
         $designId = $this->argument('design_id');
+        $recentOnly = $this->option('recent');
+
+        $query = Design::where('active', 1);
 
         if ($designId) {
-            $designs = Design::where('id', $designId)->where('active', 1)->get();
-            if ($designs->isEmpty()) {
-                $this->error("No active design found with ID: {$designId}");
-                return;
-            }
-        } else {
-            $designs = Design::where('active', 1)->get();
+            $query->where('id', $designId);
+        } elseif ($recentOnly) {
+            $query->where('updated_at', '>=', Carbon::now()->subDays(2));
+        }
+
+        $designs = $query->get();
+
+        if ($designs->isEmpty()) {
+            $this->error($designId ? "No active design found with ID: {$designId}" : "No designs found matching the criteria");
+            return;
         }
 
         $this->info("Found {$designs->count()} active Design model(s)");
@@ -42,11 +57,12 @@ class ContinueMediaConversions extends Command
                     $this->warn("Skipping media id: {$image->id} - Original file not found");
                     continue;
                 }
-
-                if (file_exists($conversionPath) && is_dir($conversionPath) && count(scandir($conversionPath)) > 2) {
-                    $this->info("Skipping media id: {$image->id} - Conversions already exist");
-                    continue;
-                }
+        
+                // Remove this check to allow re-processing of existing conversions
+                // if (file_exists($conversionPath) && is_dir($conversionPath) && count(scandir($conversionPath)) > 2) {
+                //     $this->info("Skipping media id: {$image->id} - Conversions already exist");
+                //     continue;
+                // }
                 
                 $this->info("Queueing conversions for media id: {$image->id}");
                 

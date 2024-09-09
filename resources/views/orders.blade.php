@@ -43,11 +43,12 @@
 			</div>
 		</div>
 	</div>
-	<div class="page-titles">
-		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="/orders">Заказы</a></li>
-		</ol>
-	</div>
+	@include('partials.tab-navigator', ['items' => [
+        ['url' => '/my-orders', 'label' => 'Заказы'],
+        ['url' => '/suppliers', 'label' => 'Исполнители'],
+        ['url' => '/messages', 'label' => 'Мои переписки'],
+        ['url' => '/profile', 'label' => 'Мои данные'],
+    ]])
 	<div class="row">
 		<div class="col-lg-12">
 			<div class="card">
@@ -59,6 +60,9 @@
 							</a>
 						</div>
 						<!-- Add any other buttons or elements you want here -->
+					</div>
+                    <div class="dropdown-item text-warning">
+						<small><i class="fas fa-exclamation-triangle"></i> Файлы доступны для скачивания только в течение 30 дней с момента создания заказа.</small>
 					</div>
 					<div class="table-responsive">
 						@if($projects->isNotEmpty())
@@ -95,7 +99,7 @@
 									</td>
 									<td class="py-2 text-center">{{ $project['created_at'] }}</td>
 									<td class="py-2 text-center">
-										<button class="btn btn-sm btn-primary assign-executor" data-project-id="{{ $project['id'] }}">Выбрать исполнителя</button>
+										<button class="btn btn-sm btn-primary assign-executor" data-project-id="{{ $project['id'] }}">Подобрать</button>
 									</td>
 									<td class="py-2 text-center">{{ $project['payment_amount'] }} руб.</td>
 									<td class="py-2 text-center">
@@ -106,6 +110,8 @@
 											</div>
 											<div class="dropdown-menu">
 												<a class="dropdown-item" href="{{ $project['filepath'] }}" download>Скачать</a>
+												<div class="dropdown-divider"></div>
+												
 											</div>
 										@else
 											<i class="fas fa-spinner fa-spin"></i>
@@ -127,9 +133,38 @@
 		</div>
 	</div>
 </div>
-
+<!-- executors -->
+<div class="modal fade" id="executorModal" tabindex="-1" role="dialog" aria-labelledby="executorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="executorModalLabel">Выбрать исполнителя</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="region-select">Выберите регион строительства:</label>
+                    <select id="region-select" class="form-control">
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+                <button id="confirm-region" class="btn btn-primary mb-3">Подтвердить</button>
+                <div id="executorList" class="row"></div>
+                <div id="selected-executor" class="text-center" style="display: none;">
+                    <img id="selected-executor-img" src="" alt="Executor" class="rounded-circle mb-3" width="150">
+                    <h4 id="selected-executor-name"></h4>
+                    <textarea id="message-to-executor" class="form-control mb-3" rows="4" placeholder="Введите текст для вашего исполнителя"></textarea>
+                    <button id="send-message" class="btn btn-primary">Отправить сообщение</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- executors -->
 <!-- Disclaimer Modal -->
-<div class="modal fade" id="disclaimerModal" style="z-index: 1000;" tabindex="-1" role="dialog" aria-labelledby="disclaimerModalLabel" aria-hidden="true">
+<div class="modal fade" id="disclaimerModal" tabindex="-1" role="dialog" aria-labelledby="disclaimerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -149,124 +184,7 @@
     </div>
 </div>
 
-<!-- Executor Selection Modal -->
-<div class="modal fade" id="executorModal" tabindex="-1" role="dialog" aria-labelledby="executorModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="executorModalLabel">Выбрать исполнителя</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div id="executorList"></div>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    const bulkDeleteContainer = $('#bulkDeleteContainer');
-    const checkboxes = $('input[type="checkbox"]');
-    const checkAll = $('#checkAll');
-
-    function updateBulkDeleteVisibility() {
-        const checkedBoxes = checkboxes.filter(':checked').not('#checkAll');
-        bulkDeleteContainer.toggle(checkedBoxes.length > 0);
-    }
-
-    checkboxes.on('change', updateBulkDeleteVisibility);
-
-    checkAll.on('change', function() {
-        checkboxes.not(this).prop('checked', this.checked);
-        updateBulkDeleteVisibility();
-    });
-
-    $('#bulkDeleteBtn').on('click', function(e) {
-        e.preventDefault();
-        const selectedIds = checkboxes.filter(':checked').not('#checkAll').map(function() {
-            return $(this).attr('id').replace('customCheckBox', '');
-        }).get();
-        
-        if (selectedIds.length > 0) {
-            if (confirm('Вы точно хотите удалить выбранные заказы?')) {
-                // Implement your delete logic here
-                console.log('Deleting items:', selectedIds);
-                // After deletion, you might want to refresh the table or remove the deleted rows
-            }
-        }
-    });
-
-    $('.assign-executor').on('click', function() {
-        var projectId = $(this).data('project-id');
-        $('#disclaimerModal').modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-        $('#disclaimerModal').modal('show');
-
-        // Remove any existing click handlers
-        $('#acceptDisclaimer').off('click');
-        
-        $('#acceptDisclaimer').on('click', function() {
-            $('#disclaimerModal').modal('hide');
-            loadExecutors(projectId);
-        });
-    });
-
-    // Ensure the close button works
-    $('.modal .close, .modal .btn-secondary').on('click', function() {
-        $(this).closest('.modal').modal('hide');
-    });
-
-    function loadExecutors(projectId) {
-        $.ajax({
-            url: '/api/projects/' + projectId + '/available-executors',
-            method: 'GET',
-            success: function(response) {
-                var executorHtml = '<ul class="list-group">';
-                response.executors.forEach(function(executor) {
-                    executorHtml += '<li class="list-group-item d-flex justify-content-between align-items-center">' +
-                        executor.name +
-                        '<button class="btn btn-sm btn-primary select-executor" data-executor-id="' + executor.id + '" data-project-id="' + projectId + '">Выбрать</button>' +
-                        '</li>';
-                });
-                executorHtml += '</ul>';
-                $('#executorList').html(executorHtml);
-                $('#executorModal').modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                $('#executorModal').modal('show');
-            },
-            error: function() {
-                alert('Ошибка при загрузке списка исполнителей');
-            }
-        });
-    }
-
-    $(document).on('click', '.select-executor', function() {
-        var executorId = $(this).data('executor-id');
-        var projectId = $(this).data('project-id');
-        $.ajax({
-            url: '/api/projects/' + projectId + '/assign-executor',
-            method: 'POST',
-            data: { executor_id: executorId },
-            success: function(response) {
-                $('#executorModal').modal('hide');
-                alert('Исполнитель успешно назначен');
-                // Optionally, refresh the page or update the UI
-                location.reload();
-            },
-            error: function() {
-                alert('Ошибка при назначении исполнителя');
-            }
-        });
-    });
-});
-</script>
 @endpush

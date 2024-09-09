@@ -28,7 +28,7 @@ class GenerateSEO extends Command
             $this->generateSEO($design);
             $this->info("SEO content generated for design {$designId}.");
         } else {
-            $designs = Design::all();
+            $designs = Design::where('active', 1)->get();
             $count = $designs->count();
             $this->info("Generating SEO content for {$count} designs...");
 
@@ -52,7 +52,7 @@ class GenerateSEO extends Command
         $url = 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion';
 
         $price = json_decode($design->details);
-        $price = $price->price;
+        $price = $price->price->material;
         if ($price == "999") {
             $price = "unavailable";
         }
@@ -67,7 +67,7 @@ class GenerateSEO extends Command
             'messages' => [
                 [
                     'role' => 'system',
-                    'text' => 'You are an SEO expert. Generate SEO title and description for the given building project in Russian. Give me your response as a json with 2 keys "title" and "description". Make sure the title includes what if first letter of title is Д then say дом, if  Б then  Баня. Description should be between 150 and 160 characters. If it has ОЦБ in the name it is made of бревно and if it is ПБ then брус. Make sure the meta title starts with something like "Дом из бревна x m на x m, 20м2, " followed by the price, for example "всего от 324 234 руб." (only if price is available) and do not make up any numbers only use those give. then what you think is best and the meta description starts with something like "Сметы на строительства дома из бревна 20м2 размером 20м на 40.3м... "'
+                    'text' => 'You are an SEO expert. Generate SEO title and description for the given building project in Russian. Give me your response as a copy-pastable description tag only. Make sure the title includes what if first letter of title is Д then say дом, if  Б then  Баня. Description should be between 150 and 160 characters. If it has ОЦБ in the name it is made of бревно and if it is ПБ then брус. Make sure the meta title starts with something like "Дом из бревна x m на x m, 20м2, " followed by the price, for example "всего от 324 234 руб." (only if price is available) and do not make up any numbers only use those give. then what you think is best and the meta description starts with something like "Сметы на строительства дома из бревна 20м2 размером 20м на 40.3м... "'
                 ],
                 [
                     'role' => 'user',

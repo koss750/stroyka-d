@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Support\Facades\Auth;
+use App\Jobs\GenerateOrderFileJob;
 
 class ProjectController extends Controller
 {
@@ -67,6 +69,47 @@ class ProjectController extends Controller
         //
     }
 
+    public function createSmetaOrder(Request $request)
+    {
+        $designId = $request->input('design_id');
+        $selectedOptions = json_decode($request->input('selected_configuration'));
+        $configurationDescriptions = json_decode($request->input('configuration_descriptions'));
+        $paymentAmount = $request->input('payment_amount');
+        $orderType = $request->input('order_type') ?? 'smeta';
+        $ipAddress = $request->ip();
+        $project = Project::create([
+            'user_id' => Auth::id(),
+            'human_ref' => $this->generateHumanReference($designId),
+            'order_type' => $orderType,
+            'ip_address' => $ipAddress,
+            'payment_reference' => 'test',
+            'payment_amount' => $paymentAmount,
+            'design_id' => $designId,
+            'selected_configuration' => $selectedOptions,
+            'configuration_descriptions' => $configurationDescriptions,
+        ]);
+
+        dispatch(new GenerateOrderFileJob($project->id));
+
+        return response()->json([
+            'orderId' => $project->human_ref
+        ]);
+
+        
+    }
+
+    public function generateHumanReference($designId)
+    {
+        // create an alphanumeric code starting with project ID and using some base of selectedOptions
+        $letters = ['А', 'В', 'Е', 'К', 'М', 'Н', 'О', 'Р', 'С', 'Т', 'У', 'Х', '2', '4', '5', '6', '7', '8', '9'];
+        $randomLetters = '';
+        for ($i = 0; $i < 5; $i++) {
+            $randomLetters .= $letters[array_rand($letters)];
+        }
+        $humanReference = "С" . $designId . "-" . $randomLetters;
+        return $humanReference;
+    }
+
     public function createOrder(Request $request)
     {
         $validatedData = $request->validate([
@@ -85,7 +128,7 @@ class ProjectController extends Controller
             'payment_reference' => 'test', // You might want to generate this dynamically
         ]);
 
-        $excelFile = $this->generateExcelFile($project);
+        GenerateOrderFileJob::dispatch($project->id);
 
         return response()->json([
             'message' => 'Order created successfully',

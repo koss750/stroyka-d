@@ -182,36 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    function loadExecutors(projectId) {
-        fetch(`/api/projects/${projectId}/available-executors`)
-            .then(response => response.json())
-            .then(data => {
-                const executorList = document.getElementById('executorList');
-                executorList.innerHTML = '';
-                
-                data.executors.forEach(executor => {
-                    const li = document.createElement('li');
-                    li.className = 'list-group-item';
-                    li.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5>${executor.name}</h5>
-                                <p>${executor.company_profile ? executor.company_profile.company_name : 'No company name'}</p>
-                            </div>
-                            <button class="btn btn-primary select-executor" data-executor-id="${executor.id}" data-project-id="${projectId}">Выбрать</button>
-                        </div>
-                    `;
-                    executorList.appendChild(li);
-                });
-
-                const executorModal = new bootstrap.Modal(document.getElementById('executorModal'));
-                executorModal.show();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ошибка при загрузке списка исполнителей');
-            });
-    }
+    
 
     document.addEventListener('click', function(event) {
         if (event.target.classList.contains('select-executor')) {

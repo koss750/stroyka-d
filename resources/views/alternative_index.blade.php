@@ -1,41 +1,10 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>СТРОЙКА - Проекты домов и бань</title>
-    <meta name="description" content="Каталог проектов домов и бань. Расчет стоимости строительства и фундамента." />
-    <link rel="canonical" href="https://xn--80ardojfh.com" />
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/fav.ico') }}">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <link rel="preload" href="{{ asset('assets/fonts/font.ttf') }}" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <script src="https://xn--80ardojfh.com/assets/js/typeahead.min.js"></script>
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}"/>
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}"/>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script type="text/javascript" >
-        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+@extends('layouts.alternative')
 
-        ym(97430601, "init", {
-                clickmap:true,
-                trackLinks:true,
-                accurateTrackBounce:true,
-                webvisor:true
-        });
-    </script>
-</head>
-<body>
-<noscript><div><img src="https://mc.yandex.ru/watch/97430601" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    @include('components.top')
+
+@section('canonical', '')
+
+
+@section('additional_head')
 
     <main id="afterHeader">
         <div class="container" style="margin-top: 74px;">
@@ -49,9 +18,7 @@
                                 <img src="{{ $design->image_url ? asset($design->image_url) : '' }}" alt="{{ $design->title }}" loading="lazy">
                             </div>
                             <div class="flipCard-Text">
-                                <h3>{{ $design->title }}m<sup>2</sup></h3>
-                            </div>
-                            <div class="flipCard-Text-Right">
+                                <h3 class="title">{{ $design->title }}m<sup>2</sup></h3>
                                 <h3 class="price">{{ $design->price }} руб.</h3>
                             </div>
                         </article>
@@ -61,11 +28,11 @@
                 <div class="col-sm-4">
                     <article class="flipCard">
                         <div class="flipCard-Image">
-                            <img src="{{ asset('assets/images/card-img2.jpg') }}" alt="Расчет фундамента" loading="lazy">
+                            <img src="/images/2_.jpg" alt="Расчет фундамента" loading="lazy">
                         </div>
                         <div class="flipCard-Text">
                             <h2>Рассчитать свой фундамент</h2>
-                            <a href="#container_new_section" class="scroll-to-section">Подробнее</a>
+                            <a href="/site#foundations_section" class="scroll-to-section">Подробнее</a>
                         </div>
                     </article>
                 </div>

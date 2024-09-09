@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\VerificationController;
+use Illuminate\Http\Request;
 
 class RegisterController extends Controller
 {
@@ -61,12 +63,72 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\Models\User
      */
-    protected function create(array $data)
+    protected function create(Request $request)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Send verification email
+        $verificationController = new VerificationController();
+        $verificationController->sendInitialVerificationEmail($user);
+
+        return $user;
+    }
+
+    public function registerLegalEntity(Request $request)
+    {
+        // Update the validation rules
+        $validator = Validator::make($request->all(), [
+            'company_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'inn' => ['required', 'string', 'size:10', 'unique:suppliers'], // Changed from legal_entities to suppliers
+            'ogrn' => ['required', 'string', 'size:13', 'unique:suppliers'], // Changed from legal_entities to suppliers
+            'legal_address' => ['required', 'string', 'max:255'],
+            'physical_address' => ['required', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        // Create user
+        $user = User::create([
+            'name' => $request->contact_name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'legal_entity',
+        ]);
+
+        // Update this part to create a supplier instead of a legal entity
+        $supplier = $user->supplier()->create([
+            'company_name' => $request->company_name,
+            'inn' => $request->inn,
+            'email' => $request->email,
+            'phone' => $request->phone ?? '4645464545',
+            'additional_phone' => $request->additional_phone ?? '4645464545',
+            'contact_name' => $request->contact_name,
+            'ogrn' => $request->ogrn,
+            'address' => $request->legal_address,
+            'legal_address' => $request->legal_address,
+            'physical_address' => $request->physical_address,
+        ]);
+
+        // If you're associating regions, update this part as well
+        $regionCodes = json_decode($request->region_codes, true);
+        $supplier->region_code = $regionCodes;
+        $supplier->save();
+
+        // Send verification email
+        $verificationController = new VerificationController();
+        $verificationController->sendInitialVerificationEmail($user);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration successful. Please check your email for verification.'
         ]);
     }
 }
