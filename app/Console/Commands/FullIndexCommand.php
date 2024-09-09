@@ -187,7 +187,7 @@ class FullIndexCommand extends Command
         ['Смета Железо', 'rMetalN', 'I118', 'J118'],
     ];
     protected $exceptionalSheetsArray = [
-        'Смета СВ-Рост 600х300', 'Смета плита', 'Смета лента 600х300', 'Смета Железо', 'Смета Мягкая'
+        'Смета СВ-Рост 600х300', 'Смета плита', 'Смета лента 600х300'
     ];
     protected $designs;
     protected $spreadsheet;
@@ -653,11 +653,6 @@ class FullIndexCommand extends Command
                 break;
             case "Смета лента 600х300":
                 return $this->handleLenta($design);
-                break;
-            case "Смета Железо":
-                break;
-            case "Смета Мягкая":
-                return $this->handleMyagkaya($design);
                 break;
         }
     }

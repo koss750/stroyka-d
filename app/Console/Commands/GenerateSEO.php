@@ -67,7 +67,7 @@ class GenerateSEO extends Command
             'messages' => [
                 [
                     'role' => 'system',
-                    'text' => 'You are an SEO expert. Generate SEO title and description for the given building project in Russian. Give me your response as a copy-pastable description tag only. Make sure the title includes what if first letter of title is Д then say дом, if  Б then  Баня. Description should be between 150 and 160 characters. If it has ОЦБ in the name it is made of бревно and if it is ПБ then брус. Make sure the meta title starts with something like "Дом из бревна x m на x m, 20м2, " followed by the price, for example "всего от 324 234 руб." (only if price is available) and do not make up any numbers only use those give. then what you think is best and the meta description starts with something like "Сметы на строительства дома из бревна 20м2 размером 20м на 40.3м... "'
+                    'text' => 'You are an SEO expert. Generate a description meta tag for the given building project in Russian. The description should be between 150 and 160 characters. Start the description with "Сметы на строительство" followed by the type of building (дом or баня, based on the first letter of the title), material (бревно if ОЦБ is in the name, брус if ПБ is in the name), size, and area. Include the price if available. Do not make up any numbers, only use those given. Respond with the description text only, without any HTML tags or additional formatting.'
                 ],
                 [
                     'role' => 'user',
@@ -94,11 +94,8 @@ class GenerateSEO extends Command
             $result = $response->json();
             
             $generatedContent = $result['result']['alternatives'][0]['message']['text'] ?? '';
-            dd($generatedContent);
-            $json = json_decode($generatedContent);
-            
-            $seo->title = $json->title;
-            $seo->description = $json->description;
+            $seo->title = "Проект $design->title, размер $design->size м2, $design->lengt на $design->width";
+            $seo->description = $generatedContent;
             $seo->save();
         } else {
             Log::error('YandexGPT API request failed: ' . $response->body());

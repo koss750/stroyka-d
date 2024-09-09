@@ -13,8 +13,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {    
-        // Run every hour
+        // Keep track of design views
         $schedule->job(new PersistDesignViews())->hourly();
+
+        // Clean up old orders
+        $schedule->command('orders:cleanup')->daily();
     }
 
     /**

@@ -11,38 +11,6 @@
 @section('content')
 
 <div class="container-fluid">
-	<!-- Add Order -->
-	<div class="modal fade" id="addOrderModalside">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Create Project</h5>
-					<button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<form>
-						@csrf
-						<div class="form-group">
-							<label class="text-black font-w500">Project Name</label>
-							<input type="text" class="form-control">
-						</div>
-						<div class="form-group">
-							<label class="text-black font-w500">Deadline</label>
-							<input type="date" class="form-control">
-						</div>
-						<div class="form-group">
-							<label class="text-black font-w500">Client Name</label>
-							<input type="text" class="form-control">
-						</div>
-						<div class="form-group">
-							<button type="button" class="btn btn-primary">CREATE</button>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
 	@include('partials.tab-navigator', ['items' => [
         ['url' => '/my-orders', 'label' => 'Заказы'],
         ['url' => '/suppliers', 'label' => 'Исполнители'],
@@ -54,9 +22,12 @@
 			<div class="card">
 				<div class="card-body">
 					<div class="d-flex justify-content-between align-items-center mb-3">
-						<div id="bulkDeleteContainer" style="display: none;">
-							<a href="#" id="bulkDeleteBtn" class="text-danger">
+						<div id="bulkActionContainer" style="display: none;">
+							<a href="#" id="bulkDeleteBtn" class="text-danger me-3">
 								<i class="fas fa-trash-alt"></i> Удалить
+							</a>
+							<a href="#" id="supportBtn" class="text-primary" style="display: none;">
+								<i class="fas fa-headset"></i> Поддержка
 							</a>
 						</div>
 						<!-- Add any other buttons or elements you want here -->
@@ -77,10 +48,11 @@
 										</div>
 									</th>
 									<th class="align-middle text-center order-column">Заказ</th>
-									<th class="align-middle text-center">Дата</th>
-									<th class="align-middle text-center minw200">Исполнители</th>
-									<th class="align-middle text-center minw200">Сумма</th>
-									<th class="align-middle text-center minw200">Файлы</th>
+									<th class="align-middle text-center" style="width: 80px;"></th>
+									<th class="align-middle text-center">Ваш проект и конфигурация</th>
+									<th class="align-middle text-center">Исполнитель</th>
+									<th class="align-middle text-center minw200">Оплачено</th>
+									<th class="align-middle text-center minw200">Документы</th>
 								</tr>
 							</thead>
 							<tbody id="orders">
@@ -93,11 +65,20 @@
 										</div>
 									</td>
 									<td class="py-2 order-column">
-										<a href="#">
 											<strong>{{ $project['id'] }}</strong>
-										</a> by <strong>{{ $project['title'] }}</strong> Смета <br />
+										   <br> от <small>{{ $project['created_at'] }}</small>
 									</td>
-									<td class="py-2 text-center">{{ $project['created_at'] }}</td>
+									<td class="py-2 text-center">
+										@if($project['thumbnail'])
+											<img src="{{ $project['thumbnail'] }}" alt="Thumbnail" class="img-fluid" style="max-width: 90px; max-height: 70px;">
+										@else
+											<span class="text-muted">Нет фото</span>
+										@endif
+									</td>
+									<td class="py-2 text-center">
+										{{ $project['title'] }} <br> 
+										<small>{{ $project['configuration'] }}</small>
+									</td>
 									<td class="py-2 text-center">
 										<button class="btn btn-sm btn-primary assign-executor" data-project-id="{{ $project['id'] }}">Подобрать</button>
 									</td>
@@ -187,4 +168,85 @@
 @endsection
 
 @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.custom-control-input:not(#checkAll)');
+    const checkAll = document.getElementById('checkAll');
+    const bulkActionContainer = document.getElementById('bulkActionContainer');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const supportBtn = document.getElementById('supportBtn');
+
+    function updateBulkActions() {
+        const checkedBoxes = document.querySelectorAll('.custom-control-input:checked:not(#checkAll)');
+        bulkActionContainer.style.display = checkedBoxes.length > 0 ? 'block' : 'none';
+        supportBtn.style.display = checkedBoxes.length === 1 ? 'inline-block' : 'none';
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkActions);
+    });
+
+    checkAll.addEventListener('change', function() {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        updateBulkActions();
+    });
+
+    bulkDeleteBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Вы уверены, что хотите удалить выбранные заказы?')) {
+            const selectedIds = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.id.replace('customCheckBox', ''));
+            // Here you would typically send an AJAX request to delete the orders
+            console.log('Deleting orders:', selectedIds);
+            // After successful deletion, remove the rows from the table
+            selectedIds.forEach(id => {
+                document.querySelector(`tr:has(#customCheckBox${id})`).remove();
+            });
+            updateBulkActions();
+        }
+    });
+
+    supportBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const selectedId = document.querySelector('.custom-control-input:checked:not(#checkAll)').id.replace('customCheckBox', '');
+        showSupportModal(selectedId);
+    });
+
+    function showSupportModal(orderId) {
+        // Create and show the support modal
+        const modal = `
+        <div class="modal fade" id="supportModal" tabindex="-1" role="dialog" aria-labelledby="supportModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="supportModalLabel">Отправить сообщение в поддержку</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="supportMessage" class="form-control" rows="4" placeholder="Введите ваше сообщение"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" id="sendSupportMessage">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+        $('#supportModal').modal('show');
+
+        document.getElementById('sendSupportMessage').addEventListener('click', function() {
+            const message = document.getElementById('supportMessage').value;
+            // Here you would typically send an AJAX request with the message and orderId
+            console.log('Sending support message for order:', orderId, 'Message:', message);
+            $('#supportModal').modal('hide');
+            alert('Спасибо за ваше сообщение. Мы ответим в течение 24 часов. Пока вы ждете, почему бы не просмотреть наши планы или исполнителей в вашем районе?');
+        });
+    }
+});
+</script>
 @endpush

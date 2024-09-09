@@ -93,54 +93,24 @@ class GenerateOrderFileJob implements ShouldQueue
         }
 
         // Remove the grand total after all invoices
-        $currentRow++;
+        $this->insertEmptyRow($templateSheet, $worksheet, $currentRow);
 
-        // First line: Total labour
-        $this->copyMergedCells($templateSheet, $worksheet, 19, $currentRow);
-        $this->copyRowFormatAndStyle($templateSheet, 19, $worksheet, $currentRow);
-        $this->copyRowContent($templateSheet, $worksheet, 19, $currentRow);
-        $worksheet->setCellValue("H{$currentRow}", $this->smetaTotalLabour);
-        $worksheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-        //set top border
-        $worksheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
-        $worksheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $worksheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $currentRow++;
+        //Setting up Box / Final row items
+        $lineRow = [
+            20 => $this->smetaTotalLabour,
+            21 => round($this->smetaTotalLabour*0.03, 2),
+            22 => round($this->smetaTotalLabour*0.16, 2),
+            23 => round(($this->smetaTotalLabour + $this->smetaTotalLabour*0.03 + $this->smetaTotalLabour*0.16), 2),
+            24 => round($this->smetaTotalMaterial, 2),
+            25 => round($this->smetaTotalMaterial*0.035, 2),
+            26 => round($this->smetaTotalShipping, 2),
+            27 => round(($this->smetaTotalMaterial + $this->smetaTotalMaterial*0.035 + $this->smetaTotalShipping), 2),
+        ];
+        $lineRow[28] = round($lineRow[23] + $lineRow[27], 2);
 
-        // Second line: Total material
-        $this->copyMergedCells($templateSheet, $worksheet, 20, $currentRow);
-        $this->copyRowFormatAndStyle($templateSheet, 20, $worksheet, $currentRow);
-        $this->copyRowContent($templateSheet, $worksheet, 20, $currentRow);
-        $worksheet->setCellValue("H{$currentRow}", $this->smetaTotalMaterial);
-        $worksheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-        $worksheet->getStyle("A{$currentRow}:M{$currentRow}")->getFont()->setBold(true);
-        $worksheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $worksheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $currentRow++;
+        $this->processFinalRows($templateSheet, $worksheet, $lineRow, $currentRow);
 
-        // Third line: Total shipping
-        $this->copyMergedCells($templateSheet, $worksheet, 21, $currentRow);
-        $this->copyRowFormatAndStyle($templateSheet, 21, $worksheet, $currentRow);
-        $this->copyRowContent($templateSheet, $worksheet, 21, $currentRow);
-        $worksheet->setCellValue("H{$currentRow}", $this->smetaTotalShipping);
-        $worksheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-        $worksheet->getStyle("A{$currentRow}:M{$currentRow}")->getFont()->setBold(true);
-        $worksheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $worksheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $currentRow++;
 
-        // Fourth line: Sum of the above three
-        $totalSum = $this->smetaTotalLabour + $this->smetaTotalMaterial + $this->smetaTotalShipping;
-        $this->copyMergedCells($templateSheet, $worksheet, 22, $currentRow);
-        $this->copyRowFormatAndStyle($templateSheet, 22, $worksheet, $currentRow);
-        $this->copyRowContent($templateSheet, $worksheet, 22, $currentRow);
-
-        $worksheet->setCellValue("H{$currentRow}", $totalSum);
-        $worksheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-        $worksheet->getStyle("A{$currentRow}:M{$currentRow}")->getFont()->setBold(true);
-        $worksheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
-        $worksheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $worksheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         // Remove the template sheet and save the spreadsheet
         $spreadsheet->removeSheetByIndex(0);
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
@@ -156,6 +126,77 @@ class GenerateOrderFileJob implements ShouldQueue
         $publicUrl = url('orders/' . $filename);
         $project->update(['filepath' => $publicUrl]);
         gc_collect_cycles();
+}
+
+protected function processFinalRows($templateSheet, $worksheet, $lineRow, &$currentRow)
+{
+    $totalSum = 0;
+
+    foreach ($lineRow as $templateRowNumber => $value) {
+        $this->copyMergedCells($templateSheet, $worksheet, $templateRowNumber, $currentRow);
+        $this->copyRowFormatAndStyle($templateSheet, $templateRowNumber, $worksheet, $currentRow);
+        $this->copyRowContent($templateSheet, $worksheet, $templateRowNumber, $currentRow);
+        $worksheet->setCellValue("H{$currentRow}", $value);
+        $worksheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        
+        $worksheet->getStyle("A{$currentRow}:M{$currentRow}")->getFont()->setBold(true);
+        $worksheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $worksheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        $worksheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+        $worksheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+        $totalSum += $value;
+        $currentRow++;
+    }
+}
+
+    public function insertEmptyRow($templateSheet, $worksheet, &$currentRow)
+    {
+        $templateRowNumber = 30; // The row number we're copying from the template
+
+        // Copy merged cells
+        $this->copyMergedCells($templateSheet, $worksheet, $templateRowNumber, $currentRow);
+
+        // Copy row format and style
+        $this->copyRowFormatAndStyle($templateSheet, $templateRowNumber, $worksheet, $currentRow);
+
+        // Copy row content (which should be empty for row 30)
+        $this->copyRowContent($templateSheet, $worksheet, $templateRowNumber, $currentRow);
+
+        // Ensure the row is actually empty
+        foreach ($worksheet->getRowIterator($currentRow, $currentRow) as $row) {
+            foreach ($row->getCellIterator() as $cell) {
+                $cell->setValue(null);
+            }
+        }
+
+        // Increment the current row
+        $currentRow++;
+    }
+
+    public function insertLastSectionTotalRow($templateSheet, $worksheet, &$currentRow)
+    {
+        $templateRowNumber = 18; // The row number we're copying from the template
+
+        // Copy merged cells
+        $this->copyMergedCells($templateSheet, $worksheet, $templateRowNumber, $currentRow);
+
+        // Copy row format and style
+        $this->copyRowFormatAndStyle($templateSheet, $templateRowNumber, $worksheet, $currentRow);
+
+        // Copy row content (which should be empty for row 30)
+        $this->copyRowContent($templateSheet, $worksheet, $templateRowNumber, $currentRow);
+
+        // Ensure the row is actually empty
+        foreach ($worksheet->getRowIterator($currentRow, $currentRow) as $row) {
+            foreach ($row->getCellIterator() as $cell) {
+                $cell->setValue(null);
+            }
+        }
+
+        // Increment the current row
+        $currentRow++;
     }
 
     protected function generateSmetaTitle($parentLabel, $order, $invoiceTypeDescription)
@@ -184,6 +225,8 @@ class GenerateOrderFileJob implements ShouldQueue
             $worksheet->getStyle("A7")->getFont()->setBold(true);
             $worksheet->getStyle("A7")->getFont()->setSize(12);
         } else {
+            $currentRow--;
+            $this->insertEmptyRow($templateSheet, $worksheet, $currentRow);
             $this->copyMergedCells($templateSheet, $worksheet, 7, $currentRow);
             $this->copyRowFormatAndStyle($templateSheet, 7, $worksheet, $currentRow);
             
@@ -207,6 +250,10 @@ class GenerateOrderFileJob implements ShouldQueue
             $labourTotal = $sectionTotals['labourTotal'];
             $materialTotal = $sectionTotals['materialTotal'];
 
+            if ($sectionIndex == $lastSectionIndex) {
+                $materialTotal = 0;
+            }
+
             // Skip this section if both labour and material totals are zero
             if ($labourTotal == 0 && $materialTotal == 0) {
                 //Log::info("Skipping section $sectionIndex as both totals are zero");
@@ -226,11 +273,25 @@ class GenerateOrderFileJob implements ShouldQueue
             $maxRows = max(count($section['labourItems']), count($section['materialItems']));
 
             for ($i = 0; $i < $maxRows; $i++) {
-                //Log::info("Processing row $i of section $sectionIndex, starting at row: $currentRow");
-                
+                //check if both sides are empty or zero
+                if (isset($section['labourItems'][$i]) && isset($section['materialItems'][$i])) {
+                    $labour = $section['labourItems'][$i];
+                    $material = $section['materialItems'][$i];
+                    if ($labour['labourTotal'] == 0 && $material['materialTotal'] == 0) {
+                        continue;
+                    }
+                } else {
+                    if (is_null($labour['labourTotal']) && $material['materialTotal'] == 0) {
+                        continue;
+                    }
+                    if ($labour['labourTotal'] == 0 && is_null($material['materialTotal'])) {
+                        continue;
+                    }
+                }
                 $this->copyMergedCells($templateSheet, $worksheet, 13, $currentRow);
                 $this->copyRowFormatAndStyle($templateSheet, 13, $worksheet, $currentRow);
                 $this->copyRowContent($templateSheet, $worksheet, 13, $currentRow);
+
 
                 if (isset($section['labourItems'][$i])) {
                     $labour = $section['labourItems'][$i];
@@ -247,7 +308,12 @@ class GenerateOrderFileJob implements ShouldQueue
                 }
 
                 if (isset($section['materialItems'][$i])) {
+
                     $material = $section['materialItems'][$i];
+                    if ($sectionIndex == $lastSectionIndex) {
+                        $material['materialTotal'] = 0;
+                        $material['materialQuantity'] = 0;
+                    }
                     //Log::info("Setting material item: {$material['materialTitle']} at row: $currentRow");
                     $worksheet->setCellValue("H{$currentRow}", $material['materialTitle']);
                     $worksheet->getCell("H{$currentRow}")->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
@@ -257,6 +323,7 @@ class GenerateOrderFileJob implements ShouldQueue
                     $worksheet->setCellValue("L{$currentRow}", $material['materialQuantity']);
                     $worksheet->setCellValue("M{$currentRow}", $material['materialTotal']);
                     $worksheet->getCell("M{$currentRow}")->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    
                 }
 
                 $currentRow++;
@@ -265,11 +332,17 @@ class GenerateOrderFileJob implements ShouldQueue
 
             //Log::info("Calculated section totals - Labour: $labourTotal, Material: $materialTotal");
 
-            // Copy row 14 with merged cells, format, style, and set totals
-            $this->copyAndSetTotalRow($templateSheet, $worksheet, 14, $currentRow, $labourTotal, $materialTotal);
+            // Insert last section total row
+            if ($sectionIndex !== $lastSectionIndex) {
+                $this->copyAndSetTotalRow($templateSheet, $worksheet, 14, $currentRow, $labourTotal, $materialTotal);
+            } else $this->copyAndSetTotalRow($templateSheet, $worksheet, 18, $currentRow, $labourTotal, $materialTotal);
+            
+            
             //Log::info("Set section total row at: $currentRow");
             
+            // empty row
             $currentRow++;
+            $this->insertEmptyRow($templateSheet, $worksheet, $currentRow);
             //Log::info("Moving to next section, new row: $currentRow");
             
             $invoiceTotalLabour += $labourTotal;
@@ -281,7 +354,6 @@ class GenerateOrderFileJob implements ShouldQueue
 
         // Add invoice totals only if there are non-zero sections
         if ($invoiceTotalLabour > 0 || $invoiceTotalMaterial > 0) {
-            $currentRow++;
             $this->copyAndSetTotalRow($templateSheet, $worksheet, 16, $currentRow, $invoiceTotalLabour, $invoiceTotalMaterial);
             //Log::info("Set invoice total row at: $currentRow");
 
@@ -295,7 +367,10 @@ class GenerateOrderFileJob implements ShouldQueue
         //Log::info("Finished all sections, final row: $currentRow");
         
         // Return the next row number for the next invoice
-        return $currentRow + 1;
+        // empty row
+        $currentRow++;
+        $this->insertEmptyRow($templateSheet, $worksheet, $currentRow);
+        return $currentRow;
     }
 
     protected function calculateSectionTotals($section)

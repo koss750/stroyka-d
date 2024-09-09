@@ -73,6 +73,8 @@ class ProjectController extends Controller
     {
         $designId = $request->input('design_id');
         $selectedOptions = json_decode($request->input('selected_configuration'));
+        if ($selectedOptions->roof == 222) unset($selectedOptions->roof);
+        if ($selectedOptions->foundation == 220) unset($selectedOptions->foundation);
         $configurationDescriptions = json_decode($request->input('configuration_descriptions'));
         $paymentAmount = $request->input('payment_amount');
         $orderType = $request->input('order_type') ?? 'smeta';
@@ -118,6 +120,8 @@ class ProjectController extends Controller
             'payment_amount' => 'required|numeric',
             'ip_address' => 'required|ip',
         ]);
+
+        dd('selected_configuration');
 
         $project = Project::create([
             'user_id' => auth()->id(),

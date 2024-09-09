@@ -263,15 +263,13 @@ $html .= '<thead class="thead-dark">';
         $query = $request->input('query');
 
         $designs = Design::where(function($q) use ($query) {
-            $q->where('title', 'like', "%{$query}%")
-              ->orWhere('title', 'like', "%{$query}.%")
-              ->orWhere('title', 'like', "%{$query},%");
+            $q->where('size', 'like', "{$query}%");
         })
         ->where('active', 1)
         ->whereRaw("title NOT LIKE ?", ['%.'. $query .'%'])
         ->whereRaw("title NOT LIKE ?", ['%,'. $query .'%'])
         ->select('id', 'title')
-        ->orderByRaw("CAST(REGEXP_SUBSTR(title, '[0-9]+(\.[0-9]+)?') AS DECIMAL(10,2)) DESC")
+        ->orderByRaw("size ASC")
         ->limit(10)
         ->get();
 
@@ -502,12 +500,23 @@ private function getPriceFromDb($id, $invoice_type_id)
         $filepath = "http://tmp.стройка.com/storage";
         $original = $project->filepath;
         $project->title = Design::where('id', $project->design_id)->first()->title;
+        $thumbnail = Design::where('id', $project->design_id)->first()->thumbnail;
+        $configuration = $project->configuration_descriptions;
+        $configurationArray = [$configuration['foundation'], $configuration['dd'], $configuration['roof']];
+        $configuration_string = "";
+        foreach ($configurationArray as $key => $value) {
+            if ($key == 0) $configuration_string.= $value . " ";
+            if ($key == 1) $configuration_string.= $value . " ";
+            if ($key == 2) $configuration_string.= $value;
+        }
         return [
-            'id' => $project->id,
+            'id' => $project->human_ref,
             'title' => $project->title,
             'status' => $project->status,
             'created_at' => $project->getFormattedCreatedAtAttribute(),
             'updated_at' => $project->getFormattedUpdatedAtAttribute(),
+            'thumbnail' => $thumbnail,
+            'configuration' => $configuration_string,
             'payment_amount' => $project->payment_amount,
             'filepath' => $project->filepath,
             'design' => $project->design ? $this->transformDesign($project->design) : null,

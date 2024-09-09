@@ -98,3 +98,4 @@ storage/media-library/*
 public/orders
 public/orders/*
 public/orders/
+storage/media-library/

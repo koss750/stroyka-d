@@ -313,6 +313,12 @@ public function setImages()
         return "Write a 150 character product description for a random house";
     }
 
+    public function getThumbnailAttribute()
+    {
+        $media = $this->getMedia('images')->first();
+        return $media ? $media->getUrl('thumb') : null;
+    }
+
     public function setMaterialDescription() {
         $code = $this->category[0]["category"];
         $materialDescriptions = [
