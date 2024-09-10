@@ -189,6 +189,15 @@ class FullIndexCommand extends Command
     protected $exceptionalSheetsArray = [
         'Смета СВ-Рост 600х300', 'Смета плита', 'Смета лента 600х300'
     ];
+    protected $exceptionalSheetsArrayPostOP = [148, 171, 172];
+    protected $zhelezoVariationArray = [
+            'section' => 3,
+            'materialTitle' => 'Металлочерепица Grand Line серия Classic 0,5',
+            'specialStyle' => true,
+            'materialTitleFont' => 'bold',
+            'additionalRowStart' => 2,
+            'additionalRowUnit' => 'дл./шт.'
+    ];
     protected $designs;
     protected $spreadsheet;
 
@@ -250,14 +259,17 @@ class FullIndexCommand extends Command
                         continue;
                     }
 
+                    // Empty cases
                     if ($invoice->id == 220 or $invoice->id == 222) {
-                        $results[$design->id][$invoice->id] = json_encode([
+                        $results[$design->id][$invoice->id]['price'] = json_encode([
                             'material' => 0,
                             'labour' => 0,
                             'total' => 0
                         ]);
                         continue;
                     }
+
+                    // Pre OP special cases
                     if (in_array($sheetname, $this->exceptionalSheetsArray)) {
                         $specialArray = $this->handleExceptionalSheet($sheetname, $design);
                         if ($specialArray != null) {
@@ -270,6 +282,15 @@ class FullIndexCommand extends Command
                         $results[$design->id][$invoice->id]['price'] = json_encode($this->processSheet($sheetname, $design));
                         $results[$design->id][$invoice->id]['parameters'] = json_encode($this->getSheetParameters($sheetname, $design)) ?? json_encode([error => 'error']);
                     }
+
+
+                    // Post OP special cases
+                    if (in_array($invoice->id, $this->exceptionalSheetsArrayPostOP)) {
+                        $parameters = json_decode($results[$design->id][$invoice->id]['parameters'], true);
+                        $parameters = $this->handleZhelezo($parameters);
+                        $results[$design->id][$invoice->id]['parameters'] = json_encode($parameters);
+                    }
+
                     // add to cache
                     try {
                         $cacheData = [
@@ -395,7 +416,6 @@ class FullIndexCommand extends Command
 
                 // Log the material total for each line item
                 $itemName = $materialItem['name'] ?? "Unknown Item in {$sectionKey}";
-                Log::info("Design ID: {$design->id}, Sheet: {$sheetname}, Material Item: {$itemName}, Total: {$materialValue}");
             }
         }
 
@@ -654,6 +674,7 @@ class FullIndexCommand extends Command
             case "Смета лента 600х300":
                 return $this->handleLenta($design);
                 break;
+            case "Железо":
         }
     }
 
@@ -678,6 +699,46 @@ class FullIndexCommand extends Command
             $result[$invoice->id]["parameters"] = json_encode($this->getSheetParameters($invoice->sheetname, $design));
         }
         return $result;
+    }
+
+    private function handleZhelezo($params)
+    {
+        $exceptionSection = $this->zhelezoVariationArray['section'];
+        $originalItem = $params['sheet_structure']['sections'][$exceptionSection]['materialItems'][0];
+        
+        $newSectionItems = [];
+        if ($originalItem['materialTitle'] == $this->zhelezoVariationArray['materialTitle']) {
+            unset($params['sheet_structure']['sections'][$exceptionSection]['materialItems'][0]);
+            $originalItems = $params['sheet_structure']['sections'][$exceptionSection]['materialItems'];
+            $newSectionItems[0] = $originalItem;
+            $dataSheet = $this->spreadsheet->getSheetByName("data");
+            $startRow = 281;
+            $stop = false;
+            $count = 1;
+            while (!$stop) {
+                $price = $dataSheet->getCell("M$startRow")->getCalculatedValue();
+                $quantity = $dataSheet->getCell("L$startRow")->getCalculatedValue();
+                if ($price == 0 && $quantity == 0) {
+                    $stop = true;
+                } else {
+                    $newSectionItems[] = [
+                        "materialAdditional" => false,
+                        "materialTitle" => $count,
+                        "materialUnit" => $this->zhelezoVariationArray['additionalRowUnit'],
+                        "materialPrice" => $price,
+                        "materialQuantity" => $quantity,
+                        "materialTotal" => " "
+                    ];
+                    $count++;
+                    $startRow++;
+                }
+            }
+            $params['sheet_structure']['sections'][$exceptionSection]['materialItems'] = $newSectionItems;
+            foreach ($originalItems as $item) {
+                $params['sheet_structure']['sections'][$exceptionSection]['materialItems'][] = $item;
+            }
+        }
+        return $params;
     }
 
     private function handleSVRost($design)

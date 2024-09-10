@@ -66,7 +66,7 @@ class Project extends Model
 
     public function getFormattedCreatedAtAttribute()
     {
-        return $this->created_at->format('Y-m-d H:i:s');
+        return $this->created_at->addHours(3)->format('Y-m-d H:i');
     }
 
     public function getFormattedUpdatedAtAttribute()

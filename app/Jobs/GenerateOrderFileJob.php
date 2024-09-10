@@ -20,6 +20,7 @@ use PhpOffice\PhpSpreadsheet\Style\Font;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class GenerateOrderFileJob implements ShouldQueue
 {
@@ -140,8 +141,8 @@ protected function processFinalRows($templateSheet, $worksheet, $lineRow, &$curr
         $worksheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
         
         $worksheet->getStyle("A{$currentRow}:M{$currentRow}")->getFont()->setBold(true);
-        $worksheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $worksheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $worksheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $worksheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $worksheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
         $worksheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
@@ -288,28 +289,48 @@ protected function processFinalRows($templateSheet, $worksheet, $lineRow, &$curr
                         continue;
                     }
                 }
-                $this->copyMergedCells($templateSheet, $worksheet, 13, $currentRow);
-                $this->copyRowFormatAndStyle($templateSheet, 13, $worksheet, $currentRow);
-                $this->copyRowContent($templateSheet, $worksheet, 13, $currentRow);
-
+                
+                if (!$labour['labourAdditional'] && !$material['materialAdditional']) {
+                    $this->copyMergedCells($templateSheet, $worksheet, 13, $currentRow);
+                    $this->copyRowFormatAndStyle($templateSheet, 13, $worksheet, $currentRow);
+                    $this->copyRowContent($templateSheet, $worksheet, 13, $currentRow);
+                } else {
+                    $this->copyMergedCells($templateSheet, $worksheet, 31, $currentRow);
+                    $this->copyRowFormatAndStyle($templateSheet, 31, $worksheet, $currentRow);
+                    $this->copyRowContent($templateSheet, $worksheet, 31, $currentRow);
+                }
 
                 if (isset($section['labourItems'][$i])) {
                     $labour = $section['labourItems'][$i];
-                    //Log::info("Setting labour item: {$labour['labourTitle']} at row: $currentRow");
+                    
+                    if (Str::length($labour['labourTitle']) > 56) {
+                        $worksheet->getRowDimension($currentRow)->setRowHeight(30);
+                    }
                     $worksheet->setCellValue("A{$currentRow}", $labour['labourNumber']);
                     $worksheet->setCellValue("B{$currentRow}", $labour['labourTitle']);
                     $worksheet->getCell("B{$currentRow}")->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    if ($labour['labourAdditional']) {
+                        $worksheet->setCellValue("C{$currentRow}", $labour['labourAdditionalTitle']);
+                    }
                     $worksheet->setCellValue("D{$currentRow}", $labour['labourUnit']);
-                    $worksheet->setCellValue("E{$currentRow}", $labour['labourPrice']);
-                    $worksheet->getCell("E{$currentRow}")->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-                    $worksheet->setCellValue("F{$currentRow}", $labour['labourQuantity']);
-                    $worksheet->setCellValue("G{$currentRow}", $labour['labourTotal']);
-                    $worksheet->getCell("G{$currentRow}")->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    if (is_numeric($labour['labourQuantity']) && !is_null($labour['labourQuantity'])) {
+                        $this->setCellValueWithFormat($worksheet, "E{$currentRow}", $labour['labourQuantity'], 3);
+                    }
+                    if (is_numeric($labour['labourPrice']) && !is_null($labour['labourPrice'])) {
+                        $this->setCellValueWithFormat($worksheet, "F{$currentRow}", $labour['labourPrice'], 2, true);
+                    }
+                    if (is_numeric($labour['labourTotal'])) {
+                        $this->setCellValueWithFormat($worksheet, "G{$currentRow}", $labour['labourTotal'], 2, true);
+                    }
                 }
 
                 if (isset($section['materialItems'][$i])) {
-
                     $material = $section['materialItems'][$i];
+                    
+                    if (Str::length($material['materialTitle']) > 56) {
+                        $worksheet->getRowDimension($currentRow)->setRowHeight(30);
+                    }
+                    
                     if ($sectionIndex == $lastSectionIndex) {
                         $material['materialTotal'] = 0;
                         $material['materialQuantity'] = 0;
@@ -317,12 +338,19 @@ protected function processFinalRows($templateSheet, $worksheet, $lineRow, &$curr
                     //Log::info("Setting material item: {$material['materialTitle']} at row: $currentRow");
                     $worksheet->setCellValue("H{$currentRow}", $material['materialTitle']);
                     $worksheet->getCell("H{$currentRow}")->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    if ($material['materialAdditional']) {
+                        $worksheet->setCellValue("I{$currentRow}", $material['materialAdditionalTitle']);
+                    }
                     $worksheet->setCellValue("J{$currentRow}", $material['materialUnit']);
-                    $worksheet->setCellValue("K{$currentRow}", $material['materialPrice']);
-                    $worksheet->getCell("K{$currentRow}")->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-                    $worksheet->setCellValue("L{$currentRow}", $material['materialQuantity']);
-                    $worksheet->setCellValue("M{$currentRow}", $material['materialTotal']);
-                    $worksheet->getCell("M{$currentRow}")->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    if (is_numeric($material['materialQuantity']) && !is_null($material['materialQuantity'])) {
+                        $this->setCellValueWithFormat($worksheet, "K{$currentRow}", $material['materialQuantity'], 3);
+                    }
+                    if (is_numeric($material['materialPrice']) && !is_null($material['materialPrice'])) {
+                        $this->setCellValueWithFormat($worksheet, "L{$currentRow}", $material['materialPrice'], 2, true);
+                    }
+                    if (is_numeric($material['materialTotal'])) {
+                        $this->setCellValueWithFormat($worksheet, "M{$currentRow}", $material['materialTotal'], 2, true);
+                    }
                     
                 }
 
@@ -373,6 +401,24 @@ protected function processFinalRows($templateSheet, $worksheet, $lineRow, &$curr
         return $currentRow;
     }
 
+    private function setCellValueWithFormat($worksheet, $cell, $value, $decimals, $forceDecimals = false)
+    {
+        $roundedValue = round($value, $decimals);
+        $worksheet->setCellValue($cell, $roundedValue);
+
+        if ($forceDecimals) {
+            $format = '#,##0.' . str_repeat('0', $decimals);
+        } else {
+            if ($value < 10000) {
+                $format = ($roundedValue == floor($roundedValue)) ? '#,##0' : '#,##0.' . str_repeat('#', $decimals);
+            } else {
+                $format = '#,##0';
+            }
+        }
+
+        $worksheet->getCell($cell)->getStyle()->getNumberFormat()->setFormatCode($format);
+    }
+
     protected function calculateSectionTotals($section)
     {
         $labourTotal = 0;
@@ -410,8 +456,10 @@ protected function processFinalRows($templateSheet, $worksheet, $lineRow, &$curr
         $worksheet->getStyle("E{$currentRow}:G{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         $worksheet->getStyle("K{$currentRow}:M{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         
-        $worksheet->getStyle("E{$currentRow}:G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $worksheet->getStyle("K{$currentRow}:M{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $worksheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $worksheet->getStyle("K{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $worksheet->getStyle("G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $worksheet->getStyle("M{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $worksheet->getStyle("G{$currentRow}")->getFont()->setBold(true);
         $worksheet->getStyle("M{$currentRow}")->getFont()->setBold(true);
         $worksheet->getStyle("E{$currentRow}")->getFont()->setBold(true);

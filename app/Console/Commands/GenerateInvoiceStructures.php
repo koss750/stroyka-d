@@ -15,6 +15,8 @@ class GenerateInvoiceStructures extends Command
     protected $signature = 'app:structures {invoice_type_id? : The ID of the InvoiceType to process}';
     protected $description = 'Generate invoice structures for one or all InvoiceTypes';
 
+    public $exceptionalInvoices = [148, 171, 172];
+
     public function handle()
     {
         $invoiceTypeId = $this->argument('invoice_type_id');
@@ -246,32 +248,65 @@ class GenerateInvoiceStructures extends Command
            (is_null($rowVals[$endOfLabourCol + 1]) && !is_null($rowVals[$lastLetterCol]) && !is_null($rowVals[$endOfLabourCol]));
 }
 
+private function checkForAdditionalTitle($title, string $colCheck, $spareCol): bool
+{
+    if (!is_null($title) && !is_null($spareCol)) {
+        if ($colCheck === 'G' || $colCheck === 'M') {
+            if ($title !== $spareCol) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 private function addItemsToSection(array &$sheetStructure, int $section, array $rowVals, int $rowIndex): void
 {
     $labourTotalCol = $sheetStructure['endOfLabour']['col'];
+    $labourTitle = $rowVals[$sheetStructure['otherCols']['labourTitle']] ?? null;
+    $labourNumber = $rowVals[$sheetStructure['otherCols']['labourNumber']] ?? null;
+    $labourUnit = $rowVals[$sheetStructure['otherCols']['labourUnit']] ?? null;
+
+    $labourSpareCol = $rowVals[2];
+    $labourAdditionalTitle = $this->checkForAdditionalTitle($labourUnit, $labourTotalCol, $labourSpareCol);
     $labourQuantityCol = Coordinate::stringFromColumnIndex(Coordinate::columnIndexFromString($labourTotalCol) - 1);
     $labourPriceCol = Coordinate::stringFromColumnIndex(Coordinate::columnIndexFromString($labourTotalCol) - 2);
+    
 
     $materialTotalCol = $sheetStructure['lastLetter']['col'];
     $materialQuantityCol = Coordinate::stringFromColumnIndex(Coordinate::columnIndexFromString($materialTotalCol) - 1);
     $materialPriceCol = Coordinate::stringFromColumnIndex(Coordinate::columnIndexFromString($materialTotalCol) - 2);
+    $materialUnit = $rowVals[$sheetStructure['otherCols']['materialUnit']] ?? null;
+
+    $materialSpareCol = $rowVals[$sheetStructure['otherCols']['materialUnit']-1];
+    $materialAdditionalTitle = $this->checkForAdditionalTitle($materialUnit, $materialTotalCol, $materialSpareCol);
 
     $labourItem = [
-        "labourNumber" => $rowVals[$sheetStructure['otherCols']['labourNumber']] ?? null,
-        "labourTitle" => $rowVals[$sheetStructure['otherCols']['labourTitle']] ?? null,
-        "labourUnit" => $rowVals[$sheetStructure['otherCols']['labourUnit']] ?? null,
+        "labourAdditional" => $labourAdditionalTitle,
+        "labourNumber" => $labourNumber,
+        "labourTitle" => $labourTitle,
+        "labourUnit" => $labourUnit,
         "labourPriceCell" => $labourPriceCol . $rowIndex,
         "labourQuantityCell" => $labourQuantityCol . $rowIndex,
         "labourTotalCell" => $labourTotalCol . $rowIndex
     ];
 
+    if ($labourAdditionalTitle) {
+        $labourItem['labourAdditionalTitle'] = $labourSpareCol;
+    }
+
     $materialItem = [
+        "materialAdditional" => $materialAdditionalTitle,
         "materialTitle" => $rowVals[$sheetStructure['otherCols']['materialTitle']] ?? null,
         "materialUnit" => $rowVals[$sheetStructure['otherCols']['materialUnit']] ?? null,
         "materialPriceCell" => $materialPriceCol . $rowIndex,
         "materialQuantityCell" => $materialQuantityCol . $rowIndex,
         "materialTotalCell" => $materialTotalCol . $rowIndex
     ];
+
+    if ($materialAdditionalTitle) {
+        $materialItem['materialAdditionalTitle'] = $materialSpareCol;
+    }
 
     if (!empty(array_filter($labourItem))) {
         $sheetStructure['sections'][$section]['labourItems'][] = $labourItem;

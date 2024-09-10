@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="text-center">
                         <h4 class="mb-4">Заказ подтвержден</h4>
                         <p>Спасибо за ваш заказ! Номер заказа: ${data.orderId}</p>
-                        <a href="/my-account" class="btn btn-primary">Перейти в личный кабинет</a>
+                        <a href="/my-orders" class="btn btn-outline-light">Перейти к заказам</a>
                     </div>
                 `;
             } else {
