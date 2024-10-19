@@ -108,3 +108,6 @@ public/test.csv
 public/invoice.html
 public/uc.html
 storage/orders/*
+storage/orders/
+nova-components/DesignPurchaseStats/*
+nova-components/DesignPurchaseStats/
