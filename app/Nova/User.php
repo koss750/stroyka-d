@@ -15,6 +15,8 @@ use App\Models\Message;
 use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\HasMany;
+use App\Nova\Order;
 
 
 
@@ -64,9 +66,9 @@ class User extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()->sortable(),
+            ID::make('№', 'id')->sortable(),
 
-            Gravatar::make()->maxWidth(50),
+            //Gravatar::make()->maxWidth(50),
 
             Text::make('Name')
                 ->sortable()
@@ -78,28 +80,44 @@ class User extends Resource
                 ->creationRules('unique:users,email')
                 ->updateRules('unique:users,email,{{resourceId}}'),
 
+            Text::make('Телефон', 'phone')
+                ->sortable()
+                ->rules('required', 'max:255'),
+
             Password::make('Password')
                 ->onlyOnForms()
                 ->creationRules('required', Rules\Password::defaults())
                 ->updateRules('nullable', Rules\Password::defaults()),
                 
-            Boolean::make('Superadmin')
+            Boolean::make('Администратор', 'superadmin')
                 ->sortable()
                 ->rules('required', 'boolean'),
 
-            // Assuming you have a method on the User model that provides the array structure for the permissions
+            /*
+                // Assuming you have a method on the User model that provides the array structure for the permissions
             BooleanGroup::make('Permissions', 'permissions')
                 ->options([
                     'Designs' => 'Design Model',
                     // Add other resources as necessary
                 ])
                 ->hideFromIndex(),
+            */
+
+            Panel::make('Заказы - проекты', [
+                HasMany::make('Заказы - сметы', 'allSmetaOrders', Order::class),
+                HasMany::make('Заказы - фундаменты', 'allFoundationOrders', Order::class),
+            ]),
+
+            Text::make('Регион', 'regions')
+                ->sortable()
+                ->rules('required', 'max:255'),
 
             Text::make('Переписок', function() {
                 return $this->listOfConversationsIndex();
-            })->onlyOnIndex(),
+            }),
             
-            new Panel('Переписки', $this->conversationFields())
+            //не работает ни хрена - надо группировать а не повторять каждую сто раз
+            //new Panel('Переписки', $this->conversationFields())
         ];
     }
 

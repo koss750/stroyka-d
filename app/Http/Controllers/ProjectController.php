@@ -9,7 +9,13 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\GenerateOrderFileJob;
+use App\Jobs\GenerateOrderExcelJob;
+use App\Models\InvoiceType;
+use App\Models\ProjectPrice;
+use App\Models\Design;
+use App\Models\Setting;
+use App\Models\Foundation;
+use App\Jobs\FoundationOrderFileJob;
 
 class ProjectController extends Controller
 {
@@ -72,35 +78,33 @@ class ProjectController extends Controller
     public function createSmetaOrder(Request $request)
     {
         $designId = $request->input('design_id');
+        $price_type = $request->input('price_type');
         $selectedOptions = json_decode($request->input('selected_configuration'));
         if ($selectedOptions->roof == 222) unset($selectedOptions->roof);
         if ($selectedOptions->foundation == 220) unset($selectedOptions->foundation);
         $configurationDescriptions = json_decode($request->input('configuration_descriptions'));
         $paymentAmount = $request->input('payment_amount');
-        $orderType = $request->input('order_type') ?? 'smeta';
+        $orderType = $request->input('order_type') ?? 'unknown';
         $ipAddress = $request->ip();
         $project = Project::create([
-            'user_id' => Auth::id(),
-            'human_ref' => $this->generateHumanReference($designId),
+            'user_id' => $request->input('user_id'),
+            'human_ref' => $this->generateHumanReference($designId, $orderType),
             'order_type' => $orderType,
             'ip_address' => $ipAddress,
             'payment_reference' => 'test',
             'payment_amount' => $paymentAmount,
+            'price_type' => $price_type,
             'design_id' => $designId,
             'selected_configuration' => $selectedOptions,
             'configuration_descriptions' => $configurationDescriptions,
         ]);
 
-        dispatch(new GenerateOrderFileJob($project->id));
+        dispatch(new GenerateOrderExcelJob($project->id));
 
-        return response()->json([
-            'orderId' => $project->human_ref
-        ]);
-
-        
+        return $project->id;
     }
 
-    public function generateHumanReference($designId)
+    public function generateHumanReference($itemId, $orderType)
     {
         // create an alphanumeric code starting with project ID and using some base of selectedOptions
         $letters = ['А', 'В', 'Е', 'К', 'М', 'Н', 'О', 'Р', 'С', 'Т', 'У', 'Х', '2', '4', '5', '6', '7', '8', '9'];
@@ -108,7 +112,23 @@ class ProjectController extends Controller
         for ($i = 0; $i < 5; $i++) {
             $randomLetters .= $letters[array_rand($letters)];
         }
-        $humanReference = "С" . $designId . "-" . $randomLetters;
+        switch ($orderType) {
+            case 'smeta':
+                $humanReference = "С" . $itemId . "-" . $randomLetters;
+                break;
+            case 's_example':
+                $humanReference = "СМ-" . $randomLetters;
+                break;
+            case 'foundation':
+                $humanReference = "О" . $itemId . "-" . $randomLetters;
+                break;
+            case 'fnd_ex':
+                $humanReference = "OM" . $itemId . "-" . $randomLetters;
+                break;
+            default:
+                $humanReference = "Х3" . $itemId . "-" . $randomLetters;
+                break;
+        }
         return $humanReference;
     }
 
@@ -132,7 +152,7 @@ class ProjectController extends Controller
             'payment_reference' => 'test', // You might want to generate this dynamically
         ]);
 
-        GenerateOrderFileJob::dispatch($project->id);
+        GenerateOrderExcelJob::dispatch($project->id);
 
         return response()->json([
             'message' => 'Order created successfully',
@@ -192,6 +212,158 @@ class ProjectController extends Controller
         ];
 
         return response()->json($projectData);
+    }
+
+    public function view($id)
+    {
+        $project = Project::where('human_ref', $id)
+                      ->where('user_id', auth()->id())
+                      ->firstOrFail();
+        $designTitle = Design::where('id', $project->design_id)->firstOrFail()->title;
+        $selectedConfiguration = $project->selected_configuration;
+        $priceSetting = $project->price_type;
+        if ($priceSetting == 'material') {
+            $displayLabour = false;
+        } else {
+            $displayLabour = true;
+        }
+        $invoiceTypeIds = [];
+
+        if (isset($selectedConfiguration['foundation']) && InvoiceType::where('ref', $selectedConfiguration['foundation'])->exists()) {
+            $invoiceTypeIds[] = InvoiceType::where('ref', $selectedConfiguration['foundation'])->first()->id;
+        }
+
+        if (isset($selectedConfiguration['dd']) && InvoiceType::where('ref', $selectedConfiguration['dd'])->exists()) {
+            $invoiceTypeIds[] = InvoiceType::where('ref', $selectedConfiguration['dd'])->first()->id;
+        }
+
+        if (isset($selectedConfiguration['roof']) && InvoiceType::where('ref', $selectedConfiguration['roof'])->exists()) {
+            $invoiceTypeIds[] = InvoiceType::where('ref', $selectedConfiguration['roof'])->first()->id;
+        }
+        $sheetStructures = [];
+        $totalLabour = 0;
+        $totalMaterial = 0;
+        $titleOrder = 0;
+        foreach ($invoiceTypeIds as $invoiceTypeId) {
+            $titleOrder++;
+            $projectPrice = ProjectPrice::where('invoice_type_id', $invoiceTypeId)
+                                        ->where('design_id', $project->design_id)
+                                        ->firstOrFail();
+
+            if ($projectPrice) {
+                $invoiceType = InvoiceType::where('id', $invoiceTypeId)->firstOrFail();
+                $data = json_decode($projectPrice->parameters, true);
+                $sheetStructure = $data['sheet_structure'] ?? null;
+                $smetaTitle = str_replace('{order}', $titleOrder, $invoiceType->custom_order_title);
+                if ($sheetStructure) {
+                    $sheetStructures[] = [
+                        'title' => $smetaTitle,
+                        'data' => $sheetStructure
+                    ];
+
+                    // Calculate totals
+                    foreach ($sheetStructure['sections'] as $section) {
+                        foreach ($section['labourItems'] as $item) {
+                            $addableItem = false;
+                            if (isset($item['labourTotal']) && is_numeric($item['labourTotal'])) {
+                                $addableItem = true;
+                            }
+                            if ($addableItem) {
+                                $totalLabour += $item['labourTotal'] ?? 0;
+                            }
+                        }
+                        foreach ($section['materialItems'] as $item) {
+                            $addableItem = false;
+                            if (isset($item['materialTotal']) && is_numeric($item['materialTotal'])) {
+                                $addableItem = true;
+                            }
+                            if ($addableItem) {
+                                $totalMaterial += $item['materialTotal'] ?? 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (empty($sheetStructures)) {
+            return redirect()->back()->with('error', 'Order data not found.');
+        }
+
+
+        $combinedTotals = [
+            'labour' => 0,
+            'material' => 0,
+            'total' => 0,
+            'shipping' => 0
+        ];
+        foreach ($sheetStructures as $sheetStructure) {
+            foreach ($sheetStructure['data']['totals'] as $key=>$total) {
+                $combinedTotals[$key] += $total;
+            }
+        }
+        $totals = $combinedTotals;
+
+        return view('order_view', compact('project', 'sheetStructures', 'totals', 'designTitle', 'displayLabour'));
+    }
+
+    public function selectFoundationSettings(Request $request)
+    {
+        $request->validate([
+            'foundation_id' => 'required|exists:foundations,id',
+            'cellMappings' => 'required|array',
+        ]);
+
+        $foundationId = $request->input('foundation_id');
+        $cellMappings = $request->input('cellMappings');
+
+        // Here you might want to do some processing or validation of the cell mappings
+        // For now, we'll just return a success response
+
+        return response()->json([
+            'message' => 'Foundation settings received successfully',
+            'foundation_id' => $foundationId,
+        ]);
+    }
+
+    public function generateFoundationOrder(Request $request)
+    {
+        $request->validate([
+            'foundation_id' => 'required|exists:foundations,id',
+            'cellMappings' => 'required|array',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $foundationId = $request->input('foundation_id');
+        $cellMappings = $request->input('cellMappings');
+        $userId = $request->input('user_id');
+
+        $foundation = Foundation::findOrFail($foundationId);
+
+        $orderType = 'foundation';
+
+        // Create a new project for the foundation order
+        $project = Project::create([
+            'user_id' => $userId,
+            'human_ref' => $this->generateHumanReference($foundation->id, $orderType),
+            'order_type' => $orderType,
+            'ip_address' => $request->ip(),
+            'is_example' => $request->input('is_example'),
+            'payment_reference' => 'pending',
+            'payment_amount' => 200, // This will be updated later
+            'foundation_id' => $foundation->id,
+            'selected_configuration' => $cellMappings,
+        ]);
+
+        // Dispatch the job to generate the foundation order file
+        FoundationOrderFileJob::dispatch($project);
+        GenerateOrderExcelJob::dispatch($project->id);
+
+        return response()->json([
+            'message' => 'Foundation order generation job dispatched successfully',
+            'project_id' => $project->id,
+            'order_id' => $project->human_ref,
+        ]);
     }
 
     public function submitOffer(Project $project, Request $request)

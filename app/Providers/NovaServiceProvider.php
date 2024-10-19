@@ -7,13 +7,12 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
 use App\Http\Controllers\RuTranslationController as Translator;
-use Laravel\Nova\Dashboard;
 use App\Models\Design as Design;
 use Laravel\Nova\Events\ServingNova;
 use App\Nova\Floor;
 use App\Nova\Room;
 use App\Nova\Design as NovaDesign;
-use Laravel\Nova\Dashboards\Main;
+use App\Nova\Dashboards\Main;
 use App\Nova\FormField;
 use Laravel\Nova\Menu\Menu;
 use Laravel\Nova\Menu\MenuItem;
@@ -24,12 +23,17 @@ use App\Nova\Contractor;
 use App\Nova\User;
 use App\Nova\ExcelSheet as ExcelResource;
 use App\Nova\Order;
-use App\Nova\Setting;
+use App\Nova\Setting as SettingsOriginal;
 //use App\Nova\DynamicPageCard;
 use App\Nova\Cards\RedisKeysCard;
 use Illuminate\Http\Request;
 use App\Nova\DesignNonAdmin;
 use App\Nova\DesignSeo;
+use App\Nova\ProjectPriceViewer;
+use App\Nova\ProjectType;
+use App\Nova\Metrics\DesignPurchaseStats;
+use App\Nova\DesignPurchaseStatistic;
+use App\Nova\InvoiceTypeStatistic;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -44,25 +48,25 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
         Nova::mainMenu(function (Request $request) {
             return [
-                //MenuSection::dashboard(Main::class)->icon('chart-bar'),
 
-                MenuSection::make(Translator::translate('inventory_menu'), [
+                MenuSection::dashboard(Main::class),
+
+                MenuSection::make(Translator::translate('business_menu'), [
                     MenuItem::resource(NovaDesign::class),
-                    MenuItem::resource(FormField::class),
-                    MenuItem::resource(DesignNonAdmin::class),
-                    MenuItem::resource(DesignSeo::class),
-                    MenuItem::resource(Setting::class),
-                ])->icon('library')->collapsable(),
-
-                MenuSection::make(Translator::translate('orders_menu'), [
+                    MenuItem::resource(DesignPurchaseStatistic::class),
                     MenuItem::resource(Order::class),
-                    //MenuItem::resource(AssociatedCost::class),
-                ])->icon('shopping-cart')->collapsable(),
-
-                MenuSection::make(Translator::translate('users_menu'), [
                     MenuItem::resource(Supplier::class),
                     MenuItem::resource(User::class),
-                ])->icon('user-group')->collapsable(),
+                    //MenuItem::resource(AssociatedCost::class),
+                ])->icon('library')->collapsable(),
+
+                MenuSection::make("Настройки в разработке", [
+                //MenuSection::make(Translator::translate('settings_menu'), [
+                    MenuItem::resource(FormField::class),
+                    /*MenuItem::resource(DesignNonAdmin::class),
+                    MenuItem::resource(DesignSeo::class),
+                    MenuItem::resource(SettingsOriginal::class),*/
+                ])->icon('cog')->collapsable(),
             ];
         });
 
@@ -138,7 +142,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function dashboards()
     {
         return [
-            //new \App\Nova\Dashboards\CustomDashboard(),
+            new Main
         ];
     }
 
@@ -157,7 +161,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function cards()
     {
         return [
-          //  new RedisKeysCard(),
+            new DesignPurchaseStats,
         ];
     }
 
@@ -170,7 +174,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         Nova::resources([
             Floor::class,
-            Room::class
+            Room::class,
         ]);
     }
 }

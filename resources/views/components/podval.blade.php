@@ -6,8 +6,9 @@
             </div>
             <div class="col-sm-4">
                 <ul>
-                    <li><a href="#">Политика конфиденциальности</a></li>
-                    <li><a href="#">Условия использования</a></li>
+                    <li><a href="{{ route('terms.and.conditions') }}">Политика конфиденциальности</a></li>    
+                <li><a href="{{ route('terms.and.conditions') }}">Блог</a></li>
+                    <li><a href="{{ route('terms.and.conditions') }}">Условия использования</a></li>
                 </ul>
             </div>
         </div>

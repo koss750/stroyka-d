@@ -7,6 +7,7 @@ use App\Http\Controllers\DesignController as DC;
 use App\Http\Controllers\RuTranslationController as Translator;
 use App\Http\Controllers\InvoiceController as Invoice;
 use App\Models\FormField;
+use App\Models\Foundation;
 //use Illuminate\Support\Facades\Redis;
 
 class UIController extends Controller
@@ -27,41 +28,51 @@ class UIController extends Controller
     public function lentaFoundationCalculator()
     {
         $formFields = FormField::where('form_type', 'lenta')->orderBy('order')->get();
+        $foundation = Foundation::where('title', 'lenta')->firstOrFail();
+        $foundation->image = 'https://xn--80ardojfh.com/images/foundation-lenta.jpg';
         $page_title = 'Калькулятор ленточного фундамента';
         $page_description = 'Рассчитайте стоимость ленточного фундамента';
-        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description', 'foundation'));
     }
 
     public function SRPFoundationCalculator()
     {
         $formFields = FormField::where('form_type', 'srp')->orderBy('order')->get();
+        $foundation = Foundation::where('title', 'svs')->firstOrFail();
+        $foundation->image = 'https://xn--80ardojfh.com/images/foundation-srp.jpg';
         $page_title = 'Калькулятор свайно ростверкового фундамента с плитой перекрытия';
         $page_description = 'Расчёт свайно-ростверкового фундамента с плитой перекрытия';
-        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description', 'foundation'));
     }
 
     public function SRFoundationCalculator()
     {
         $formFields = FormField::where('form_type', 'sr')->orderBy('order')->get();
+        $foundation = Foundation::where('title', 'sv')->firstOrFail();
+        $foundation->image = 'https://xn--80ardojfh.com/images/foundation-sr.jpg';
         $page_title = 'Калькулятор свайно ростверкового фундамента';
         $page_description = 'Расчёт свайно-ростверкового фундамента';
-        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description', 'foundation'));
     }
 
     public function LPFoundationCalculator()
     {
         $formFields = FormField::where('form_type', 'lp')->orderBy('order')->get();
+        $foundation = Foundation::where('title', 'pLenta')->firstOrFail();
+        $foundation->image = 'https://xn--80ardojfh.com/images/foundation-lp.jpg';
         $page_title = 'Калькулятор ленточного фундамента с плитой перекрытия';
         $page_description = 'Рассчитайте стоимость ленточного плитного фундамента';
-        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description', 'foundation'));
     }
 
     public function MPFoundationCalculator()
     {
         $formFields = FormField::where('form_type', 'mp')->orderBy('order')->get();
+        $foundation = Foundation::where('title', 'plita')->firstOrFail();
+        $foundation->image = 'https://xn--80ardojfh.com/images/foundation-mp.jpg';
         $page_title = 'Калькулятор фундамента монолитная плита';
         $page_description = 'Калькулятор фундамента монолитная плита';
-        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description'));
+        return view('foundation.lenta', compact('formFields', 'page_title', 'page_description', 'foundation'));
     }
 	
     // Dashboard

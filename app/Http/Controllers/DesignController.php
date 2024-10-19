@@ -21,6 +21,8 @@ use App\Models\DesignSeo;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 use App\Models\Region;
+use App\Models\Foundation;
+use Illuminate\Support\Facades\Cache;
 
 
 
@@ -268,7 +270,7 @@ $html .= '<thead class="thead-dark">';
         ->where('active', 1)
         ->whereRaw("title NOT LIKE ?", ['%.'. $query .'%'])
         ->whereRaw("title NOT LIKE ?", ['%,'. $query .'%'])
-        ->select('id', 'title')
+        ->select('id', 'title', 'slug')
         ->orderByRaw("size ASC")
         ->limit(10)
         ->get();
@@ -351,14 +353,22 @@ $html .= '<thead class="thead-dark">';
     
     public function getDemoDesigns($category_group = 'doma_iz_brevna')
     {
-        $category_groups = [
-            'doma_iz_brevna' => ['df_cat_4', 'df_cat_19', 'df_cat_20'],
-            'doma_iz_brusa' => ['df_cat_1', 'df_cat_9', 'df_cat_21', 'df_cat_22'],
-            'bani_iz_brevna' => ['df_cat_7', 'df_cat_13', 'df_cat_14'],
-            'bani_iz_brusa' => ['df_cat_2', 'df_cat_5', 'df_cat_6', 'df_cat_15', 'df_cat_16'],
-        ];
-        foreach ($category_groups[$category_group] as $category) {
-            $designs[] = Design::where('category', 'LIKE', '%"category":"' . $category . '"%')
+        // Cache key based on the category group
+        $cacheKey = "demo_designs_{$category_group}";
+    
+        // Try to get the data from cache, if not found, compute and cache it
+        $designs = Cache::remember($cacheKey, now()->addHours(12), function () use ($category_group) {
+            $category_groups = [
+                'doma_iz_brevna' => ['df_cat_4', 'df_cat_19', 'df_cat_20'],
+                'doma_iz_brusa' => ['df_cat_1', 'df_cat_9', 'df_cat_21', 'df_cat_22'],
+                'bani_iz_brevna' => ['df_cat_7', 'df_cat_13', 'df_cat_14'],
+                'bani_iz_brusa' => ['df_cat_2', 'df_cat_5', 'df_cat_6', 'df_cat_15', 'df_cat_16'],
+            ];
+    
+            $designs = collect();
+    
+            foreach ($category_groups[$category_group] as $category) {
+                $categoryDesigns = Design::where('category', 'LIKE', '%"category":"' . $category . '"%')
                     ->where('active', 1)
                     ->get()
                     ->sortBy('size')
@@ -367,23 +377,31 @@ $html .= '<thead class="thead-dark">';
                         $design->reviewCount = 10;
                         return $this->transformDesign($design);
                     });
-        }
-        $designs = collect($designs)->flatten();
-        //$fullUrl = $request->fullUrl();
-        //$count = Redis::get("visits:$fullUrl") ?? 0;
+    
+                $designs = $designs->concat($categoryDesigns);
+            }
+    
+            return $designs->flatten();
+        });
+    
         $page_title = Translator::translate("listing_page_title");
         $page_description = Translator::translate("listing_page_description");
+    
         return view('alternative_index', compact('page_title', 'page_description', 'designs'));
     }
 
     public function getDemoDetail($id = 220, Request $request)
 {
-    $currentSetting = Setting::where('label', 'display_prices')->first()->value;
-    $toolTipLabel = Setting::where('label', 'tooltip_label_'.$currentSetting)->first()->value;
+    if (is_numeric($id)) {
+        $design = Design::where('id', $id)->firstOrFail();
+        return redirect('/project/' . $design->slug);
+    }
+    $design = Design::where('slug', $id)->firstOrFail();
+    $currentSetting = Setting::where('key', 'display_prices')->first()->value;
+    $toolTipLabel = Setting::where('key', 'tooltip_label_'.$currentSetting)->first()->value;
     // Increment view count in Redis
-    $redisKey = "design_views:{$id}";
+    $redisKey = "design_views:{$design->id}";
     Redis::incr($redisKey);
-    $design = Design::where('id', $id)->firstOrFail();
     $design->rating = 5;
     $design->etiketka = json_decode($design->details, true)["price"];
     $design->etiketka = round($design->etiketka, 2);
@@ -400,16 +418,20 @@ $html .= '<thead class="thead-dark">';
         $design->user = false;
     }
 
-    $meta = DesignSeo::where('design_id', $id)->first();
-    $foundations = $this->buildNestedOptions($data->where('parent', 102), $data, $id);
-    $dd_options = $this->buildNestedOptions($data->where('parent', 103), $data, $id);
-    $roofs = $this->buildNestedOptions($data->where('parent', 101), $data, $id);
+    $meta = DesignSeo::where('design_id', $design->id)->first();
 
-    $nestedData = [
-        'foundations' => $foundations,
-        'dd_options' => $dd_options,
-        'roofs' => $roofs,
-    ];
+    // Cache key for nested data
+    $cacheKey = "nested_data_{$id}";
+
+    // Try to get nested data from cache
+    $nestedData = Cache::remember($cacheKey, now()->addHours(24), function () use ($data, $design) {
+        return [
+            'foundations' => $this->buildNestedOptions($data->where('parent', 102), $data, $design->id),
+            'dd_options' => $this->buildNestedOptions($data->where('parent', 103), $data, $design->id),
+            'roofs' => $this->buildNestedOptions($data->where('parent', 101), $data, $design->id),
+        ];
+    });
+
     $fullUrl = $request->fullUrl();
     $page_title = Translator::translate("listing_page_title");
     $page_description = Translator::translate("listing_page_description");
@@ -421,7 +443,7 @@ $html .= '<thead class="thead-dark">';
 private function getPriceFromDb($id, $invoice_type_id)
 {
     try {
-        $setting = Setting::where('label', 'display_prices')->first();
+        $setting = Setting::where('key', 'display_prices')->first();
         $displayPrices = $setting->value;
         $invoice_type_id = InvoiceType::where('label', $invoice_type_id)->first()->id;
         $price = ProjectPrice::where('design_id', $id)->where('invoice_type_id', $invoice_type_id)->first();
@@ -473,10 +495,9 @@ private function getPriceFromDb($id, $invoice_type_id)
     }
 
     
-    public function getDemoOrder(Request $request)
+    public function getDemoOrder(Request $request, $payment_status = null, $new_order = null)
     {
         $user = Auth::user();
-
         $projects = Project::where(function($query) use ($user) {
                         $query->where('user_id', $user ? $user->id : null);
                     })
@@ -492,39 +513,102 @@ private function getPriceFromDb($id, $invoice_type_id)
 
         $page_title = "Заказы";
         $page_description = Translator::translate("listing_page_description");
-        return view('orders', compact('page_title', 'page_description', 'projects', 'regions', 'userRegion'));
+        return view('orders', compact('page_title', 'page_description', 'projects', 'regions', 'payment_status', 'new_order'));
+    }
+
+    public function getDemoOrderNew(Request $request, $payment_status, $new_order = null)
+    {
+        $new_order = $new_order ?? "О5-У582У";
+        return $this->getDemoOrder($request, $payment_status, $new_order);
     }
     
     private function transformProject($project)
     {
         $filepath = "http://tmp.стройка.com/storage";
         $original = $project->filepath;
-        $project->title = Design::where('id', $project->design_id)->first()->title;
-        $thumbnail = Design::where('id', $project->design_id)->first()->thumbnail;
-        $configuration = $project->configuration_descriptions;
-        $configurationArray = [$configuration['foundation'], $configuration['dd'], $configuration['roof']];
-        $configuration_string = "";
-        foreach ($configurationArray as $key => $value) {
-            if ($key == 0) $configuration_string.= $value . " ";
-            if ($key == 1) $configuration_string.= $value . " ";
-            if ($key == 2) $configuration_string.= $value;
+
+        if ($project->design_id) {
+            $design = Design::find($project->design_id);
+            $title = $design ? $design->title : 'Unknown Design';
+            if (strpos($title, 'Б-ПБ') !== false) {
+                $title = 'Баня из бруса ' . $design->size . 'м2 (Проект ' . $title . ')';
+            } elseif (strpos($title, 'Б-ОЦБ') !== false) {
+                $title = 'Баня из бревна ' . $design->size . 'м2 (Проект ' . $title . ')';
+            } elseif (strpos($title, 'Д-ОЦБ') !== false) {
+                $title = 'Дом из бревна ' . $design->size . 'м2 (Проект ' . $title . ')';
+            } elseif (strpos($title, 'Д-ПБ') !== false) {
+                $title = 'Дом из бруса ' . $design->size . 'м2 (Проект ' . $title . ')';
+            }
+            $thumbnail = $design ? $design->thumbnail : null;
+        } elseif ($project->foundation_id) {
+            $foundation = Foundation::find($project->foundation_id);
+            $title = "Расчет фундамента";
+            if ($project->is_example) {
+                $title = "Пример расчета фундамента";
+            }
+            $thumbnail = null; // Foundations might not have thumbnails
+        } else {
+            $title = 'Unknown Project';
+            $thumbnail = null;
         }
+
+        $configuration_string = "";
+        if ($project->configuration_descriptions) {
+            $configuration = $project->configuration_descriptions;
+            $configurationArray = [
+                $configuration['foundation'] ?? null,
+                $configuration['dd'] ?? null,
+                $configuration['roof'] ?? null
+            ];
+            $configuration_string = implode(" ", array_filter($configurationArray));
+        } elseif ($project->selected_configuration) {
+            // Handle foundation configuration
+            $configuration_string = $foundation->site_title; // You might want to elaborate on this
+        }
+
+        $price_type = $project->price_type;
+        $price_type_string = "";
+        if ($price_type == 'material') {
+            $price_type_string = "Только материалы";
+        } elseif ($price_type == 'total') {
+            $price_type_string = "Материалы + работы";
+        } else $price_type_string = "";
+
+        $configuration_string = $configuration_string . " (" . $price_type_string . ")";
+
         return [
             'id' => $project->human_ref,
-            'title' => $project->title,
+            'order_id' => $project->id,
+            'title' => $title,
             'status' => $project->status,
             'created_at' => $project->getFormattedCreatedAtAttribute(),
             'updated_at' => $project->getFormattedUpdatedAtAttribute(),
             'thumbnail' => $thumbnail,
             'configuration' => $configuration_string,
             'payment_amount' => $project->payment_amount,
+            'payment_status' => $project->payment_status,
+            'payment_reference' => $project->payment_reference,
+            'payment_link' => $project->payment_link,
             'filepath' => $project->filepath,
+            'is_example' => $project->is_example,
             'design' => $project->design ? $this->transformDesign($project->design) : null,
+            'foundation' => $project->foundation ? $this->transformFoundation($project->foundation) : null,
             'executor' => $project->executor ? [
                 'id' => $project->executor->id,
                 'name' => $project->executor->name,
                 'company_name' => $project->executor->supplier->company_name ?? null,
             ] : null,
+        ];
+    }
+
+    // Add this new method to handle foundation transformations
+    private function transformFoundation($foundation)
+    {
+        // Transform foundation data as needed
+        return [
+            'id' => $foundation->id,
+            'title' => $foundation->title,
+            // Add other relevant foundation properties
         ];
     }
     
@@ -543,7 +627,6 @@ private function getPriceFromDb($id, $invoice_type_id)
     }
     
      
-    
     
     
     
@@ -613,8 +696,25 @@ private function getPriceFromDb($id, $invoice_type_id)
         $design->setMaterialDescription();
         $design->setDefaultRef();
         $design->image_url = $design->mildMailImage();
+        // Add smetaPrice calculation
+        $design->smeta_price = $this->calculateSmetaPrice($design->size);
+
         return $design;
     }
+
+    private function calculateSmetaPrice($size, $category = 'smeta-normal')
+    {
+        $customerPrices = Setting::where('key', 'customer_prices');
+        /*
+        foreach ($customerPrices as $price) {
+            if ($size >= $price->range_from && $size <= $price->range_to) {
+                return $price->value;
+            }
+        }
+        */
+        return 200;
+    }
+
     
     
 

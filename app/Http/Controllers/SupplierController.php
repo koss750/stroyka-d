@@ -70,16 +70,44 @@ class SupplierController extends Controller
         return response()->json(['success' => true, 'message' => 'Регистрация успешно отправлена']);
     }
 
-    // Contacts
-    public function indexSuppliers(){
+    // Список поставщиков
+    public function indexSuppliers(Request $request)
+    {
         $page_title = 'Исполнители';
         $page_description = 'Наши партнёры';
-		return view('suppliers-index', compact('page_title', 'page_description'));
+
+        $query = Supplier::where('status', 'approved')->with('regions');
+
+        if ($request->has('type')) {
+            switch ($request->type) {
+                case 'ltd':
+                    $query->where('type_of_organisation', 'ltd');
+                    break;
+                case 'brigade':
+                    $query->where('type_of_organisation', 'brigade');
+                    break;
+                case 'se':
+                    $query->where('type_of_organisation', 'se');
+                    break;
+            }
+        }
+
+        $suppliers = $query->get();
+
+        return view('suppliers-index', compact('page_title', 'page_description', 'suppliers'));
     }
 
-    public function checkCompany(Request $request)
+    // Профиль поставщика
+    public function viewProfile($id)
     {
-        $inn = $request->input('inn');
+        $supplier = Supplier::with('regions')->findOrFail($id);
+        $currentUser = auth()->user();
+        return view('view-profile', compact('supplier', 'currentUser'));
+    }
+
+    // Проверка компании по ИНН
+    public function checkCompany($inn)
+    {
         $token = env('DADATA_API');
 
         $response = Http::withHeaders([
@@ -94,6 +122,11 @@ class SupplierController extends Controller
 
         if (isset($data['suggestions'][0])) {
             $suggestion = $data['suggestions'][0];
+            if ($suggestion['data']['state']['status'] == 'ACTIVE') {
+                $is_active = true;
+            } else {
+                $is_active = false;
+            }
             return response()->json([
                 'success' => true,
                 'company_name' => $suggestion['value'],
@@ -101,6 +134,7 @@ class SupplierController extends Controller
                 'ogrn' => $suggestion['data']['ogrn'],
                 'address' => $suggestion['data']['address']['value'],
                 'state_status' => $suggestion['data']['state']['status'],
+                'is_active' => $is_active,
                 'ogrn_date' => $suggestion['data']['ogrn_date'],
             ]);
         } else {

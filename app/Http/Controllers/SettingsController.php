@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
 {
@@ -12,21 +13,33 @@ class SettingsController extends Controller
         return Setting::all();
     }
 
-    public function show($label)
+    public function show($key)
     {
-        return Setting::where('label', $label)->firstOrFail();
+        if ($key == 'special') {
+            $setting = Setting::where('key', $key)->firstOrFail();
+            $setting->treatAsRefillable = true;
+            return $setting;
+        } else {
+            return Setting::where('key', $key)->firstOrFail();
+        }
     }
 
-    public function update(Request $request, $label)
+    public function update(Request $request, $key)
     {
+        $setting = Setting::where('key', $key)->firstOrFail();
+
         $request->validate([
-            'value' => 'required|string',
-            'affected_users' => 'sometimes|string',
-            'affected_areas' => 'sometimes|string',
+            'name' => 'required|string',
+            'description' => 'nullable|string',
+            'type' => ['required', Rule::in(['text', 'select', 'multiple_select', 'key_value', 'nested_select', 'nested_boolean'])],
+            'options' => 'nullable|json',
+            'value' => 'required',
+            'enabled' => 'required|boolean',
+            'affected_users' => 'required|string',
+            'affected_areas' => 'required|string',
         ]);
 
-        $setting = Setting::where('label', $label)->firstOrFail();
-        $setting->update($request->only(['value', 'affected_users', 'affected_areas']));
+        $setting->update($request->all());
 
         return $setting;
     }

@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
     }
 
     protected $commands = [
-        Commands\UpdateDesignDetails::class,
-        Commands\ContinueMediaConversions::class,
+        Commands\DesignDetailsCommand::class,
+        Commands\ImageConversionCommand::class,
     ];
 }

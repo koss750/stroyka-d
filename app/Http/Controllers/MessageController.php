@@ -72,7 +72,13 @@ class MessageController extends Controller
     public function getNewMessages(Request $request, $userId)
     {
         $user = Auth::user();
-        $lastTimestamp = $request->input('last_timestamp');
+        $lastTimestamp = Carbon::parse($request->input('last_timestamp'));
+
+        \Log::info('Fetching new messages', [
+            'user_id' => $user->id,
+            'other_user_id' => $userId,
+            'last_timestamp' => $lastTimestamp->toDateTimeString()
+        ]);
 
         $messages = Message::where(function($query) use ($user, $userId) {
             $query->where('sender_id', $user->id)->where('receiver_id', $userId);
@@ -82,6 +88,8 @@ class MessageController extends Controller
           ->with(['project', 'sender', 'attachments'])
           ->orderBy('created_at', 'asc')
           ->get();
+
+        \Log::info('Found messages', ['count' => $messages->count()]);
 
         $formattedMessages = $messages->map(function ($message) {
             return [

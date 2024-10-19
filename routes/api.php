@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ProjectController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,7 +33,7 @@ Route::post('/designs/{id}/update-order', [DesignController::class, 'updateOrder
 Route::get('/regions/search', [RegionController::class, 'searchRegions']);
 Route::get('/regions', [RegionController::class, 'getAllRegions']);
 Route::post('/register-legal-entity', [SupplierController::class, 'registerCompany']);
-Route::post('/check-company', [SupplierController::class, 'checkCompany']);
+Route::get('/check-company/{inn}', [SupplierController::class, 'checkCompany']);
 Route::post('register-individual', [RegisterController::class, 'create']);
 Route::post('register-legal-entity', [RegisterController::class, 'registerLegalEntity']);
 Route::post('email/verify/{id}', [VerificationController::class, 'verifyEmail'])
@@ -43,3 +44,5 @@ Route::post('email/resend', [VerificationController::class, 'sendVerificationEma
     ->name('verification.verify');
     Route::get('/projects/{projectId}/available-executors', [SupplierController::class, 'getAvailableExecutors']);
     Route::post('/projects/{projectId}/contact-executor', [MessageController::class, 'contactExecutor']);
+Route::post('/foundation/select-settings', [ProjectController::class, 'selectFoundationSettings']);
+Route::post('/foundation/generate-order', [ProjectController::class, 'generateFoundationOrder']);

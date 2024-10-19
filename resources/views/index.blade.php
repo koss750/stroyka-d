@@ -62,7 +62,7 @@
                     <div class="inner">
                         <div class="box">
                             <div class="image">
-                                <img src="/images/2_.jpg" alt="Фундамент ленточный" loading="lazy">
+                                <img src="https://xn--80ardojfh.com/images/foundation-lenta.jpg" alt="Фундамент ленточный" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/fundament/fundament-lentochnyj/" aria-label="Перейти к расчету фундамента ленточного">
@@ -74,7 +74,7 @@
 
                         <div class="box">
                             <div class="image">
-                                <img src="images/5_.jpg" alt="Фундамент свайно-ростверковый" loading="lazy">
+                                <img src="https://xn--80ardojfh.com/images/foundation-sr.jpg" alt="Фундамент свайно-ростверковый" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/fundament/fundament-svayno-rostverkovyy/" aria-label="Перейти к расчету фундамента свайно-ростверкового">
@@ -85,7 +85,7 @@
                         </div>
                         <div class="box">
                             <div class="image">
-                                <img src="images/1_.jpg" alt="Фундамент ленточный с плитой перекрытия" loading="lazy">
+                                <img src="https://xn--80ardojfh.com/images/foundation-lp.jpg" alt="Фундамент ленточный с плитой перекрытия" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/fundament/fundament-lentochniy-s-plitoy" aria-label="Перейти к расчету фундамента ленточного с плитой перекрытия">
@@ -97,7 +97,7 @@
                         
                         <div class="box">
                             <div class="image">
-                                <img src="images/4_.jpg" alt="Фундамент свайно-ростверковый с плитой перекрытия" loading="lazy">
+                                <img src="https://xn--80ardojfh.com/images/foundation-srp.jpg" alt="Фундамент свайно-ростверковый с плитой перекрытия" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/fundament/fundament-svayno-rostverkovyy-s-plitoy" aria-label="Перейти к расчету фундамента свайно-ростверкового с плитой перекрытия">
@@ -108,7 +108,7 @@
                         </div>
                         <div class="box">
                             <div class="image">
-                                <img src="images/3_.jpg" alt="Фундамент монолитная плита" loading="lazy">
+                                <img src="https://xn--80ardojfh.com/images/foundation-mp.jpg" alt="Фундамент монолитная плита" loading="lazy">
                             </div>
                             <div class="content">
                                 <a href="/fundament/fundament-monolitnaya-plita" aria-label="Перейти к расчету фундамента монолитной плиты">

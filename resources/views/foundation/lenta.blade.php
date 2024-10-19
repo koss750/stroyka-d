@@ -36,7 +36,7 @@
                     @if($field->type == 'number')
                         <input type="text" class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" placeholder="{{ $field->default }}" {{ $isDisabled }} data-type="number">
                     @elseif($field->type == 'select')
-                        <select class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" {{ $isDisabled }}>
+                        <select class="form-control light-placeholder" id="{{ $field->name }}" name="{{ $field->name }}" {{ $isRequired }} data-excel-cell="{{ $field->excel_cell }}" {{ $isDisabled }} data-default="{{ $field->default }}">
                             @php
                                 $options = explode(',', $field->options);
                                 $firstOption = true;
@@ -56,16 +56,31 @@
                     @endif
                 </div>
             @endforeach
-            <button type="submit" class="btn btn-primary mt-3">Рассчитать стоимость</button>
+            <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#exampleModal">Пример сметы</button>
+            <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#paymentModal">Купить смету</button>
         </form>
     </div>
 </div>
+
+@component('components.foundation-payment-modal', ['id' => $foundation->id, 'title' => $foundation->site_title, 'image' => $foundation->image, 'price' => 0])
+@endcomponent
+@component('components.foundation-payment-modal', ['id' => $foundation->id, 'title' => $foundation->site_title, 'image' => $foundation->image, 'price' => 500])
+@endcomponent
 @endsection
 
 @section('additional_scripts')
 <script>
     $(document).ready(function() {
         $('[data-toggle="tooltip"]').tooltip();
+
+        // Button click handlers for opening modals
+        $('[data-target="#exampleModal"]').on('click', function() {
+            $('#exampleModal').modal('show');
+        });
+
+        $('[data-target="#paymentModal"]').on('click', function() {
+            $('#paymentModal').modal('show');
+        });
 
         // Handle dependent fields
         $('[data-depends-on]').each(function() {
@@ -82,16 +97,20 @@
             }).trigger('change'); // Trigger change to set initial state
         });
 
-        $('#stripFoundationForm').on('submit', function(e) {
-            e.preventDefault();
-            var formData = $(this).serializeArray();
+        function getFormData(useDefaults = false) {
+            var formData = $('#stripFoundationForm').serializeArray();
             var excelData = {};
             
             formData.forEach(function(input) {
                 var $input = $('[name="' + input.name + '"]');
                 var excelCell = $input.data('excel-cell');
                 if (excelCell) {
-                    var value = input.value;
+                    var value;
+                    if (useDefaults) {
+                        value = $input.attr('placeholder') || $input.data('default') || '';
+                    } else {
+                        value = input.value;
+                    }
                     if ($input.data('type') === 'number') {
                         value = parseFloat(value) || 0;
                     }
@@ -99,26 +118,59 @@
                 }
             });
 
-            // Send excelData to the Excel processing application
+            return excelData;
+        }
+
+        function sendFoundationData(isExample) {
+            var formData = getFormData(isExample);
+            var additionalData = isExample ? $('#exampleForm').serializeArray() : $('#paymentForm').serializeArray();
+            
+            additionalData.forEach(function(input) {
+                formData[input.name] = input.value;
+            });
+
             $.ajax({
-                url: 'http://tmp.стройка.com/foundation-full-file',
-                method: 'GET',
+                url: '/api/foundation/generate-order',
+                method: 'POST',
                 data: JSON.stringify({
-                    foundation_type: 'lenta',
-                    excel_data: excelData
+                    foundation_id: {{ $foundation->id }},
+                    cellMappings: formData.excel_data,
+                    is_example: isExample,
+                    user_id: {{ Auth::id() ?? 'null' }} // Add this line
                 }),
                 contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 success: function(response) {
-                    if (response.download_url) {
-                        window.location.href = response.download_url;
+                    if (isExample) {
+                        alert('Настройки фундамента сохранены успешно. Пример сметы будет отправлен на указанный email.');
                     } else {
-                        alert('Ошибка при генерации файла.');
+                        if (response.order_id) {
+                            alert('Заказ создан успешно. Номер заказа: ' + response.order_id);
+                            // You might want to redirect to an order confirmation page here
+                        } else {
+                            alert('Ошибка при создании заказа.');
+                        }
                     }
                 },
-                error: function() {
-                    alert('Произошла ошибка при обработке данных.');
+                error: function(xhr) {
+                    var errorMessage = xhr.responseJSON && xhr.responseJSON.message 
+                        ? xhr.responseJSON.message 
+                        : 'Произошла ошибка при обработке данных.';
+                    alert(errorMessage);
                 }
             });
+        }
+
+        $('#exampleForm').on('submit', function(e) {
+            e.preventDefault();
+            sendFoundationData(true);
+        });
+
+        $('#paymentForm').on('submit', function(e) {
+            e.preventDefault();
+            sendFoundationData(false);
         });
 
         // Validate number inputs
@@ -136,6 +188,33 @@
             if (e.which === 38 || e.which === 40) {
                 e.preventDefault();
             }
+        });
+
+        // Card number formatting
+        $('#card-number').on('input', function() {
+            var target = this;
+            var position = target.selectionEnd;
+            var length = target.value.length;
+            
+            target.value = target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+            target.selectionEnd = position += ((target.value.charAt(position - 1) === ' ' && target.value.charAt(length - 1) === ' ' && length !== target.value.length) ? 1 : 0);
+        });
+
+        // Expiry date formatting
+        $('#expiry-date').on('input', function() {
+            var target = this;
+            var position = target.selectionEnd;
+            var length = target.value.length;
+            
+            target.value = target.value.replace(/[^\d]/g, '').substring(0, 4);
+            if (target.value.length > 2) {
+                target.value = target.value.substring(0, 2) + '/' + target.value.substring(2);
+            }
+            
+            if (length !== target.value.length) {
+                position = target.value.length;
+            }
+            target.selectionEnd = position;
         });
     });
 </script>

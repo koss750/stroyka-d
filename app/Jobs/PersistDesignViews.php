@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Redis;
 use App\Models\Design;
 use App\Models\InvoiceType;
-
+use Illuminate\Support\Facades\Log;
 class PersistDesignViews implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -22,8 +22,12 @@ class PersistDesignViews implements ShouldQueue
         foreach ($keys as $key) {
             $id = str_replace('design_views:', '', $key);
             $views = Redis::get($key);
-            Design::where('id', $id)->increment('view_count', $views);
-            Redis::del($key);
+            try {
+                Design::where('id', $id)->orWhere('slug', $id)->increment('view_count', $views);
+                Redis::del($key);
+            } catch (\Exception $e) {
+                Log::error('Error incrementing view count for design ' . $id . ': ' . $e->getMessage());
+            }
         }
         
         /*

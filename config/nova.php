@@ -6,6 +6,7 @@ use Laravel\Nova\Http\Middleware\Authorize;
 use Laravel\Nova\Http\Middleware\BootTools;
 use Laravel\Nova\Http\Middleware\DispatchServingNovaEvent;
 use Laravel\Nova\Http\Middleware\HandleInertiaRequests;
+use App\Nova\Dashboards\StroykaDashboard;
 
 return [
 
@@ -148,7 +149,7 @@ return [
     |
     */
 
-    'currency' => 'USD',
+    'currency' => 'RUB',
 
     /*
     |--------------------------------------------------------------------------

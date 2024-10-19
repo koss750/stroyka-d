@@ -27,6 +27,9 @@ class User extends Authenticatable
         'email',
         'password',
         'last_seen',
+        'phone',
+        'roles',
+        'permissions',
     ];
 
     /**
@@ -49,6 +52,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'superadmin' => 'boolean',
         'permissions' => 'array',
+        'roles' => 'array',
     ];
 
     public function setLastSeenAttribute($value)
@@ -74,6 +78,32 @@ class User extends Authenticatable
     {
         return $this->hasOne(Supplier::class);
     }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    public function allFoundationOrders()
+    {
+        return $this->projects()->where('order_type', 'foundation');
+    }
+
+    public function allSmetaOrders()
+    {
+        return $this->projects()->where('order_type', 'smeta');
+    }
+
+    public function paidFoundationOrders()
+    {
+        return $this->projects()->where('order_type', 'foundation')->where('payment_status', 'success');
+    }
+
+    public function paidSmetaOrders()
+    {
+        return $this->projects()->where('order_type', 'smeta')->where('payment_status', 'success');
+    }
+    
 
     // Example method to check if user has access to a Nova resource
     public function hasAccessToNovaResource($resource)

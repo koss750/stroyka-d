@@ -245,9 +245,11 @@ class Design extends Resource
                     return round($value * 100, 0) . '%';
                 }),
                 
+                /*
                 Text::make('Незаполненные поля', 'incompleteFields')->onlyOnDetail()->displayUsing(function ($value) {
                     return implode(', ', $value);
                 }),
+                */
 
                 SimpleRepeatable::make(Translator::translate('Category'), 'category', [
                     Select::make(Translator::translate('Category'), 'category')->options($this->translatedSelects("category")),

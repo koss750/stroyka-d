@@ -35,6 +35,13 @@ return [
             'root' => storage_path('app'),
             'throw' => false,
         ],
+
+        'smeta' => [
+            'driver' => 'local',
+            'root' => storage_path('app/orders'),
+            'url' => env('APP_URL').'/orders',
+            'visibility' => 'public',
+        ],
         
         'image' => [
             'driver' => 'local',
@@ -77,6 +84,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('orders') => storage_path('app/orders'),
     ],
 
 ];

@@ -54,6 +54,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => ['required', 'string', 'max:11'],
         ]);
     }
 
@@ -63,11 +64,12 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\Models\User
      */
-    protected function create(Request $request)
+    public function create(Request $request, $bypass_verification = false)
     {
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
         ]);
 
@@ -75,6 +77,9 @@ class RegisterController extends Controller
         $verificationController = new VerificationController();
         $verificationController->sendInitialVerificationEmail($user);
 
+        if ($bypass_verification) {
+            auth()->login($user);
+        }
         return $user;
     }
 
@@ -126,9 +131,18 @@ class RegisterController extends Controller
         $verificationController = new VerificationController();
         $verificationController->sendInitialVerificationEmail($user);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Registration successful. Please check your email for verification.'
+        return view('legal_entity_confirmation', [
+            'company_name' => $request->company_name,
+            'inn' => $request->inn,
+            'kpp' => $request->kpp,
+            'ogrn' => $request->ogrn,
+            'legal_address' => $request->legal_address,
+            'physical_address' => $request->physical_address,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'additional_phone' => $request->additional_phone,
+            'contact_name' => $request->contact_name,
+            'selected_regions' => $selectedRegions, // Assuming you have this data
         ]);
     }
 }

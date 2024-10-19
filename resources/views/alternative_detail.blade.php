@@ -5,6 +5,24 @@
 
 
 @section('additional_head')
+<link rel="canonical" href="{{ url()->current() }}" />
+<title>{{ $design->title }} - Стройка.com</title>
+<meta name="description" content="Проект дома {{ $design->length }}m x {{ $design->width}}m">
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "{{ $design->title }}",
+        "description": "Проект дома {{ $design->length }}m x {{ $design->width}}m",
+        "image": "{{ $jpgImageUrls[0] ?? '' }}",
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "RUB",
+            "price": "{{ str_replace(' ', '', $design->etiketka) }}",
+            "availability": "https://schema.org/InStock"
+        }
+    }
+    </script>
 <script src="https://xn--80ardojfh.com/assets/js/detail.js"></script>
 <script>
     var selectedOptions = {
@@ -50,6 +68,12 @@
 
             @section('content')
             <div class="row" style="margin-top: 30px;">
+            @include('partials.tab-navigator', ['items' => [
+            ['url' => '../browse/doma_iz_brusa', 'label' => 'Дома из бруса'],
+            ['url' => '../browse/doma_iz_brevna', 'label' => 'Дома из бревна'],
+            ['url' => '../browse/bani_iz_brusa', 'label' => 'Бани из бруса'],
+            ['url' => '../browse/bani_iz_brevna', 'label' => 'Бани из бревна'],
+        ]])
                <div class="col-lg-6 col-md-12">
                <div class="price-tag flipCard-title text-black">
                         <h2>Проект {{ $design->title }}m2 <br class="mobile-break"> {{ $design->length }}m x {{ $design->width}}m</h2>
@@ -58,7 +82,7 @@
                     
                   
                   <div class="buttons col-12">
-                  <button class="btn btn-outline-light" id="exampleSmetaBtn">Пример сметы</button>
+                  <button class="btn btn-outline-light" data-toggle="modal" data-target="#exampleModal" data-bs-toggle="modal" data-bs-target="#exampleModal">Пример сметы</button>
                   <button type="button" class="btn btn-outline-light" data-toggle="modal" data-target="#paymentModal" data-bs-toggle="modal" data-bs-target="#paymentModal">
                 Купить смету
                 </button>
@@ -67,7 +91,11 @@
                <div class="col-lg-6 col-md-12">
                <div class="price-tag text-black">
                     <h2>Стоимость: <span id="totalPrice">{{ $design->etiketka }}</span>
-                        <i class="fas fa-info-circle text-danger" data-toggle="tooltip" data-placement="top" title="{{$toolTipLabel}}"></i>
+                        <i class="fas fa-info-circle text-danger" data-toggle="tooltip" data-placement="top" title="{{$toolTipLabel}}" style="
+    font-size: 48%;
+    vertical-align: top;
+    padding-top: 5px;
+"></i>
                     </h2>
                 </div>
                
@@ -97,7 +125,9 @@
                </div>
             </div>
       <!-- Payment Modal -->
-      @component('components.payment-modal', ['id' => $design->id, 'title' => $design->title, 'image' => $design->image_url])
+      @component('components.payment-modal', ['id' => $design->id, 'title' => $design->title, 'image' => $design->image_url, 'price' => $design->smeta_price])
+@endcomponent
+@component('components.payment-modal', ['id' => 1, 'title' => "Пример сметы", 'image' => $design->image_url, 'price' => 0])
 @endcomponent
       <x-modal-carousel />
       @endsection

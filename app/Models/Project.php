@@ -28,17 +28,29 @@ class Project extends Model
         'configuration_descriptions',
         'title',
         'status',
+        'foundation_id',
+        'foundation_params',
+        'payment_provider',
+        'payment_link',
+        'payment_status',
+        'price_type',
     ];
 
     protected $casts = [
         'selected_configuration' => 'array',
         'configuration_descriptions' => 'array',
         'payment_amount' => 'decimal:2',
+        'foundation_params' => 'array',
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function foundation()
+    {
+        return $this->belongsTo(Foundation::class);
     }
 
     public function design()

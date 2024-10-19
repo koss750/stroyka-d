@@ -7,23 +7,27 @@ use Illuminate\Database\Eloquent\Model;
 class Supplier extends Model
 {
     protected $fillable = [
-        'company_name', // название компании или ИП
-        'inn', // ИНН
-        'address', // адрес
-        'email', // эмайл
-        'phone_1', // телефон 1
-        'phone_2', // телефон 2
-        'message', // поле для ввода текста/письма
-        'type', // подрядчик или поставщик
+        'company_name',
+        'inn',
+        'address',
+        'email',
+        'phone_1',
+        'phone_2',
+        'message',
+        'type',
         'status',
         'type_of_organisation',
-        'region_code',
         'profile_picture_url',
+        'yandex_maps_link',
     ];
 
-    // Include any accessors, mutators, or relationships if needed
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function regions()
+    {
+        return $this->belongsToMany(Region::class, 'supplier_regions');
     }
 }

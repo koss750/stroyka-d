@@ -16,63 +16,64 @@
 			['url' => '/messages', 'label' => 'Мои переписки'],
 			['url' => '/profile', 'label' => 'Мои данные'],
 		]])
+	@include('partials.supplier-type-filter')
+
 	<div class="row">
-		<div class="col-xl-9 col-xxl-8 col-lg-8">
-			<div class="tab-content">
-				<div class="tab-pane fade show active" id="navpills-1" role="tabpanel">
-					<div class="row loadmore-content" id="RecentActivitiesContent">
-						<!-- Замена имен на названия российских строительных компаний -->
-						<div class="col-xl-4 col-xxl-6 col-sm-6">
-							<div class="card contact-bx">	
-								<div class="card-body">
-									<div class="media">
-										<div class="image-bx me-3 me-lg-2 me-xl-3 ">
-											<img src="{{ asset('images/users/13.jpg')}}" alt="" class="rounded-circle" width="90">
-											<span class="active"></span>
-										</div>
-										<div class="media-body">
-											<h6 class="fs-20 font-w600 mb-0"><a href="{{ url('app-profile')}}" class="text-black">СтройМатериалы</a></h6>
-											<p class="fs-14">ООО "СтройГрупп"</p>
-											<ul>
-												<li><a href="{{ url('messages')}}"><i class="las la-sms"></i></a></li>
-											</ul>
-										</div>
-									</div>
+		@forelse($suppliers as $supplier)
+			<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-4">
+				<div class="card h-100">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-4 text-center">
+								<img src="{{ $supplier->profile_picture_url ?? asset('images/profile/default.png') }}" class="img-fluid rounded-circle mb-3" alt="{{ $supplier->company_name }}">
+								<div class="rating">
+								@for ($i = 1; $i <= 5; $i++)
+										<i class="fas fa-star {{ $i <= 4 ? 'text-warning' : 'text-muted' }}"></i>
+									@endfor
+								@if($supplier->yandex_maps_link)
+								
+								<a href="{{ $supplier->yandex_maps_link }}" target="_blank" class="ml-2 no-text-decoration" title="Посмотреть на Яндекс Картах">	
+									
+									<span class="ml-1">4.7</span>
+									
+										
+											<i class="fas fa-map-marker-alt"></i>
+										</a>
+									@endif
 								</div>
 							</div>
-						</div>
-						<div class="col-xl-4 col-xxl-6 col-sm-6">
-							<div class="card contact-bx">	
-								<div class="card-body">
-									<div class="media">
-										<div class="image-bx me-3 me-lg-2 me-xl-3 ">
-											<img src="{{ asset('images/users/13.jpg')}}" alt="" class="rounded-circle" width="90">
-											<span class="active"></span>
-										</div>
-										<div class="media-body">
-											<h6 class="fs-20 font-w600 mb-0"><a href="{{ url('app-profile')}}" class="text-black">Константин Б.</a></h6>
-											<p class="fs-14">Borodin Services Ltd</p>
-											<ul>
-												<li><a href="{{ url('messages')}}"><i class="las la-sms"></i></a></li>
-											</ul>
-										</div>
-									</div>
-								</div>
+							<div class="col-8">
+								<h4 class="mb-1">{{ $supplier->company_name }}</h4>
+								<p class="text-muted small mb-2">
+									<i class="fas fa-check-circle text-success"></i> ИНН: {{ $supplier->inn ?? 'Не указан' }}
+								</p>
+								<p class="mb-1"><strong>Тип:</strong> {{ $supplier->type == 'contractor' ? 'Подрядчик' : 'Поставщик' }}</p>
+								<p class="mb-1"><strong>Организация:</strong> {{ $supplier->type_of_organisation }}</p>
+								<p class="mb-0"><strong>Регионы:</strong> {{ $supplier->regions->pluck('name')->implode(', ') }}</p>
 							</div>
 						</div>
-						<!-- Продолжение списка контактов с названиями компаний -->
-					</div>
-				</div>
-				<div class="tab-pane fade" id="navpills-2" role="tabpanel">
-					<div class="row loadmore-content" id="RecentActivities2Content">
-						<!-- Контент ожидающих приглашений с измененными на российские строительные компании именами -->
+						<div class="row mt-3">
+							<div class="col-6">
+								<a href="{{ route('supplier.profile', $supplier->id) }}" class="btn btn-primary btn-block">Профиль</a>
+							</div>
+							<div class="col-6">
+								<a href="#" class="btn btn-outline-primary btn-block">Сообщение</a>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="col-xl-3 col-xxl-4 col-lg-4">
-			<!-- Боковая панель профиля -->
-		</div>
+		@empty
+			<div class="col-12">
+				<p>На данный момент нет одобренных исполнителей.</p>
+			</div>
+		@endforelse
 	</div>
 </div>
 @endsection
+
+<style>
+	.no-text-decoration {
+		text-decoration: none;
+	}
+</style>

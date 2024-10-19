@@ -25,11 +25,15 @@ use Spatie\Image\Manipulations;
 use signifly\Nova\Fields\ProgressBar\ProgressBar;
 use App\Http\Controllers\RuTranslationController as Translator;
 use App\Models\DesignSeo;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Laravel\Nova\Actions\Actionable;
 
 
 class Design extends Model implements HasMedia
 {
 	use InteractsWithMedia;
+    use Authorizable;
+    use Actionable;
 	 
     
 	protected $table = 'designs';
@@ -77,6 +81,7 @@ class Design extends Model implements HasMedia
         'indexed_prices',
         'etiketka',
         'etiketka_seasonal',
+        'slug',
         // ... include other fields as needed
     ];
 
@@ -199,6 +204,10 @@ class Design extends Model implements HasMedia
         $this->addMediaConversion('jpg')
             ->format('jpg')
             ->quality(99);
+        $this->addMediaConversion('milder')
+            ->width(500)
+            ->height(500)
+            ->performOnCollections('images');
         $this->addMediaConversion('mild')
             ->width(1000)
             ->height(2000)
@@ -206,6 +215,10 @@ class Design extends Model implements HasMedia
         $this->addMediaConversion('thumb')
             ->width(500)
             ->height(500)
+            ->performOnCollections('images');
+        $this->addMediaConversion('thumbie')
+            ->width(100)
+            ->height(100)
             ->performOnCollections('images');
         $this->addMediaConversion('watermarked')
             ->width(1800)
@@ -239,14 +252,14 @@ public function registerMediaCollections(): void
     public function thumbImageUrls()
     {
         return $this->getMedia('images')->map(function ($media) {
-                    return $media->getUrl('thumb');
+                    return $media->getUrl('thumbie');
                 })->all();
     }
 
     public function mildMailImage()
 {
     $firstMedia = $this->getMedia('images')->first();
-    return $firstMedia ? $firstMedia->getUrl('mild') : null;
+    return $firstMedia ? $firstMedia->getUrl('milder') : null;
 }
 
 public function setImages()
@@ -389,7 +402,7 @@ public function setImages()
     public function setPrice(Design $design) {
         //details is a json that contains price element that should be set as "price"
         try {
-            $setting = Setting::where('label', 'display_prices')->first();
+            $setting = Setting::where('key', 'display_prices')->first();
             $displayPrices = $setting->value;
             $details = json_decode($design->details, true);
             $price = $details['price'][$displayPrices];
@@ -625,6 +638,49 @@ public function foundationLentaExcelTest($tape)
     public function seo()
     {
         return $this->hasOne(DesignSeo::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($design) {
+            $design->slug = self::generateSlug($design);
+        });
+
+        static::updating(function ($design) {
+            if ($design->isDirty(['title', 'size', 'length', 'width'])) {
+                $design->slug = self::generateSlug($design);
+            }
+        });
+    }
+
+    public static function generateSlug($design)
+    {
+        $prefix = self::getSlugPrefix($design->title);
+        $size = number_format($design->size, 1, '.', '');
+        $length = number_format($design->length, 1, '.', '');
+        $width = number_format($design->width, 1, '.', '');
+
+        return "{$prefix}-{$size}m2-{$length}m-na-{$width}m";
+    }
+
+    private static function getSlugPrefix($title)
+    {
+        $prefixMap = [
+            'Д-ОЦБ' => 'dom-iz-brevna',
+            'Д-ПБ' => 'dom-iz-brusa',
+            'Б-ОЦБ' => 'banya-iz-brevna',
+            'Б-ПБ' => 'banya-iz-brusa',
+        ];
+
+        foreach ($prefixMap as $key => $value) {
+            if (str_starts_with($title, $key)) {
+                return $value;
+            }
+        }
+
+        return 'design'; // Default prefix if no match found
     }
 }
 

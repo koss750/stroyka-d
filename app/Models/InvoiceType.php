@@ -19,7 +19,8 @@ class InvoiceType extends Model
         'label',
         'params',
         'sheetnames',
-        'sheet_spec'
+        'sheet_spec',
+        'custom_order_title'
     ];
 
     protected $casts = [

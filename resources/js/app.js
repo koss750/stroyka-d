@@ -37,3 +37,12 @@ app.component('example-component', ExampleComponent);
  */
 
 app.mount('#app');
+
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        emailInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toLowerCase();
+        });
+    }
+});

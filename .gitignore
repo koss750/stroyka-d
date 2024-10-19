@@ -98,4 +98,13 @@ storage/media-library/*
 public/orders
 public/orders/*
 public/orders/
-storage/media-library/
+storage/media-library/temp/*
+storage/media-library/temp/
+storage/media-library/temp
+ТУДУШЕЧКИ.yaml
+public/assets/yandex_e6dd846e21e95a9c.html
+public/yandex_e6dd846e21e95a9c.html
+public/test.csv
+public/invoice.html
+public/uc.html
+storage/orders/*

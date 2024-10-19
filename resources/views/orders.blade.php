@@ -1,3 +1,7 @@
+@php
+$colour_class = "";
+@endphp
+
 @extends('layouts.alternative')
 
 
@@ -11,6 +15,7 @@
 @section('content')
 
 <div class="container-fluid">
+	
 	@include('partials.tab-navigator', ['items' => [
         ['url' => '/my-orders', 'label' => 'Заказы'],
         ['url' => '/suppliers', 'label' => 'Исполнители'],
@@ -33,12 +38,14 @@
 						<!-- Add any other buttons or elements you want here -->
 					</div>
                     <div class="dropdown-item text-warning">
-						<small><i class="fas fa-exclamation-triangle"></i> Файлы доступны для скачивания только в течение 30 дней с момента создания заказа.</small>
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <strong>Пожалуйста имейте ввиду</strong>, что файлы доступны для скачивания только в течении 30 дней после создания заказа.
+                        </div>
 					</div>
 					<div class="table-responsive">
 						@if($projects->isNotEmpty())
 
-						<table class="table table-sm table-responsive-lg table-bordered border solid text-black">
+						<table class="table table-sm table-responsive-lg table-bordered border solid text-black min-h-150">
 							<thead>
 								<tr>
 									<th class="align-middle text-center checkbox-column">
@@ -50,14 +57,20 @@
 									<th class="align-middle text-center order-column">Заказ</th>
 									<th class="align-middle text-center" style="width: 80px;"></th>
 									<th class="align-middle text-center">Ваш проект и конфигурация</th>
-									<th class="align-middle text-center">Исполнитель</th>
-									<th class="align-middle text-center minw200">Оплачено</th>
-									<th class="align-middle text-center minw200">Документы</th>
+									<th class="align-middle text-center">Документы</th>
+									<th class="align-middle text-center minw200">Исполнитель</th>
+									<th class="align-middle text-center minw200">Цена</th>
 								</tr>
 							</thead>
 							<tbody id="orders">
 							@foreach($projects as $project)
-								<tr>
+                            @if($new_order)
+                                @php
+                                    $new_order = base64_decode($new_order);
+                                    $colour_class = $new_order == $project['id'] ? ($payment_status == 'success' ? 'bg-success-light' : ($payment_status == 'error' ? 'bg-danger-light' : '')) : '';
+                                @endphp
+                            @endif
+								<tr class="{{ $colour_class }}">
 									<td class="py-2 text-center checkbox-column">
 										<div class="custom-control custom-checkbox">
 											<input type="checkbox" class="custom-control-input" id="customCheckBox{{ $project['id'] }}" required="">
@@ -79,27 +92,59 @@
 										{{ $project['title'] }} <br> 
 										<small>{{ $project['configuration'] }}</small>
 									</td>
-									<td class="py-2 text-center">
-										<button class="btn btn-sm btn-primary assign-executor" data-project-id="{{ $project['id'] }}">Подобрать</button>
-									</td>
-									<td class="py-2 text-center">{{ $project['payment_amount'] }} руб.</td>
-									<td class="py-2 text-center">
+                                    <td class="py-2 text-center vertical-align-middle">
 										<div class="dropdown ms-auto text-centre">
-										@if($project['filepath'])
+										@if($project['filepath'] && ( $project['payment_status'] == 'success' || $project['is_example'] ))
 											<div class="btn-link" data-bs-toggle="dropdown">
-											<i class="fas fa-file-excel fa-lg" style="color: #217346;"></i>
+												<i class="fas fa-download fa-lg" style="color: #007bff;"></i>
 											</div>
-											<div class="dropdown-menu">
-												<a class="dropdown-item" href="{{ $project['filepath'] }}" download>Скачать</a>
-												<div class="dropdown-divider"></div>
-												
+											<div class="dropdown-menu dropdown-menu-orders">
+												<a class="dropdown-item" href="{{ $project['filepath'] }}" download>
+													<i class="fas fa-file-excel fa-lg" style="color: #217346;"></i> Скачать xlsx
+												</a>
+												<a class="dropdown-item" href="{{ route('orders.view', $project['id']) }}" target="_blank">
+													<i class="fas fa-eye fa-lg" style="color: #17a2b8;"></i> Смотреть
+												</a>
 											</div>
-										@else
-											<i class="fas fa-spinner fa-spin"></i>
+										@elseif($project['payment_link'] && $project['payment_status'] != 'success' && !$project['is_example'])
+                                        <a href="{{ $project['payment_link'] }}" class="btn btn-sm btn-success">Оплатить</a>
+                                        @else
+                                        <i class="fas fa-spinner fa-spin"></i>
 										@endif
 										</div>
 									</td>
+									<td class="py-2 text-center vertical-align-middle">
+                                    @if(!$project['is_example'])
+										<button class="btn btn-sm btn-primary assign-executor" data-project-id="{{ $project['id'] }}">Подобрать</button>
+                                    @endif
+									</td>
+									<td class="py-2 text-center vertical-align-middle">
+                                        @if(!$project['is_example'])
+										<div>{{ $project['payment_amount'] }} руб.</div>
+										<a href="{{ route('general.receipt', $project['payment_reference']) }}" class="receipt-link">
+											<i class="fas fa-receipt fa-lg"></i>
+											<div class="receipt-caption">чек</div>
+										</a>
+                                        @endif
+									</td>
 								</tr>
+                                @if($new_order == $project['id'])
+                                    <tr class="{{ $colour_class }}">
+                                    @if($payment_status == 'success')
+                                    <td colspan="7" class="text-center">
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 0; padding: 0;">
+                                            <strong>Новый заказ успешно создан!</strong> Пожалуйста, дождитесь выполнения заказа перед скачиванием.
+                                        </div>
+                                    </td>
+                                    @elseif($payment_status == 'error')
+                                    <td colspan="7" class="text-center"> 
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin: 0; padding: 0;">
+                                            <strong>Ошибка при оплате</strong> Пожалуйста, попробуйте еще раз.
+                                        </div> 
+                                    </td>
+                                    @endif
+                                    </tr>
+                                @endif
 							@endforeach
 							</tbody>
 						</table>
@@ -247,6 +292,35 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Спасибо за ваше сообщение. Мы ответим в течение 24 часов. Пока вы ждете, почему бы не просмотреть наши планы или исполнителей в вашем районе?');
         });
     }
+
+    // Add this to automatically dismiss the alert after 5 seconds
+    setTimeout(function() {
+        $('.alert').alert('close');
+    }, 5000);
 });
 </script>
 @endpush
+
+<style>
+    .bg-success-light {
+        background-color: rgba(40, 167, 69, 0.1) !important;
+    }
+    .bg-danger-light {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+    }
+    .receipt-link {
+        display: inline-block;
+        text-decoration: none;
+        color: #007bff;
+        transition: color 0.3s ease;
+    }
+
+    .receipt-link:hover {
+        color: #0056b3;
+    }
+
+    .receipt-caption {
+        font-size: 0.7rem;
+        margin-top: 2px;
+    }
+</style>

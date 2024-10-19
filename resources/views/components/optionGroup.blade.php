@@ -111,6 +111,10 @@ function selectWoodType(element, groupName, optionRef, suboptionRef, subsuboptio
         gap: 10px;
     }
 
+    .non-hover {
+        pointer-events: none;
+    }
+
     .mobile-break {
     display: none;
     width: 100%;
@@ -147,7 +151,7 @@ function selectWoodType(element, groupName, optionRef, suboptionRef, subsuboptio
     }
 </style>
 <div class="option-group" id="{{ $groupName }}_option_group">
-    <label class="btn btn-outline-light title-btn w-100 mb-2" id="title_label_{{ $groupName }}" disabled>{{ $label }}</label>
+    <label class="btn btn-outline-light title-btn w-100 mb-2 non-hover" id="title_label_{{ $groupName }}" disabled>{{ $label }}</label>
     <!-- Level 2: Main options -->
     <div class="btn-group main-options w-100" role="group" aria-label="{{ $groupName }} button group">
         @foreach($options as $option)

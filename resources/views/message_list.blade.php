@@ -278,8 +278,10 @@ $(document).ready(function() {
         if (!currentUserId) return;
 
         const lastMessageTimestamp = $('.message:last').data('timestamp') || 0;
+        console.log('Checking for new messages since:', lastMessageTimestamp);
         
         $.get(`/messages/${currentUserId}/new`, { last_timestamp: lastMessageTimestamp }, function(data) {
+            console.log('Received messages:', data.messages);
             if (data.messages && data.messages.length > 0) {
                 appendNewMessages(data.messages);
             }
@@ -289,54 +291,61 @@ $(document).ready(function() {
     function appendNewMessages(messages) {
         let messagesHtml = '';
         messages.forEach(function(message) {
-            const messageClass = message.sender_id == {{ Auth::id() }} ? 'sent' : 'received';
-            const supportClass = message.is_support ? 'support' : '';
-            const supportIcon = message.is_support ? '<i class="fas fa-headset ms-1 text-primary" title="Тех поддержка"></i>' : '';
-            
-            // Provide a fallback for sender_name
-            const senderName = message.sender_name || 'Неизвестный отправитель';
-            
-            let projectInfo = '';
-            if (message.project) {
-                projectInfo = `
-                    <div class="project-info">
-                        <strong>${senderName} хотел направить вам сообщение о смете проекта <a href="${message.project.link}" target="_blank">${message.project.title}</a> </strong>
-                        <br>
-                        
-                        <strong>Скачать смету: <a href="${message.project.filepath}" download></strong>
-                            <i class="fas fa-file-excel fa-lg" style="color: #217346;"></i>
-                        </a>
-                        <br>
-                        <br>
-                        <strong>Сообщение от ${senderName}: </strong>
-                        <br>
-                    </div>
-                `;
-            }
-
-            messagesHtml += `
-                <div class="message ${messageClass} ${supportClass}" data-timestamp="${message.created_at}">
-                    ${projectInfo}
-                    <p>${message.content}</p>
-                    <small>${new Date(message.created_at).toLocaleTimeString()} ${supportIcon}</small>
-                </div>
-            `;
-
-            if (message.attachments && message.attachments.length > 0) {
-                message.attachments.forEach(function(attachment) {
-                    const icon = attachment.mime_type.includes('pdf') ? 'fa-file-pdf' : 'fa-file-excel';
-                    messagesHtml += `
-                        <div class="attachment">
-                            <a href="${attachment.url}" target="_blank">
-                                <i class="fas ${icon}"></i> ${attachment.filename}
+            // Only append messages that are newer than the last displayed message
+            if (new Date(message.created_at) > new Date($('.message:last').data('timestamp'))) {
+                const messageClass = message.sender_id == {{ Auth::id() }} ? 'sent' : 'received';
+                const supportClass = message.is_support ? 'support' : '';
+                const supportIcon = message.is_support ? '<i class="fas fa-headset ms-1 text-primary" title="Тех поддержка"></i>' : '';
+                
+                // Provide a fallback for sender_name
+                const senderName = message.sender_name || 'Неизвестный отправитель';
+                
+                let projectInfo = '';
+                if (message.project) {
+                    projectInfo = `
+                        <div class="project-info">
+                            <strong>${senderName} хотел направить вам сообщение о смете проекта <a href="${message.project.link}" target="_blank">${message.project.title}</a> </strong>
+                            <br>
+                            
+                            <strong>Скачать смету: <a href="${message.project.filepath}" download></strong>
+                                <i class="fas fa-file-excel fa-lg" style="color: #217346;"></i>
                             </a>
-                            (${(attachment.size / 1024).toFixed(2)} KB)
+                            <br>
+                            <br>
+                            <strong>Сообщение от ${senderName}: </strong>
+                            <br>
                         </div>
                     `;
-                });
+                }
+
+                messagesHtml += `
+                    <div class="message ${messageClass} ${supportClass}" data-message-id="${message.id}" data-timestamp="${message.created_at}">
+                        ${projectInfo}
+                        <p>${message.content}</p>
+                        <small>${new Date(message.created_at).toLocaleTimeString()} ${supportIcon}</small>
+                    </div>
+                `;
+
+                if (message.attachments && message.attachments.length > 0) {
+                    message.attachments.forEach(function(attachment) {
+                        const icon = attachment.mime_type.includes('pdf') ? 'fa-file-pdf' : 'fa-file-excel';
+                        messagesHtml += `
+                            <div class="attachment">
+                                <a href="${attachment.url}" target="_blank">
+                                    <i class="fas ${icon}"></i> ${attachment.filename}
+                                </a>
+                                (${(attachment.size / 1024).toFixed(2)} KB)
+                            </div>
+                        `;
+                    });
+                }
             }
         });
-        $('#chat-messages').append(messagesHtml);
+        
+        if (messagesHtml) {
+            $('#chat-messages').append(messagesHtml);
+            scrollChatToBottom();
+        }
     }
 
     // Check for new messages every 5 seconds

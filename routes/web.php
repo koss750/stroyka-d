@@ -25,6 +25,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\ProjectController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,12 +41,14 @@ Route::get('/', function () {
     return redirect('/site');
 });
 
+Route::get('/home', function () {
+    return redirect('/site');
+});
+
 //under construction - переделать
 Route::prefix('projects')->middleware('check.redirection')->group(function () {
     Route::view('/{slug}', 'under-construction')->middleware('counter');
 });
-Route::post('/logout', 'Auth\LoginController@logout')->name('logout');
-Route::post('/login', 'Auth\LoginController@login')->name('login');
 
 Route::get('/forex', [ExchangeRateController::class, 'index']);
 Route::get('/export', [DesignController::class, 'exportAll']);
@@ -60,7 +63,7 @@ Route::get('/email-compose', [UIController::class, 'email_compose']);
 Route::get('/email-read', [UIController::class, 'email_read']);
 Route::get('/page-login', [UIController::class, 'page_login']);
 Route::get('/app-profile', [UIController::class, 'app_profile']);
-Route::get('/suppliers', [SupplierController::class, 'indexSuppliers']);
+Route::get('/suppliers', [SupplierController::class, 'indexSuppliers'])->name('suppliers.index');
 Route::get('/dashboard', [UIController::class, 'dashboard_1']);
 Route::get('/register', [UIController::class, 'page_register']);
 Route::get('/str', [UIController::class, 'str']);
@@ -198,7 +201,12 @@ Route::prefix('vora')->group(function () {
     });
 });
 
+//Route::post('/process-foundation-smeta-order', [OrderController::class, 'processFoundationSmetaOrder'])->name('process-foundation-smeta-order');
+Route::post('/process-project-smeta-order', [OrderController::class, 'processProjectSmetaOrder'])->name('process-project-smeta-order');
+Route::post('/process-example-smeta-order', [OrderController::class, 'processExampleSmetaOrder'])->name('process-example-smeta-order');
 Route::post('/process-foundation-order', [OrderController::class, 'processFoundationOrder'])->name('process-foundation-order');
+Route::post('/process-example-foundation-order', [OrderController::class, 'processExampleFoundationOrder'])->name('process-example-foundation-order');
+
 Route::post('/generate-excel', [TemplateController::class, 'generateExcel'])->name('generate-excel');
 //route group prefix tmp
 Route::prefix('tmp')->group(function () {
@@ -261,6 +269,8 @@ Route::get('/get-sheetname-suggestions', function (Request $request) {
     return response()->json(['success' => true, 'suggestions' => $suggestions]);
 });
 
+Route::get('/payment/set-status/{payment_status}/{order_id}', [OrderController::class, 'setPaymentStatus'])->name('payment.set.status');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -275,6 +285,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [ProfileController::class, 'updateSettings'])->name('user.updateSettings');
     Route::get('/my-account', [UIController::class, 'my_account'])->name('my.account');
     Route::get('/my-orders', [DesignController::class, 'getDemoOrder']);
+    Route::get('/my-orders/view/{id}', [ProjectController::class, 'view'])->name('orders.view');
+    Route::get('/my-orders/{payment_status}/{order_id}', [DesignController::class, 'getDemoOrderNew'])->name('payment.status');
+    Route::get('/fiscal-receipt/{id}', [OrderController::class, 'viewFiscalReceipt'])->name('fiscal.receipt');
+    Route::get('/general-receipt/{id}', [OrderController::class, 'viewGeneralReceipt'])->name('general.receipt');
 });
 Route::get('/get-foundation-file', [FulfillmentController::class, 'foundationFullFile']);
 Auth::routes();
@@ -294,4 +308,22 @@ Route::get('/messages/{userId}/new', [MessageController::class, 'getNewMessages'
 Route::post('/messages', [MessageController::class, 'store']);
 Route::get('/messages/{userId}', [MessageController::class, 'getConversation']);
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/view-profile/{id}', [SupplierController::class, 'viewProfile'])->name('supplier.profile');
+Route::put('/update-profile/{id}', [SupplierController::class, 'updateProfile'])->name('update.profile');
 
+
+
+//static pages
+Route::get('/terms-and-conditions', function () {
+    return view('statics.terms');
+})->name('terms.and.conditions');
+
+
+//admin routes
+Route::prefix('admin')->middleware(['auth', 'can:access-admin'])->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/edit-captions', [AdminController::class, 'editCaptions'])->name('admin.edit-captions');
+    Route::post('/update-captions', [AdminController::class, 'updateCaptions'])->name('admin.update-captions');
+});
+
+//Route::post('/create-yandex-pay-order', [OrderController::class, 'processProjectSmetaOrder']);

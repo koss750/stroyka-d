@@ -10,7 +10,7 @@
     <meta name="description" content="Проекты и сметы для домов и бань. Расчет фундаментов.">
     <meta name="keywords" content="стройка, проекты домов, сметы, дома из бревна, дома из бруса, бани, фундаменты, каменные дома, блочные дома, каркасные дома">
     
-    <link rel="canonical" href="https://xn--80ardojfh.com">
+    <link rel="canonical" href="{{ url('/') }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/fav.ico') }}">
     
     <!-- Styles -->

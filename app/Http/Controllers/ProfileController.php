@@ -63,9 +63,12 @@ class ProfileController extends Controller
 
     public function settings()
     {
-        $user = auth()->user();
+        $user = auth()->user()->load('supplier');
         $regions = Region::all();
-        return view('edit_profile', compact('user', 'regions'));
+        $supplierTypes = ['contractor' => 'Подрядчик', 'supplier' => 'Поставщик'];
+        $organizationTypes = ['ИП' => 'ИП', 'ООО' => 'ООО', 'АО' => 'АО']; // Add more as needed
+
+        return view('edit_profile', compact('user', 'regions', 'supplierTypes', 'organizationTypes'));
     }
 
     public function updateSettings(Request $request)

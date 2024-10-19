@@ -16,7 +16,11 @@
         "build-RedisKeys": "cd nova-components/RedisKeys && npm run dev",
         "build-RedisKeys-prod": "cd nova-components/RedisKeys && npm run prod",
         "build-RedisKeysCard": "cd nova-components/RedisKeysCard && npm run dev",
-        "build-RedisKeysCard-prod": "cd nova-components/RedisKeysCard && npm run prod"
+        "build-RedisKeysCard-prod": "cd nova-components/RedisKeysCard && npm run prod",
+        "build-DesignPurchaseStats": "cd nova-components/DesignPurchaseStats && npm run dev",
+        "build-DesignPurchaseStats-prod": "cd nova-components/DesignPurchaseStats && npm run prod",
+        "build-designpurchasestats": "cd nova-components/Designpurchasestats && npm run dev",
+        "build-designpurchasestats-prod": "cd nova-components/Designpurchasestats && npm run prod"
     },
     "devDependencies": {
         "@popperjs/core": "^2.11.6",
