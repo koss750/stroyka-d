@@ -25,7 +25,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\ProjectController;
-
+use App\Http\Controllers\BlogController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -317,6 +317,10 @@ Route::put('/update-profile/{id}', [SupplierController::class, 'updateProfile'])
 Route::get('/terms-and-conditions', function () {
     return view('statics.terms');
 })->name('terms.and.conditions');
+
+//blogs
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 
 //admin routes

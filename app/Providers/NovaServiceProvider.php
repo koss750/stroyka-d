@@ -34,7 +34,7 @@ use App\Nova\ProjectType;
 use App\Nova\Metrics\DesignPurchaseStats;
 use App\Nova\DesignPurchaseStatistic;
 use App\Nova\InvoiceTypeStatistic;
-
+use App\Nova\BlogPost;
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
     /**
@@ -57,6 +57,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Order::class),
                     MenuItem::resource(Supplier::class),
                     MenuItem::resource(User::class),
+                    MenuItem::resource(BlogPost::class),
                     //MenuItem::resource(AssociatedCost::class),
                 ])->icon('library')->collapsable(),
 
